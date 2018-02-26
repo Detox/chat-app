@@ -1,0 +1,19 @@
+{
+	"name"         : "@detox/chat-app",
+	"description"  : "",
+	"keywords"     : [],
+	"version"      : "",
+	"homepage"     : "https://github.com/Detox/chat-app",
+	"author"       : "Nazar Mokrynskyi <nazar@mokrynskyi.com>",
+	"repository"   : {
+		"type" : "git",
+		"url"  : "git://github.com/Detox/chat-app.git"
+	},
+	"license"      : "0BSD",
+	"dependencies" : {
+		"@detox/chat"  : "^0.1.0",
+		"@detox/core"  : "^0.4.0",
+		"@detox/utils" : "^1.4.0",
+		"alameda"      : "^1.2.1"
+	}
+}
