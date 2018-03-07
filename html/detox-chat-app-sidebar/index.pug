@@ -1,5 +1,12 @@
 dom-module(id="detox-chat-app-sidebar")
 	link(rel="import" href="style.css" type="css")
 	template
-		| Sidebar contents here
+		csw-tabs
+			csw-button: button Contacts
+			csw-button: button Settings
+		csw-switcher
+			#contacts-list
+				| TODO: Contacts list
+			#settings
+				| TODO: Settings
 	script(src="script.js")
