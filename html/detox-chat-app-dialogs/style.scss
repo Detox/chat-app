@@ -1,0 +1,10 @@
+/**
+ * @package Detox chat app
+ * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
+ * @license 0BSD
+ */
+:host {
+	background : var(--base-background-color);
+	color      : var(--base-text-color);
+	display    : block;
+}

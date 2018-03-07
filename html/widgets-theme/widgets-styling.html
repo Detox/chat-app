@@ -1,0 +1,431 @@
+<custom-style><style>
+	html {
+		/* Global */
+
+		--csw-global: {
+			box-sizing  : border-box;
+			color       : inherit;
+			font-family : inherit;
+			font-size   : inherit;
+			line-height : inherit;
+		};
+
+		/* Form */
+
+		--csw-form-legend: {
+			border-bottom : var(--form-legend-border);
+			font-size     : 1.4em;
+			margin-bottom : var(--block-padding);
+		};
+
+		--csw-form-label: {
+			font-weight   : bold;
+			margin-bottom : var(--block-padding);
+		};
+
+		--csw-form-after-label: {
+			margin-bottom : var(--block-padding);
+		};
+
+		/* Input text */
+
+		--csw-input-text: {
+			background : var(--form-element-background);
+			border     : var(--form-element-border);
+			color      : var(--form-element-color);
+			height     : var(--form-element-height);
+			max-width  : 100%;
+			padding    : 0 var(--form-element-padding-horizontal);
+			transition : color var(--transition-duration);
+			width      : var(--form-element-width);
+		};
+
+		--csw-input-text-focus: {
+			color      : var(--form-element-focus-color);
+			box-shadow : var(--form-element-box-shadow), var(--form-element-inner-box-shadow);
+		};
+
+		--csw-input-text-disabled: {
+			background-color : var(--background-color-base-disabled);
+			color            : var(--text-color-base-disabled);
+		};
+
+		--csw-input-text-readonly: {
+			color : var(--text-color-base-disabled);
+		};
+
+		/* Textarea */
+
+		--csw-textarea: {
+			height     : var(--form-textarea-height);
+			min-height : var(--form-textarea-height);
+			padding    : var(--form-element-padding);
+		};
+
+		/* Select */
+
+		--csw-select-option: {
+			margin  : 0 -var(--form-element-padding-horizontal);
+			padding : var(--form-element-padding);
+		};
+
+		--csw-select-optgroup: {
+			padding-bottom : 0;
+		};
+
+		--csw-select-optgroup-first-option: {
+			margin-top : var(--form-element-padding-vertical)
+		};
+
+		/* Button */
+
+		--csw-button: {
+			background-color : var(--background-color-base);
+			box-sizing       : border-box;
+			color            : var(--text-color-base);
+			height           : var(--form-element-height);
+			justify-content  : center;
+			padding          : 0 var(--form-element-padding-horizontal);
+		};
+
+		--csw-button-hover: {
+			color      : var(--button-hover-color);
+			background : var(--button-hover-background);
+		};
+
+		--csw-button-active: {
+			color      : var(--button-active-color) !important;
+			background : var(--button-active-background) !important;
+		};
+
+		--csw-button-disabled: {
+			background-color : var(--background-color-base-disabled);
+			background-image : none;
+			box-shadow       : none;
+			color            : var(--text-color-base-disabled);
+		};
+
+		--csw-button-compact: {
+			height  : auto;
+			padding : var(--button-compact-padding);
+			width   : auto;
+		};
+
+		--csw-button-primary: {
+			background-color : var(--button-background-color-primary);
+			color            : var(--button-text-color-primary);
+		};
+
+		--csw-button-primary-hover: {
+			color : var(--button-text-color-primary);
+		};
+
+		--csw-button-primary-disabled: {
+			background-color : var(--button-background-color-primary-disabled);
+			color            : var(--button-text-color-primary-disabled);
+		};
+
+		/* Link button */
+
+		--csw-link-button: {
+			padding         : var(--link-button-padding);
+			text-decoration : none;
+		};
+
+		--csw-link-button-compact: {
+			text-align : center;
+		};
+
+		/* Label button */
+
+		--csw-label-button: {
+			background-color : var(--background-color-base-disabled);
+			color            : var(--text-color-base-disabled);
+		};
+
+		--csw-label-button-active: {
+			background-color : var(--background-color-base);
+			color            : var(--text-color-base);
+		};
+
+		--csw-label-button-primary: {
+			background-color : var(--button-background-color-primary-disabled);
+			color            : var(--button-text-color-primary-disabled);
+		};
+
+		--csw-label-button-primary-active: {
+			background-color : var(--button-background-color-primary);
+			color            : var(--button-text-color-primary);
+		};
+
+		--csw-label-button: {
+			padding : var(--form-element-padding);
+		};
+
+		/* Label switcher */
+
+		--csw-label-switcher: {
+			cursor  : pointer;
+			height  : var(--form-element-height);
+			padding : var(--form-element-padding);
+		};
+
+		--csw-label-switcher-icon: {
+			font-size : 1.2em;
+			opacity   : .1;
+		};
+
+		--csw-label-switcher-hover-icon: {
+			opacity : .2;
+		};
+
+		--csw-label-switcher-focus-icon: {
+			box-shadow : var(--form-element-box-shadow), var(--form-element-inner-box-shadow);
+			opacity    : .8;
+		};
+
+		--csw-label-switcher-active-icon: {
+			opacity : 1 !important;
+		};
+
+		/* Modal */
+
+		--csw-modal: {
+			opacity     : 0;
+			transform   : scale(0);
+			transition  : opacity var(--transition-duration) var(--transition-duration-short), transform 0s var(--transition-duration);
+			will-change : opacity;
+
+			@apply --layout;
+			@apply --layout-center-center;
+		};
+
+		--csw-modal-open: {
+			opacity    : 1;
+			transform  : scale(1);
+			transition : opacity var(--transition-duration);
+
+			@apply --layout;
+			@apply --layout-center-center;
+		};
+
+		--csw-modal-body: {
+			transition : filter var(--transition-duration) var(--transition-duration);
+		};
+
+		--csw-modal-body-open: {
+			filter   : blur(var(--modal-blur-radius));
+			overflow : hidden;
+		};
+
+		--csw-modal-overlay: {
+			display    : block;
+			background : var(--modal-overlay-background);
+		};
+
+		--csw-modal-content: {
+			background          : var(--modal-content-background);
+			display             : block;
+			opacity             : 0;
+			padding             : var(--modal-content-padding);
+			transform           : translateY(var(--modal-content-translate));
+			transition          : var(--transition-duration) var(--transition-duration-short);
+			transition-property : opacity, transform;
+			will-change         : opacity, transform;
+		};
+
+		--csw-modal-content-open: {
+			opacity    : 1;
+			transform  : translateY(0);
+			transition : var(--transition-duration);
+		};
+
+		--csw-modal-content-as-is: {
+			background : transparent;
+			padding    : 0;
+		};
+
+		/* Tabs */
+
+		--csw-tabs: {
+			border-bottom : var(--tabs-border);
+		};
+
+		/* Section switcher */
+
+		--csw-switcher-block: {
+			padding : var(--block-padding)
+		};
+
+		/* Tooltip */
+
+		--csw-tooltip: {
+			background  : var(--tooltip-background);
+			color       : var(--tooltip-color);
+			margin-top  : -var(--tooltip-arrow-height);
+			opacity     : 0;
+			transform   : scale(0);
+			transition  : opacity var(--transition-duration-short) var(--transition-duration-short), transform 0s var(--transition-duration);
+			will-change : opacity, transform;
+
+			@apply --layout;
+			@apply --layout-center;
+		};
+
+		--csw-tooltip-top: {
+			margin-top : var(--tooltip-arrow-height);
+		};
+
+		--csw-tooltip-show: {
+			opacity    : 1;
+			transform  : scale(1);
+			transition : opacity var(--transition-duration) var(--transition-duration-short);
+
+			@apply --layout;
+			@apply --layout-center;
+		};
+
+		--csw-tooltip-show-quick: {
+			transform  : scale(1);
+			transition : none;
+		};
+
+		--csw-tooltip-content: {
+			max-height : var(--tooltip-max-height);
+			max-width  : var(--tooltip-max-width);
+			overflow   : auto;
+			padding    : var(--tooltip-padding);
+		};
+
+		--csw-tooltip-arrow: {
+			border-style : solid;
+			border-width : var(--tooltip-arrow-height) var(--tooltip-arrow-width) 0 var(--tooltip-arrow-width);
+			border-color : var(--tooltip-background) transparent transparent transparent;
+		};
+
+		--csw-tooltip-arrow-top: {
+			border-width : 0 var(--tooltip-arrow-width) var(--tooltip-arrow-height) var(--tooltip-arrow-width);
+			border-color : transparent transparent var(--tooltip-background) transparent;
+		};
+
+		/* Notify */
+
+		--csw-notify: {
+			display     : inline-block;
+			padding     : var(--block-padding);
+			transition  : all var(--notify-transition-duration) cubic-bezier(0.47, 0, 0.75, 0.72); /* In - Sine */
+			will-change : transform;
+		};
+
+		--csw-notify-content: {
+			background : var(--background-color-base);
+			max-height : var(--notify-translate);
+			overflow   : hidden;
+			padding    : var(--block-padding);
+			transition : all var(--transition-duration) var(--transition-duration-short);
+		};
+
+		--csw-notify-content-icon-hover: {
+			padding    : var(--notify-content-padding);
+			transition : all var(--transition-duration);
+		};
+
+		--csw-notify-icon: {
+			cursor     : pointer;
+			opacity    : 0;
+			padding    : var(--block-padding);
+			right      : 0;
+			top        : 0;
+			transform  : scale(0);
+			transition : all var(--transition-duration-short);
+		};
+
+		--csw-notify-icon-hover: {
+			opacity    : 1;
+			transform  : scale(1);
+			transition : all var(--transition-duration-short) var(--transition-duration);
+		};
+
+		--csw-notify-content-success: {
+			background : var(--background-color-success);
+			color      : var(--text-color-success);
+		};
+
+		--csw-notify-content-warning: {
+			background : var(--background-color-warning);
+			color      : var(--text-color-warning);
+		};
+
+		--csw-notify-content-error: {
+			background : var(--background-color-error);
+			color      : var(--text-color-error);
+		};
+
+		--csw-notify-bottom: {
+			transform : translateY(var(--notify-translate));
+		};
+
+		--csw-notify-top: {
+			transform : translateY(-var(--notify-translate));
+		};
+
+		--csw-notify-show: {
+			transform  : translateY(0);
+			transition : all var(--notify-transition-duration) cubic-bezier(0.39, 0.58, 0.57, 1); /* Out - Sine */
+		};
+
+		/* Progress */
+
+		--csw-progress: {
+			padding : 0;
+			width   : var(--form-element-width);
+		};
+
+		--csw-progress-text: {
+			color         : var(--text-color-base);
+		};
+
+		--csw-progress-bar: {
+			padding    : 0;
+			transition : width var(--transition-duration-short) ease-out;
+		};
+
+		--csw-progress-primary: {
+		};
+
+		--csw-progress-text-primary: {
+			color : var(--button-text-color-primary);
+		};
+
+		--csw-progress-bar-primary: {
+		};
+
+		/* Dropdown */
+
+		--csw-dropdown: {
+			display    : block;
+			margin-top : var(--dropdown-translate);
+			opacity    : 0;
+			transform  : scale(0);
+			transition : margin-top var(--transition-duration), opacity var(--transition-duration), transform 0s var(--transition-duration);
+		};
+
+		--csw-dropdown-open: {
+			margin-top : 0;
+			opacity    : 1;
+			transform  : scale(1);
+			transition : margin-top var(--transition-duration), opacity var(--transition-duration);
+		};
+
+		--csw-dropdown-content: {
+			background : var(--background-color-base);
+			padding    : var(--tooltip-padding);
+		};
+
+		--csw-dropdown-content-as-is: {
+			background : transparent;
+			box-shadow : none;
+			padding    : 0;
+		};
+	}
+</style></custom-style>
