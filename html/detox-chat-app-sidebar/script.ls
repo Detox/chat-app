@@ -4,6 +4,8 @@
  * @license 0BSD
  */
 Polymer(
-	is	: 'detox-chat-app-sidebar'
+	is			: 'detox-chat-app-sidebar'
+	properties	:
+		chat-id	: String
 )
 

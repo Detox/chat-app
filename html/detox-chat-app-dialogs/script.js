@@ -6,6 +6,9 @@
  */
 (function(){
   Polymer({
-    is: 'detox-chat-app-dialogs'
+    is: 'detox-chat-app-dialogs',
+    properties: {
+      chatId: String
+    }
   });
 }).call(this);

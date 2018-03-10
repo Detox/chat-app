@@ -1,6 +1,6 @@
 dom-module(id="detox-chat-app")
 	link(rel="import" href="style.css" type="css")
 	template
-		detox-chat-app-sidebar
-		detox-chat-app-dialogs
+		detox-chat-app-sidebar(chat-id="[[chat-id]]")
+		detox-chat-app-dialogs(chat-id="[[chat-id]]")
 	script(src="script.js")

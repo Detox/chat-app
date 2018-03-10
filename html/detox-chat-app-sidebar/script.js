@@ -6,6 +6,9 @@
  */
 (function(){
   Polymer({
-    is: 'detox-chat-app-sidebar'
+    is: 'detox-chat-app-sidebar',
+    properties: {
+      chatId: String
+    }
   });
 }).call(this);
