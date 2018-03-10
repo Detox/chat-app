@@ -21,17 +21,17 @@ function Wrapper (async-eventer)
 		@_state	= initial_state
 
 		# v0 of the state structure
-		if !('version' of !@_state)
-			@_state['version']	= 0
-			@_state['profile']	= {
-				'name'		: ''
-				'seed'		: null
-				'secrets'	: []
-			}
-			@_state['contacts']	= []
+		if !('version' of @_state)
+			@_state
+				..'version'		= 0
+				..'name'		= ''
+				..'seed'		= null
+				..'secrets'		= []
+				..'contacts'	= []
 
 		# Normalize state after deserialization
-		@_state['profile']['seed']	= Uint8Array.from(@_state['profile']['seed'])
+		if @_state['seed']
+			@_state['seed']	= Uint8Array.from(@_state['seed'])
 		for secret in @_state['secrets']
 			secret['secret']	= Uint8Array.from(secret['secret'])
 		for contact in @_state['contacts']
@@ -56,17 +56,17 @@ function Wrapper (async-eventer)
 		..'ready' = (callback) ->
 			if callback
 				@_ready.then(callback)
-			Boolean(@_state['profile']['seed'])
+			Boolean(@_state['seed'])
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
 		..'get_seed' = ->
-			@_state['profile']['seed']
+			@_state['seed']
 		/**
 		 * @param {!Uint8Array} seed
 		 */
 		..'set_seed' = (seed) !->
-			@_state['profile']['seed']	= Uint8Array.from(seed)
+			@_state['seed']	= Uint8Array.from(seed)
 			if @_ready_resolve
 				@_ready_resolve()
 				delete @_ready_resolve

@@ -9,7 +9,7 @@
     var global_state, x$;
     global_state = Object.create(null);
     function detoxState(name, initial_state){
-      var i$, ref$, len$, secret, contact, j$, ref1$, len1$, this$ = this;
+      var x$, i$, ref$, len$, secret, contact, j$, ref1$, len1$, this$ = this;
       if (!(this instanceof detoxState)) {
         return new detoxState(name, initial_state);
       }
@@ -21,16 +21,17 @@
           : Object.create(null);
       }
       this._state = initial_state;
-      if (!('version' in !this._state)) {
-        this._state['version'] = 0;
-        this._state['profile'] = {
-          'name': '',
-          'seed': null,
-          'secrets': []
-        };
-        this._state['contacts'] = [];
+      if (!('version' in this._state)) {
+        x$ = this._state;
+        x$['version'] = 0;
+        x$['name'] = '';
+        x$['seed'] = null;
+        x$['secrets'] = [];
+        x$['contacts'] = [];
       }
-      this._state['profile']['seed'] = Uint8Array.from(this._state['profile']['seed']);
+      if (this._state['seed']) {
+        this._state['seed'] = Uint8Array.from(this._state['seed']);
+      }
       for (i$ = 0, len$ = (ref$ = this._state['secrets']).length; i$ < len$; ++i$) {
         secret = ref$[i$];
         secret['secret'] = Uint8Array.from(secret['secret']);
@@ -62,19 +63,19 @@
       if (callback) {
         this._ready.then(callback);
       }
-      return Boolean(this._state['profile']['seed']);
+      return Boolean(this._state['seed']);
     };
     /**
      * @return {Uint8Array} Seed if configured or `null` otherwise
      */
     x$['get_seed'] = function(){
-      return this._state['profile']['seed'];
+      return this._state['seed'];
     };
     /**
      * @param {!Uint8Array} seed
      */
     x$['set_seed'] = function(seed){
-      this._state['profile']['seed'] = Uint8Array.from(seed);
+      this._state['seed'] = Uint8Array.from(seed);
       if (this._ready_resolve) {
         this._ready_resolve();
         delete this._ready_resolve;

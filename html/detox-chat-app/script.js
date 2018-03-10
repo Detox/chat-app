@@ -12,6 +12,18 @@
         type: String,
         value: 'detox-chat-app'
       }
+    },
+    ready: function(){
+      var this$ = this;
+      require(['@detox/chat', 'state']).then(function(arg$){
+        var detoxChat, state;
+        detoxChat = arg$[0], state = arg$[1];
+        this$._state_instance = state['get_instance'](this$.chatId);
+        if (!this$._state_instance['ready']()) {
+          csw['functions']['notify']("Previous state was not found, new identity generated", 'warning');
+          this$._state_instance['set_seed'](detoxChat['generate_seed']());
+        }
+      });
     }
   });
 }).call(this);
