@@ -16,7 +16,7 @@
     },
     ready: function(){
       var this$ = this;
-      this['_state_ready'] = require(['@detox/chat', 'state']).then(function(arg$){
+      this['_state_instance_ready'] = require(['@detox/chat', 'state']).then(function(arg$){
         var detoxChat, state;
         detoxChat = arg$[0], state = arg$[1];
         this$._state_instance = state['get_instance'](this$.chatId);

@@ -5,8 +5,51 @@
  * @license 0BSD
  */
 (function(){
+  var bootstrap_node_id, bootstrap_ip, bootstrap_port, bootstrap_node_info, ice_servers, packets_per_second;
+  bootstrap_node_id = '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29';
+  bootstrap_ip = '127.0.0.1';
+  bootstrap_port = 16882;
+  bootstrap_node_info = {
+    node_id: bootstrap_node_id,
+    host: bootstrap_ip,
+    port: bootstrap_port
+  };
+  ice_servers = [
+    {
+      urls: 'stun:stun.l.google.com:19302'
+    }, {
+      urls: 'stun:global.stun.twilio.com:3478?transport=udp'
+    }
+  ];
+  packets_per_second = 5;
   Polymer({
     is: 'detox-chat-app',
-    behaviors: [detoxChatApp.behaviors.state]
+    behaviors: [detoxChatApp.behaviors.state],
+    ready: function(){
+      var this$ = this;
+      Promise.all([require(['state', '@detox/chat', '@detox/core']), this._state_instance_ready]).then(function(arg$){
+        var ref$, detoxState, detoxChat, detoxCore, wait_for;
+        ref$ = arg$[0], detoxState = ref$[0], detoxChat = ref$[1], detoxCore = ref$[2];
+        wait_for = 2;
+        function ready(){
+          --wait_for;
+          if (!wait_for) {
+            this$._connect_to_the_network(detoxState, detoxChat, detoxCore);
+          }
+        }
+        detoxChat['ready'](ready);
+        detoxCore['ready'](ready);
+      });
+    },
+    _connect_to_the_network: function(detoxState, detoxChat, detoxCore){
+      var state;
+      state = this._state_instance;
+      this._core_instance = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
+        state.set_network_state(detoxState.NETWORK_STATE_ONLINE);
+      });
+      this._chat_instance = detoxChat.Chat(this._core_instance, state.get_seed()).once('announced', function(){
+        state.set_announcement_state(detoxState.ANNOUNCEMENT_STATE_ANNOUNCED);
+      });
+    }
   });
 }).call(this);

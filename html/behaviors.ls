@@ -10,7 +10,7 @@ window.{}detox-chat-app.{}behaviors
 				type	: String
 				value	: 'detox-chat-app'
 		ready : !->
-			@'_state_ready'	= require(['@detox/chat', 'state'])
+			@'_state_instance_ready'	= require(['@detox/chat', 'state'])
 				.then ([detox-chat, state]) !~>
 					@_state_instance	= state['get_instance'](@chat-id)
 					if !@_state_instance['ready']()

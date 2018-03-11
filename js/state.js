@@ -6,12 +6,12 @@
  */
 (function(){
   function Wrapper(asyncEventer){
-    var global_state, x$;
+    var global_state;
     global_state = Object.create(null);
-    function detoxState(name, initial_state){
+    function State(name, initial_state){
       var x$, i$, ref$, len$, secret, contact, j$, ref1$, len1$, this$ = this;
-      if (!(this instanceof detoxState)) {
-        return new detoxState(name, initial_state);
+      if (!(this instanceof State)) {
+        return new State(name, initial_state);
       }
       asyncEventer.call(this);
       if (!initial_state) {
@@ -21,6 +21,10 @@
           : Object.create(null);
       }
       this._state = initial_state;
+      this._local_state = {
+        network_state: State['NETWORK_STATE_OFFLINE'],
+        announcement_state: State['ANNOUNCEMENT_STATE_NOT_ANNOUNCED']
+      };
       if (!('version' in this._state)) {
         x$ = this._state;
         x$['version'] = 0;
@@ -53,55 +57,96 @@
         }
       });
     }
-    detoxState.prototype = Object.create(asyncEventer.prototype);
-    x$ = detoxState.prototype;
-    /**
-     * @param {Function} callback Callback to be executed once state is ready
-     *
-     * @return {boolean} Whether state is ready
-     */
-    x$['ready'] = function(callback){
-      if (callback) {
-        this._ready.then(callback);
+    State['NETWORK_STATE_OFFLINE'] = 0;
+    State['NETWORK_STATE_ONLINE'] = 1;
+    State['ANNOUNCEMENT_STATE_NOT_ANNOUNCED'] = 0;
+    State['ANNOUNCEMENT_STATE_ANNOUNCED'] = 1;
+    State.prototype = {
+      /**
+       * @param {Function} callback Callback to be executed once state is ready
+       *
+       * @return {boolean} Whether state is ready
+       */
+      'ready': function(callback){
+        if (callback) {
+          this._ready.then(callback);
+        }
+        return Boolean(this._state['seed']);
       }
-      return Boolean(this._state['seed']);
-    };
-    /**
-     * @return {Uint8Array} Seed if configured or `null` otherwise
-     */
-    x$['get_seed'] = function(){
-      return this._state['seed'];
-    };
-    /**
-     * @param {!Uint8Array} seed
-     */
-    x$['set_seed'] = function(seed){
-      this._state['seed'] = Uint8Array.from(seed);
-      if (this._ready_resolve) {
-        this._ready_resolve();
-        delete this._ready_resolve;
+      /**
+       * @return {Uint8Array} Seed if configured or `null` otherwise
+       */,
+      'get_seed': function(){
+        return this._state['seed'];
+      }
+      /**
+       * @param {!Uint8Array} seed
+       */,
+      'set_seed': function(seed){
+        this._state['seed'] = Uint8Array.from(seed);
+        if (this._ready_resolve) {
+          this._ready_resolve();
+          delete this._ready_resolve;
+        }
+        this['fire']('seed_updated');
+      }
+      /**
+       * @return {number} One of `State.NETWORK_STATE_*` constants
+       */,
+      'get_network_state': function(){
+        return this._local_state.network_state;
+      }
+      /**
+       * @param {number} network_state One of `State.NETWORK_STATE_*` constants
+       */,
+      'set_network_state': function(network_state){
+        switch (network_state) {
+        case State['NETWORK_STATE_OFFLINE']:
+        case State['NETWORK_STATE_ONLINE']:
+          this._local_state.network_state = network_state;
+          this['fire']('network_state_updated');
+        }
+      }
+      /**
+       * @return {number} One of `State.NETWORK_STATE_*` constants
+       */,
+      'get_announcement_state': function(){
+        return this._local_state.announcement_state;
+      }
+      /**
+       * @param {number} announcement_state One of `State.ANNOUNCEMENT_STATE_*` constants
+       */,
+      'set_announcement_state': function(announcement_state){
+        switch (announcement_state) {
+        case State['ANNOUNCEMENT_STATE_NOT_ANNOUNCED']:
+        case State['ANNOUNCEMENT_STATE_ANNOUNCED']:
+          this._local_state.announcement_state = announcement_state;
+          this['fire']('announcement_state_updated');
+        }
+      }
+      /**
+       * @return {!Array<!Object>}
+       */,
+      'get_contacts': function(){
+        return this._state['contacts'];
       }
     };
-    /**
-     * @return {!Array<!Object>}
-     */
-    x$['get_contacts'] = function(){
-      return this._state['contacts'];
-    };
-    Object.defineProperty(detoxState.prototype, 'constructor', {
+    State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);
+    Object.defineProperty(State.prototype, 'constructor', {
       enumerable: false,
-      value: detoxState
+      value: State
     });
     return {
+      'State': State
       /**
        * @param {string}	name
        * @param {!Object}	initial_state
        *
        * @return {!detoxState}
-       */
+       */,
       'get_instance': function(name, initial_state){
         if (!(name in global_state)) {
-          global_state[name] = detoxState(initial_state);
+          global_state[name] = State(initial_state);
         }
         return global_state[name];
       }
