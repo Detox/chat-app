@@ -26,6 +26,7 @@
         x$['version'] = 0;
         x$['name'] = '';
         x$['seed'] = null;
+        x$['settings'] = {};
         x$['secrets'] = [];
         x$['contacts'] = [];
       }

@@ -26,6 +26,7 @@ function Wrapper (async-eventer)
 				..'version'		= 0
 				..'name'		= ''
 				..'seed'		= null
+				..'settings'	= {} # TODO
 				..'secrets'		= []
 				..'contacts'	= []
 

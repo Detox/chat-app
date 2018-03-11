@@ -42,7 +42,8 @@
     ]
   });
   ready = new Promise(function(resolve){
-    if (window.WebComponents) {
+    var ref$;
+    if ((ref$ = window.WebComponents) != null && ref$.ready) {
       resolve();
     } else {
       window.addEventListener('WebComponentsReady', resolve);

@@ -5,7 +5,8 @@
  */
 Polymer(
 	is			: 'detox-chat-app-sidebar'
-	properties	:
-		chat-id	: String
+	behaviors	: [
+		detox-chat-app.behaviors.state
+	]
 )
 

@@ -42,7 +42,7 @@ requirejs.config(
 )
 
 ready = new Promise (resolve) !->
-	if window.WebComponents
+	if window.WebComponents?.ready
 		resolve()
 	else
 		window.addEventListener('WebComponentsReady', resolve)
