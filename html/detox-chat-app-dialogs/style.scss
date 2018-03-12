@@ -4,11 +4,35 @@
  * @license 0BSD
  */
 :host {
-	background : var(--base-background-color);
-	color      : var(--base-text-color);
-	display    : block;
+	background     : var(--base-background-color);
+	color          : var(--base-text-color);
+	display        : flex;
+	flex-direction : column;
 }
 
-p[right] {
-	text-align : right;
+#messages-list {
+	flex-grow : 1;
+
+	p[right] {
+		text-align : right;
+	}
+}
+
+#send-form {
+	align-items : stretch;
+	display     : flex;
+
+	csw-textarea {
+		flex-grow : 1;
+
+		textarea {
+			border : none;
+			height : auto;
+			margin : 0;
+		}
+	}
+
+	button {
+		height : 100%;
+	}
 }
