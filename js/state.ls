@@ -33,7 +33,9 @@ function Wrapper (async-eventer)
 				..'version'		= 0
 				..'name'		= ''
 				..'seed'		= null
-				..'settings'	= {} # TODO
+				..'settings'	=
+					'announce_myself'	: true
+					# TODO
 				..'secrets'		= []
 				..'contacts'	= []
 
@@ -83,6 +85,17 @@ function Wrapper (async-eventer)
 				delete @_ready_resolve
 			@'fire'('seed_updated')
 		/**
+		 * @return {Uint8Array} Seed if configured or `null` otherwise
+		 */
+		'get_name' : ->
+			@_state['name']
+		/**
+		 * @param {string} name
+		 */
+		'set_name' : (name) !->
+			@_state['name']	= String(name)
+			@'fire'('name_updated')
+		/**
 		 * @return {number} One of `State.NETWORK_STATE_*` constants
 		 */
 		'get_network_state' : ->
@@ -108,6 +121,17 @@ function Wrapper (async-eventer)
 				case State['ANNOUNCEMENT_STATE_NOT_ANNOUNCED'], State['ANNOUNCEMENT_STATE_ANNOUNCED']
 					@_local_state.announcement_state = announcement_state
 					@'fire'('announcement_state_updated')
+		/**
+		 * @return {boolean}
+		 */
+		'get_settings_announce_myself' : ->
+			@_state['settings']['announce_myself']
+		/**
+		 * @param {boolean} announce_myself
+		 */
+		'set_settings_announce_myself' : (announce_myself) !->
+			@_state['settings']['announce_myself']	= announce_myself
+			@'fire'('settings_announce_myself_updated')
 		/**
 		 * @return {!Array<!Object>}
 		 */

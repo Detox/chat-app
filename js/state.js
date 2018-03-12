@@ -30,7 +30,9 @@
         x$['version'] = 0;
         x$['name'] = '';
         x$['seed'] = null;
-        x$['settings'] = {};
+        x$['settings'] = {
+          'announce_myself': true
+        };
         x$['secrets'] = [];
         x$['contacts'] = [];
       }
@@ -91,6 +93,19 @@
         this['fire']('seed_updated');
       }
       /**
+       * @return {Uint8Array} Seed if configured or `null` otherwise
+       */,
+      'get_name': function(){
+        return this._state['name'];
+      }
+      /**
+       * @param {string} name
+       */,
+      'set_name': function(name){
+        this._state['name'] = String(name);
+        this['fire']('name_updated');
+      }
+      /**
        * @return {number} One of `State.NETWORK_STATE_*` constants
        */,
       'get_network_state': function(){
@@ -123,6 +138,19 @@
           this._local_state.announcement_state = announcement_state;
           this['fire']('announcement_state_updated');
         }
+      }
+      /**
+       * @return {boolean}
+       */,
+      'get_settings_announce_myself': function(){
+        return this._state['settings']['announce_myself'];
+      }
+      /**
+       * @param {boolean} announce_myself
+       */,
+      'set_settings_announce_myself': function(announce_myself){
+        this._state['settings']['announce_myself'] = announce_myself;
+        this['fire']('settings_announce_myself_updated');
       }
       /**
        * @return {!Array<!Object>}

@@ -37,18 +37,23 @@
             this$._connect_to_the_network(detoxState, detoxChat, detoxCore);
           }
         }
-        detoxChat['ready'](ready);
-        detoxCore['ready'](ready);
+        detoxChat.ready(ready);
+        detoxCore.ready(ready);
       });
     },
     _connect_to_the_network: function(detoxState, detoxChat, detoxCore){
-      var state;
+      var state, core, chat;
       state = this._state_instance;
-      this._core_instance = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
-        state.set_network_state(detoxState.NETWORK_STATE_ONLINE);
+      core = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
+        state.set_network_state(detoxState.State.NETWORK_STATE_ONLINE);
+        console.log('ready');
+        if (state.get_settings_announce_myself()) {
+          chat.announce();
+        }
       });
-      this._chat_instance = detoxChat.Chat(this._core_instance, state.get_seed()).once('announced', function(){
-        state.set_announcement_state(detoxState.ANNOUNCEMENT_STATE_ANNOUNCED);
+      chat = detoxChat.Chat(core, state.get_seed()).once('announced', function(){
+        state.set_announcement_state(detoxState.State.ANNOUNCEMENT_STATE_ANNOUNCED);
+        console.log('announced');
       });
     }
   });
