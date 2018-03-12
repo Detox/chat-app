@@ -6,10 +6,7 @@ dom-module(id="detox-chat-app-sidebar")
 			csw-button: button Profile
 			csw-button: button Settings
 		csw-switcher
-			#contacts-list
-				csw-button(icon="plus"): button Add new contact
-				div
-					| TODO: Contacts list
+			detox-chat-app-sidebar-contacts(chat-id="[[chat-id]]")
 			#profile
 				csw-form: form
 					label ID:
