@@ -8,4 +8,17 @@ Polymer(
 	behaviors	: [
 		detox-chat-app.behaviors.state
 	]
+	properties	:
+		id_base58	: String
+	ready : !->
+		Promise.all([
+			require(['@detox/crypto', '@detox/utils'])
+			@_state_instance_ready
+		]).then ([[detox-crypto, detox-utils]]) !~>
+			<~! detox-crypto.ready
+			state		= @_state_instance
+			@id_base58	= detox-utils['base58_encode'](
+				detox-crypto.create_keypair(state.get_seed()).ed25519.public
+			)
+
 )

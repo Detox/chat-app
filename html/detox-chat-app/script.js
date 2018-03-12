@@ -28,17 +28,13 @@
     ready: function(){
       var this$ = this;
       Promise.all([require(['state', '@detox/chat', '@detox/core']), this._state_instance_ready]).then(function(arg$){
-        var ref$, detoxState, detoxChat, detoxCore, wait_for;
+        var ref$, detoxState, detoxChat, detoxCore;
         ref$ = arg$[0], detoxState = ref$[0], detoxChat = ref$[1], detoxCore = ref$[2];
-        wait_for = 2;
-        function ready(){
-          --wait_for;
-          if (!wait_for) {
+        detoxChat.ready(function(){
+          detoxCore.ready(function(){
             this$._connect_to_the_network(detoxState, detoxChat, detoxCore);
-          }
-        }
-        detoxChat.ready(ready);
-        detoxCore.ready(ready);
+          });
+        });
       });
     },
     _connect_to_the_network: function(detoxState, detoxChat, detoxCore){

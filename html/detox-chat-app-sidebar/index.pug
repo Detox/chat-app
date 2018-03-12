@@ -3,12 +3,17 @@ dom-module(id="detox-chat-app-sidebar")
 	template
 		csw-tabs
 			csw-button: button Contacts
+			csw-button: button Profile
 			csw-button: button Settings
 		csw-switcher
 			#contacts-list
 				csw-button(icon="plus"): button Add new contact
 				div
 					| TODO: Contacts list
+			#profile
+				csw-form: form
+					label ID:
+					csw-textarea: textarea(readonly, value="[[id_base58]]")
 			#settings
 				| TODO: Settings
 		detox-chat-app-sidebar-status(chat-id="[[chat-id]]")

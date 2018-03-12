@@ -25,13 +25,9 @@ Polymer(
 			require(['state', '@detox/chat', '@detox/core'])
 			@_state_instance_ready
 		]).then ([[detox-state, detox-chat, detox-core]]) !~>
-			wait_for	= 2
-			!~function ready
-				--wait_for
-				if !wait_for
-					@_connect_to_the_network(detox-state, detox-chat, detox-core)
-			detox-chat.ready(ready)
-			detox-core.ready(ready)
+			<~! detox-chat.ready
+			<~! detox-core.ready
+			@_connect_to_the_network(detox-state, detox-chat, detox-core)
 	_connect_to_the_network : (detox-state, detox-chat, detox-core) !->
 		# TODO: For now we are using defaults and hardcoded constants for Chat and Core instances, but in future this will be configurable
 		state	= @_state_instance

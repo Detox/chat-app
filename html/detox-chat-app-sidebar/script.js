@@ -7,6 +7,21 @@
 (function(){
   Polymer({
     is: 'detox-chat-app-sidebar',
-    behaviors: [detoxChatApp.behaviors.state]
+    behaviors: [detoxChatApp.behaviors.state],
+    properties: {
+      id_base58: String
+    },
+    ready: function(){
+      var this$ = this;
+      Promise.all([require(['@detox/crypto', '@detox/utils']), this._state_instance_ready]).then(function(arg$){
+        var ref$, detoxCrypto, detoxUtils;
+        ref$ = arg$[0], detoxCrypto = ref$[0], detoxUtils = ref$[1];
+        detoxCrypto.ready(function(){
+          var state;
+          state = this$._state_instance;
+          this$.id_base58 = detoxUtils['base58_encode'](detoxCrypto.create_keypair(state.get_seed()).ed25519['public']);
+        });
+      });
+    }
   });
 }).call(this);
