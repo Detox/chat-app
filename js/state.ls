@@ -47,6 +47,7 @@ function Wrapper (detox-utils, async-eventer)
 						[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125]
 						'Fake contact'
 						(+Date)
+						(+Date)
 					]
 				]
 
@@ -55,7 +56,7 @@ function Wrapper (detox-utils, async-eventer)
 			@_state['seed']	= Uint8Array.from(@_state['seed'])
 		for secret in @_state['secrets']
 			secret['secret']	= Uint8Array.from(secret['secret'])
-		# Each contact item is an array `[public_key, name, last_time_active]`
+		# Each contact item is an array `[public_key, name, last_time_active, last_read_message]`
 		for contact in @_state['contacts']
 			contact[0]	= Uint8Array.from(contact[0])
 
