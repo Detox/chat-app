@@ -32,10 +32,10 @@
         var detoxState, state;
         detoxState = arg$[0][0];
         state = this$._state_instance;
-        state.on('network_state_updated', function(){
-          this$.network_connected = state.get_network_state() === detoxState.State.NETWORK_STATE_ONLINE;
-        }).on('announcement_state_updated', function(){
-          this$.announced = state.get_announcement_state() === detoxState.State.ANNOUNCEMENT_STATE_ANNOUNCED;
+        state.on('online_updated', function(){
+          this$.network_connected = state.get_online();
+        }).on('announced_updated', function(){
+          this$.announced = state.get_announced();
         });
       });
     },

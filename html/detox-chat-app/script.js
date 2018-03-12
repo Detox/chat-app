@@ -41,15 +41,13 @@
       var state, core, chat;
       state = this._state_instance;
       core = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
-        state.set_network_state(detoxState.State.NETWORK_STATE_ONLINE);
-        console.log('ready');
+        state.set_online(true);
         if (state.get_settings_announce_myself()) {
           chat.announce();
         }
       });
       chat = detoxChat.Chat(core, state.get_seed()).once('announced', function(){
-        state.set_announcement_state(detoxState.State.ANNOUNCEMENT_STATE_ANNOUNCED);
-        console.log('announced');
+        state.set_announced(true);
       });
     }
   });

@@ -33,16 +33,13 @@ Polymer(
 		state	= @_state_instance
 		core	= detox-core.Core(detox-core.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second)
 			.once('ready', !->
-				state.set_network_state(detox-state.State.NETWORK_STATE_ONLINE)
-				console.log('ready')
+				state.set_online(true)
 
 				if state.get_settings_announce_myself()
 					chat.announce()
 			)
 		chat	= detox-chat.Chat(core, state.get_seed())
 			.once('announced', !->
-				state.set_announcement_state(detox-state.State.ANNOUNCEMENT_STATE_ANNOUNCED)
-
-				console.log('announced')
+				state.set_announced(true)
 			)
 )

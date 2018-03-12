@@ -22,8 +22,8 @@
       }
       this._state = initial_state;
       this._local_state = {
-        network_state: State['NETWORK_STATE_OFFLINE'],
-        announcement_state: State['ANNOUNCEMENT_STATE_NOT_ANNOUNCED']
+        online: false,
+        announced: false
       };
       if (!('version' in this._state)) {
         x$ = this._state;
@@ -59,10 +59,6 @@
         }
       });
     }
-    State['NETWORK_STATE_OFFLINE'] = 0;
-    State['NETWORK_STATE_ONLINE'] = 1;
-    State['ANNOUNCEMENT_STATE_NOT_ANNOUNCED'] = 0;
-    State['ANNOUNCEMENT_STATE_ANNOUNCED'] = 1;
     State.prototype = {
       /**
        * @param {Function} callback Callback to be executed once state is ready
@@ -106,38 +102,30 @@
         this['fire']('name_updated');
       }
       /**
-       * @return {number} One of `State.NETWORK_STATE_*` constants
+       * @return {boolean}
        */,
-      'get_network_state': function(){
-        return this._local_state.network_state;
+      'get_online': function(){
+        return this._local_state.online;
       }
       /**
-       * @param {number} network_state One of `State.NETWORK_STATE_*` constants
+       * @param {boolean} online
        */,
-      'set_network_state': function(network_state){
-        switch (network_state) {
-        case State['NETWORK_STATE_OFFLINE']:
-        case State['NETWORK_STATE_ONLINE']:
-          this._local_state.network_state = network_state;
-          this['fire']('network_state_updated');
-        }
+      'set_online': function(online){
+        this._local_state.online = online;
+        this['fire']('online_updated');
       }
       /**
-       * @return {number} One of `State.NETWORK_STATE_*` constants
+       * @return {boolean}
        */,
-      'get_announcement_state': function(){
-        return this._local_state.announcement_state;
+      'get_announced': function(){
+        return this._local_state.announced;
       }
       /**
-       * @param {number} announcement_state One of `State.ANNOUNCEMENT_STATE_*` constants
+       * @param {boolean} announced
        */,
-      'set_announcement_state': function(announcement_state){
-        switch (announcement_state) {
-        case State['ANNOUNCEMENT_STATE_NOT_ANNOUNCED']:
-        case State['ANNOUNCEMENT_STATE_ANNOUNCED']:
-          this._local_state.announcement_state = announcement_state;
-          this['fire']('announcement_state_updated');
-        }
+      'set_announced': function(announced){
+        this._local_state.announced = announced;
+        this['fire']('announced_updated');
       }
       /**
        * @return {boolean}
