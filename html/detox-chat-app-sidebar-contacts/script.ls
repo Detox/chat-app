@@ -18,4 +18,6 @@ Polymer(
 			.on('contacts_changed', !~>
 				@contacts	= state.get_contacts()
 			)
+	_set_active_contact : (e) !->
+		@_state_instance.set_ui_active_contact(e.model.item[0])
 )

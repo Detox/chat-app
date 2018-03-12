@@ -21,6 +21,9 @@
           this$.contacts = state.get_contacts();
         });
       });
+    },
+    _set_active_contact: function(e){
+      this._state_instance.set_ui_active_contact(e.model.item[0]);
     }
   });
 }).call(this);

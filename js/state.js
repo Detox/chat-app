@@ -5,7 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  function Wrapper(asyncEventer){
+  function Wrapper(detoxUtils, asyncEventer){
     var global_state;
     global_state = Object.create(null);
     function State(name, initial_state){
@@ -23,7 +23,11 @@
       this._state = initial_state;
       this._local_state = {
         online: false,
-        announced: false
+        announced: false,
+        messages: detoxUtils.ArrayMap(),
+        ui: {
+          active_contact: null
+        }
       };
       if (!('version' in this._state)) {
         x$ = this._state;
@@ -34,7 +38,7 @@
           'announce': true
         };
         x$['secrets'] = [];
-        x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact']];
+        x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', +Date]];
       }
       if (this._state['seed']) {
         this._state['seed'] = Uint8Array.from(this._state['seed']);
@@ -47,6 +51,7 @@
         contact = ref$[i$];
         contact[0] = Uint8Array.from(contact[0]);
       }
+      this._local_state.messages.set(this._state['contacts'][0][0], [[true, +new Date, 'Received message'], [false, +new Date, 'Sent message']]);
       this._ready = new Promise(function(resolve){
         if (this$._state['seed']) {
           resolve();
@@ -126,6 +131,19 @@
       /**
        * @return {boolean}
        */,
+      'get_ui_active_contact': function(){
+        return this._local_state.ui.active_contact;
+      }
+      /**
+       * @param {!Uint8Array} public_key
+       */,
+      'set_ui_active_contact': function(public_key){
+        this._local_state.ui.active_contact = public_key;
+        this['fire']('ui_active_contact_changed');
+      }
+      /**
+       * @return {boolean}
+       */,
       'get_settings_announce': function(){
         return this._state['settings']['announce'];
       }
@@ -141,6 +159,14 @@
        */,
       'get_contacts': function(){
         return this._state['contacts'];
+      }
+      /**
+       * @param {!Uint8Array} public_key
+       *
+       * @return {!Array<!Array>} Each inner array is `[from, date, text]`, where `received` is `true` if message was received and `false` if sent to a friend
+       */,
+      'get_contact_messages': function(public_key){
+        return this._local_state.messages.get(public_key) || [];
       }
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);
@@ -164,5 +190,5 @@
       }
     };
   }
-  define(['async-eventer'], Wrapper);
+  define(['@detox/utils', 'async-eventer'], Wrapper);
 }).call(this);

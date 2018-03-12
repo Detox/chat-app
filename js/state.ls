@@ -3,7 +3,7 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-function Wrapper (async-eventer)
+function Wrapper (detox-utils, async-eventer)
 	global_state	= Object.create(null)
 	!function State (name, initial_state)
 		if !(@ instanceof State)
@@ -26,6 +26,10 @@ function Wrapper (async-eventer)
 		@_local_state =
 			online		: false
 			announced	: false
+			messages	: detox-utils.ArrayMap()
+			ui			:
+				active_contact	: null
+				# TODO
 
 		# v0 of the state structure
 		if !('version' of @_state)
@@ -38,9 +42,11 @@ function Wrapper (async-eventer)
 					# TODO
 				..'secrets'		= []
 				..'contacts'	= [
+					# TODO: This is just for demo purposes
 					[
 						[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125]
 						'Fake contact'
+						(+Date)
 					]
 				]
 
@@ -49,10 +55,18 @@ function Wrapper (async-eventer)
 			@_state['seed']	= Uint8Array.from(@_state['seed'])
 		for secret in @_state['secrets']
 			secret['secret']	= Uint8Array.from(secret['secret'])
-		# [public_key, name]
+		# Each contact item is an array `[public_key, name, last_time_active]`
 		for contact in @_state['contacts']
 			contact[0]	= Uint8Array.from(contact[0])
 
+		# TODO: This is just for demo purposes
+		@_local_state.messages.set(
+			@_state['contacts'][0][0],
+			[
+				[true, +(new Date), 'Received message']
+				[false, +(new Date), 'Sent message']
+			]
+		)
 		@_ready = new Promise (resolve) !~>
 			# Seed is necessary for operation
 			if @_state['seed']
@@ -120,6 +134,17 @@ function Wrapper (async-eventer)
 		/**
 		 * @return {boolean}
 		 */
+		'get_ui_active_contact' : ->
+			@_local_state.ui.active_contact
+		/**
+		 * @param {!Uint8Array} public_key
+		 */
+		'set_ui_active_contact' : (public_key) !->
+			@_local_state.ui.active_contact = public_key
+			@'fire'('ui_active_contact_changed')
+		/**
+		 * @return {boolean}
+		 */
 		'get_settings_announce' : ->
 			@_state['settings']['announce']
 		/**
@@ -133,6 +158,16 @@ function Wrapper (async-eventer)
 		 */
 		'get_contacts' : ->
 			@_state['contacts']
+		/**
+		 * @param {!Uint8Array} public_key
+		 *
+		 * @return {!Array<!Array>} Each inner array is `[from, date, text]`, where `received` is `true` if message was received and `false` if sent to a friend
+		 */
+		'get_contact_messages' : (public_key) ->
+			@_local_state.messages.get(public_key) || []
+#		'add_contact_message' : (public_key, from, date, text) !->
+#			if !@_local_state.messages.has(public_key)
+#				@_local_state.messages.set(public_key, [])
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)
@@ -152,4 +187,4 @@ function Wrapper (async-eventer)
 			global_state[name]
 	}
 
-define(['async-eventer'], Wrapper)
+define(['@detox/utils', 'async-eventer'], Wrapper)

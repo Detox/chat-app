@@ -7,6 +7,24 @@
 (function(){
   Polymer({
     is: 'detox-chat-app-dialogs',
-    behaviors: [detoxChatApp.behaviors.state]
+    behaviors: [detoxChatApp.behaviors.state],
+    properties: {
+      active_contact: {
+        type: Boolean,
+        value: false
+      },
+      messages: Array
+    },
+    ready: function(){
+      var this$ = this;
+      this._state_instance_ready.then(function(){
+        var state;
+        state = this$._state_instance;
+        state.on('ui_active_contact_changed', function(){
+          this$.active_contact = true;
+          this$.messages = state.get_contact_messages(state.get_ui_active_contact());
+        });
+      });
+    }
   });
 }).call(this);

@@ -8,3 +8,7 @@
 	color      : var(--base-text-color);
 	display    : block;
 }
+
+p[right] {
+	text-align : right;
+}
