@@ -82,12 +82,15 @@
        * @param {!Uint8Array} seed
        */,
       'set_seed': function(seed){
-        this._state['seed'] = Uint8Array.from(seed);
+        var old_seed, new_seed;
+        old_seed = this._state['seed'];
+        new_seed = Uint8Array.from(seed);
+        this._state['seed'] = new_seed;
         if (this._ready_resolve) {
           this._ready_resolve();
           delete this._ready_resolve;
         }
-        this['fire']('seed_changed');
+        this['fire']('seed_changed', new_seed, old_seed);
       }
       /**
        * @return {Uint8Array} Seed if configured or `null` otherwise
@@ -99,8 +102,11 @@
        * @param {string} name
        */,
       'set_name': function(name){
-        this._state['name'] = String(name);
-        this['fire']('name_changed');
+        var old_name, new_name;
+        old_name = this._state['name'];
+        new_name = String(name);
+        this._state['name'] = new_name;
+        this['fire']('name_changed', new_name, old_name);
       }
       /**
        * @return {boolean}
@@ -112,8 +118,11 @@
        * @param {boolean} online
        */,
       'set_online': function(online){
-        this._local_state.online = !!online;
-        this['fire']('online_changed');
+        var old_online, new_online;
+        old_online = this._local_state.online;
+        new_online = !!online;
+        this._local_state.online = new_online;
+        this['fire']('online_changed', new_online, old_online);
       }
       /**
        * @return {boolean}
@@ -125,8 +134,11 @@
        * @param {boolean} announced
        */,
       'set_announced': function(announced){
-        this._local_state.announced = !!announced;
-        this['fire']('announced_changed');
+        var old_announced, new_announced;
+        old_announced = this._local_state.announced;
+        new_announced = !!announced;
+        this._local_state.announced = new_announced;
+        this['fire']('announced_changed', new_announced, old_announced);
       }
       /**
        * @return {boolean}
@@ -138,8 +150,11 @@
        * @param {!Uint8Array} public_key
        */,
       'set_ui_active_contact': function(public_key){
-        this._local_state.ui.active_contact = public_key;
-        this['fire']('ui_active_contact_changed');
+        var old_active_contact, new_active_contact;
+        old_active_contact = this._local_state.ui.active_contact;
+        new_active_contact = Uint8Array.from(new_active_contact);
+        this._local_state.ui.active_contact = new_active_contact;
+        this['fire']('ui_active_contact_changed', new_active_contact, old_active_contact);
       }
       /**
        * @return {boolean}
@@ -151,7 +166,10 @@
        * @param {boolean} announce
        */,
       'set_settings_announce': function(announce){
-        this._state['settings']['announce'] = !!announce;
+        var old_announce, new_announce;
+        old_announce = this._state['settings']['announce'];
+        new_announce = !!announce;
+        this._state['settings']['announce'] = new_announce;
         this['fire']('settings_announce_changed');
       }
       /**
@@ -175,13 +193,15 @@
        * @param {string} 		text
        */,
       'add_contact_message': function(public_key, from, date, text){
-        var messages;
+        var messages, message;
         if (!this._local_state.messages.has(public_key)) {
           this._local_state.messages.set(public_key, []);
         }
+        public_key = Uint8Array.from(public_key);
         messages = this._local_state.messages.get(public_key);
-        messages.push([from, date, text]);
-        this['fire']('contact_messages_changed');
+        message = [from, date, text];
+        messages.push(message);
+        this['fire']('contact_messages_changed', public_key, message);
       }
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);

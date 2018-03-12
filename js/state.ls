@@ -93,11 +93,13 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {!Uint8Array} seed
 		 */
 		'set_seed' : (seed) !->
-			@_state['seed']	= Uint8Array.from(seed)
+			old_seed		= @_state['seed']
+			new_seed		= Uint8Array.from(seed)
+			@_state['seed']	= new_seed
 			if @_ready_resolve
 				@_ready_resolve()
 				delete @_ready_resolve
-			@'fire'('seed_changed')
+			@'fire'('seed_changed', new_seed, old_seed)
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
@@ -107,8 +109,10 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {string} name
 		 */
 		'set_name' : (name) !->
-			@_state['name']	= String(name)
-			@'fire'('name_changed')
+			old_name		= @_state['name']
+			new_name		= String(name)
+			@_state['name']	= new_name
+			@'fire'('name_changed', new_name, old_name)
 		/**
 		 * @return {boolean}
 		 */
@@ -118,8 +122,10 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {boolean} online
 		 */
 		'set_online' : (online) !->
-			@_local_state.online = !!online
-			@'fire'('online_changed')
+			old_online				= @_local_state.online
+			new_online				= !!online
+			@_local_state.online	= new_online
+			@'fire'('online_changed', new_online, old_online)
 		/**
 		 * @return {boolean}
 		 */
@@ -129,8 +135,10 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {boolean} announced
 		 */
 		'set_announced' : (announced) !->
-			@_local_state.announced = !!announced
-			@'fire'('announced_changed')
+			old_announced			= @_local_state.announced
+			new_announced			= !!announced
+			@_local_state.announced	= new_announced
+			@'fire'('announced_changed', new_announced, old_announced)
 		/**
 		 * @return {boolean}
 		 */
@@ -140,8 +148,10 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {!Uint8Array} public_key
 		 */
 		'set_ui_active_contact' : (public_key) !->
-			@_local_state.ui.active_contact = public_key
-			@'fire'('ui_active_contact_changed')
+			old_active_contact				= @_local_state.ui.active_contact
+			new_active_contact				= Uint8Array.from(new_active_contact)
+			@_local_state.ui.active_contact = new_active_contact
+			@'fire'('ui_active_contact_changed', new_active_contact, old_active_contact)
 		/**
 		 * @return {boolean}
 		 */
@@ -151,7 +161,9 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {boolean} announce
 		 */
 		'set_settings_announce' : (announce) !->
-			@_state['settings']['announce']	= !!announce
+			old_announce					= @_state['settings']['announce']
+			new_announce					= !!announce
+			@_state['settings']['announce']	= new_announce
 			@'fire'('settings_announce_changed')
 		/**
 		 * @return {!Array<!Object>}
@@ -174,9 +186,11 @@ function Wrapper (detox-utils, async-eventer)
 		'add_contact_message' : (public_key, from, date, text) !->
 			if !@_local_state.messages.has(public_key)
 				@_local_state.messages.set(public_key, [])
+			public_key	= Uint8Array.from(public_key)
 			messages	= @_local_state.messages.get(public_key)
-			messages.push([from, date, text])
-			@'fire'('contact_messages_changed')
+			message		= [from, date, text]
+			messages.push(message)
+			@'fire'('contact_messages_changed', public_key, message)
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)

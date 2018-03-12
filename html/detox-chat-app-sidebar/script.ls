@@ -29,13 +29,11 @@ Polymer(
 			@name				= state.get_name()
 			@settings_announce	= @_bool_to_int(state.get_settings_announce())
 			state
-				.on('name_changed', !~>
-					new_name	= state.get_name()
+				.on('name_changed', (new_name) !~>
 					if @name != new_name
 						@name	= new_name
 				)
-				.on('settings_announce_changed', !~>
-					new_settings_announce	= state.get_settings_announce()
+				.on('settings_announce_changed', (new_settings_announce) !~>
 					if @settings_announce !~= new_settings_announce
 						@settings_announce	= @_bool_to_int(new_settings_announce)
 				)

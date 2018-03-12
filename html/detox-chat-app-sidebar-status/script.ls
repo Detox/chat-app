@@ -19,11 +19,11 @@ Polymer(
 		<~! @_state_instance_ready.then
 		state	= @_state_instance
 		state
-			.on('online_changed', !~>
-				@online	= state.get_online()
+			.on('online_changed', (new_online) !~>
+				@online	= new_online
 			)
-			.on('announced_changed', !~>
-				@announced	= state.get_announced()
+			.on('announced_changed', (new_announced) !~>
+				@announced	= new_announced
 			)
 	_online : (online) ->
 		if online

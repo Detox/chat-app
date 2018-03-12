@@ -23,10 +23,10 @@
       this._state_instance_ready.then(function(){
         var state;
         state = this$._state_instance;
-        state.on('online_changed', function(){
-          this$.online = state.get_online();
-        }).on('announced_changed', function(){
-          this$.announced = state.get_announced();
+        state.on('online_changed', function(new_online){
+          this$.online = new_online;
+        }).on('announced_changed', function(new_announced){
+          this$.announced = new_announced;
         });
       });
     },

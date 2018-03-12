@@ -17,14 +17,17 @@
     },
     ready: function(){
       var this$ = this;
-      this._state_instance_ready.then(function(){
-        var state;
+      Promise.all([require(['@detox/utils']), this._state_instance_ready]).then(function(arg$){
+        var detoxUtils, state;
+        detoxUtils = arg$[0][0];
         state = this$._state_instance;
-        state.on('ui_active_contact_changed', function(){
+        state.on('ui_active_contact_changed', function(new_active_contact){
           this$.active_contact = true;
-          this$.messages = state.get_contact_messages(state.get_ui_active_contact());
-        }).on('contact_messages_changed', function(){
-          this$.messages = state.get_contact_messages(state.get_ui_active_contact());
+          this$.messages = state.get_contact_messages(new_active_contact);
+        }).on('contact_messages_changed', function(public_key){
+          if (detoxUtils.are_arrays_equal(public_key, state.get_ui_active_contact())) {
+            this$.messages = state.get_contact_messages(public_key);
+          }
         });
       });
     }
