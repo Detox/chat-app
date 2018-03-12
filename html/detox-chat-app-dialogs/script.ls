@@ -21,4 +21,7 @@ Polymer(
 				@active_contact	= true
 				@messages		= state.get_contact_messages(state.get_ui_active_contact())
 			)
+			.on('contact_messages_changed', !~>
+				@messages		= state.get_contact_messages(state.get_ui_active_contact())
+			)
 )

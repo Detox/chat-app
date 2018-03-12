@@ -168,6 +168,21 @@
       'get_contact_messages': function(public_key){
         return this._local_state.messages.get(public_key) || [];
       }
+      /**
+       * @param {!Uint8Array}	public_key
+       * @param {boolean}		from		`true` if message was received and `false` if sent to a friend
+       * @param {number}		date
+       * @param {string} 		text
+       */,
+      'add_contact_message': function(public_key, from, date, text){
+        var messages;
+        if (!this._local_state.messages.has(public_key)) {
+          this._local_state.messages.set(public_key, []);
+        }
+        messages = this._local_state.messages.get(public_key);
+        messages.push([from, date, text]);
+        this['fire']('contact_messages_changed');
+      }
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);
     Object.defineProperty(State.prototype, 'constructor', {

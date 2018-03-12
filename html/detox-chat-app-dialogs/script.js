@@ -23,6 +23,8 @@
         state.on('ui_active_contact_changed', function(){
           this$.active_contact = true;
           this$.messages = state.get_contact_messages(state.get_ui_active_contact());
+        }).on('contact_messages_changed', function(){
+          this$.messages = state.get_contact_messages(state.get_ui_active_contact());
         });
       });
     }

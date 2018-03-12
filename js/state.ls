@@ -165,9 +165,18 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'get_contact_messages' : (public_key) ->
 			@_local_state.messages.get(public_key) || []
-#		'add_contact_message' : (public_key, from, date, text) !->
-#			if !@_local_state.messages.has(public_key)
-#				@_local_state.messages.set(public_key, [])
+		/**
+		 * @param {!Uint8Array}	public_key
+		 * @param {boolean}		from		`true` if message was received and `false` if sent to a friend
+		 * @param {number}		date
+		 * @param {string} 		text
+		 */
+		'add_contact_message' : (public_key, from, date, text) !->
+			if !@_local_state.messages.has(public_key)
+				@_local_state.messages.set(public_key, [])
+			messages	= @_local_state.messages.get(public_key)
+			messages.push([from, date, text])
+			@'fire'('contact_messages_changed')
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)
