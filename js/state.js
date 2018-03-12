@@ -9,7 +9,7 @@
     var global_state;
     global_state = Object.create(null);
     function State(name, initial_state){
-      var x$, i$, ref$, len$, secret, contact, j$, ref1$, len1$, this$ = this;
+      var x$, i$, ref$, len$, secret, contact, this$ = this;
       if (!(this instanceof State)) {
         return new State(name, initial_state);
       }
@@ -34,7 +34,7 @@
           'announce': true
         };
         x$['secrets'] = [];
-        x$['contacts'] = [];
+        x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact']];
       }
       if (this._state['seed']) {
         this._state['seed'] = Uint8Array.from(this._state['seed']);
@@ -45,11 +45,7 @@
       }
       for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
         contact = ref$[i$];
-        contact['public_key'] = Uint8Array.from(contact['public_key']);
-        for (j$ = 0, len1$ = (ref1$ = contact['secrets']).length; j$ < len1$; ++j$) {
-          secret = ref1$[j$];
-          secret['secret'] = Uint8Array.from(secret['secret']);
-        }
+        contact[0] = Uint8Array.from(contact[0]);
       }
       this._ready = new Promise(function(resolve){
         if (this$._state['seed']) {

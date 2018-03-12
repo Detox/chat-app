@@ -49,6 +49,8 @@
       chat = detoxChat.Chat(core, state.get_seed()).once('announced', function(){
         state.set_announced(true);
       });
+      this._core_instance = core;
+      this._chat_instance = chat;
     }
   });
 }).call(this);

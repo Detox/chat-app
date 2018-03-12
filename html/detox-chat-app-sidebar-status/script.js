@@ -9,44 +9,35 @@
     is: 'detox-chat-app-sidebar-status',
     behaviors: [detoxChatApp.behaviors.state],
     properties: {
-      network_connected: {
+      online: {
         type: Boolean,
         value: false
-      },
-      network_state: {
-        computed: '_network_state(network_connected)',
-        type: String
       },
       announced: {
         type: Boolean,
         value: false
-      },
-      announced_string: {
-        computed: '_announced_string(announced)',
-        type: String
       }
     },
     ready: function(){
       var this$ = this;
-      Promise.all([require(['state']), this._state_instance_ready]).then(function(arg$){
-        var detoxState, state;
-        detoxState = arg$[0][0];
+      this._state_instance_ready.then(function(){
+        var state;
         state = this$._state_instance;
         state.on('online_changed', function(){
-          this$.network_connected = state.get_online();
+          this$.online = state.get_online();
         }).on('announced_changed', function(){
           this$.announced = state.get_announced();
         });
       });
     },
-    _network_state: function(network_connected){
-      if (network_connected) {
+    _online: function(online){
+      if (online) {
         return 'Online';
       } else {
         return 'Offline';
       }
     },
-    _announced_string: function(announced){
+    _announced: function(announced){
       if (announced) {
         return 'Yes';
       } else {

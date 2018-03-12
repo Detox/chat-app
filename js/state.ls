@@ -37,17 +37,21 @@ function Wrapper (async-eventer)
 					'announce'	: true
 					# TODO
 				..'secrets'		= []
-				..'contacts'	= []
+				..'contacts'	= [
+					[
+						[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125]
+						'Fake contact'
+					]
+				]
 
 		# Normalize state after deserialization
 		if @_state['seed']
 			@_state['seed']	= Uint8Array.from(@_state['seed'])
 		for secret in @_state['secrets']
 			secret['secret']	= Uint8Array.from(secret['secret'])
+		# [public_key, name]
 		for contact in @_state['contacts']
-			contact['public_key']	= Uint8Array.from(contact['public_key'])
-			for secret in contact['secrets']
-				secret['secret']	= Uint8Array.from(secret['secret'])
+			contact[0]	= Uint8Array.from(contact[0])
 
 		@_ready = new Promise (resolve) !~>
 			# Seed is necessary for operation

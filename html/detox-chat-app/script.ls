@@ -42,4 +42,6 @@ Polymer(
 			.once('announced', !->
 				state.set_announced(true)
 			)
+		@_core_instance	= core
+		@_chat_instance	= chat
 )
