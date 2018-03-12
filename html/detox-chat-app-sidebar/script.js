@@ -13,6 +13,10 @@
       name: {
         observer: '_name_changed',
         type: String
+      },
+      settings_announce: {
+        observer: '_settings_announce_changed',
+        type: Number
       }
     },
     ready: function(){
@@ -25,19 +29,38 @@
           state = this$._state_instance;
           this$.id_base58 = detoxUtils['base58_encode'](detoxCrypto.create_keypair(state.get_seed()).ed25519['public']);
           this$.name = state.get_name();
+          this$.settings_announce = this$._bool_to_int(state.get_settings_announce());
           state.on('name_changed', function(){
             var new_name;
             new_name = state.get_name();
             if (this$.name !== new_name) {
               this$.name = new_name;
             }
+          }).on('settings_announce_changed', function(){
+            var new_settings_announce;
+            new_settings_announce = state.get_settings_announce();
+            if (this$.settings_announce != new_settings_announce) {
+              this$.settings_announce = this$._bool_to_int(new_settings_announce);
+            }
           });
         });
       });
     },
+    _bool_to_int: function(value){
+      if (value) {
+        return 1;
+      } else {
+        return 0;
+      }
+    },
     _name_changed: function(){
       if (this.name !== this._state_instance.get_name()) {
         this._state_instance.set_name(this.name);
+      }
+    },
+    _settings_announce_changed: function(){
+      if (this.settings_announce != this._state_instance.get_settings_announce()) {
+        this._state_instance.set_settings_announce(this.settings_announce == 1);
       }
     }
   });

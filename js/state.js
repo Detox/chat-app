@@ -31,7 +31,7 @@
         x$['name'] = '';
         x$['seed'] = null;
         x$['settings'] = {
-          'announce_myself': true
+          'announce': true
         };
         x$['secrets'] = [];
         x$['contacts'] = [];
@@ -111,7 +111,7 @@
        * @param {boolean} online
        */,
       'set_online': function(online){
-        this._local_state.online = online;
+        this._local_state.online = !!online;
         this['fire']('online_changed');
       }
       /**
@@ -124,21 +124,21 @@
        * @param {boolean} announced
        */,
       'set_announced': function(announced){
-        this._local_state.announced = announced;
+        this._local_state.announced = !!announced;
         this['fire']('announced_changed');
       }
       /**
        * @return {boolean}
        */,
-      'get_settings_announce_myself': function(){
-        return this._state['settings']['announce_myself'];
+      'get_settings_announce': function(){
+        return this._state['settings']['announce'];
       }
       /**
-       * @param {boolean} announce_myself
+       * @param {boolean} announce
        */,
-      'set_settings_announce_myself': function(announce_myself){
-        this._state['settings']['announce_myself'] = announce_myself;
-        this['fire']('settings_announce_myself_changed');
+      'set_settings_announce': function(announce){
+        this._state['settings']['announce'] = !!announce;
+        this['fire']('settings_announce_changed');
       }
       /**
        * @return {!Array<!Object>}

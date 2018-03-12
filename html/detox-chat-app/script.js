@@ -27,22 +27,22 @@
     behaviors: [detoxChatApp.behaviors.state],
     ready: function(){
       var this$ = this;
-      Promise.all([require(['state', '@detox/chat', '@detox/core']), this._state_instance_ready]).then(function(arg$){
-        var ref$, detoxState, detoxChat, detoxCore;
-        ref$ = arg$[0], detoxState = ref$[0], detoxChat = ref$[1], detoxCore = ref$[2];
+      Promise.all([require(['@detox/chat', '@detox/core']), this._state_instance_ready]).then(function(arg$){
+        var ref$, detoxChat, detoxCore;
+        ref$ = arg$[0], detoxChat = ref$[0], detoxCore = ref$[1];
         detoxChat.ready(function(){
           detoxCore.ready(function(){
-            this$._connect_to_the_network(detoxState, detoxChat, detoxCore);
+            this$._connect_to_the_network(detoxChat, detoxCore);
           });
         });
       });
     },
-    _connect_to_the_network: function(detoxState, detoxChat, detoxCore){
+    _connect_to_the_network: function(detoxChat, detoxCore){
       var state, core, chat;
       state = this._state_instance;
       core = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
         state.set_online(true);
-        if (state.get_settings_announce_myself()) {
+        if (state.get_settings_announce()) {
           chat.announce();
         }
       });

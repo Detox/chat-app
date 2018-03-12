@@ -22,20 +22,20 @@ Polymer(
 	]
 	ready : !->
 		Promise.all([
-			require(['state', '@detox/chat', '@detox/core'])
+			require(['@detox/chat', '@detox/core'])
 			@_state_instance_ready
-		]).then ([[detox-state, detox-chat, detox-core]]) !~>
+		]).then ([[detox-chat, detox-core]]) !~>
 			<~! detox-chat.ready
 			<~! detox-core.ready
-			@_connect_to_the_network(detox-state, detox-chat, detox-core)
-	_connect_to_the_network : (detox-state, detox-chat, detox-core) !->
+			@_connect_to_the_network(detox-chat, detox-core)
+	_connect_to_the_network : (detox-chat, detox-core) !->
 		# TODO: For now we are using defaults and hardcoded constants for Chat and Core instances, but in future this will be configurable
 		state	= @_state_instance
 		core	= detox-core.Core(detox-core.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second)
 			.once('ready', !->
 				state.set_online(true)
 
-				if state.get_settings_announce_myself()
+				if state.get_settings_announce()
 					chat.announce()
 			)
 		chat	= detox-chat.Chat(core, state.get_seed())

@@ -34,7 +34,7 @@ function Wrapper (async-eventer)
 				..'name'		= ''
 				..'seed'		= null
 				..'settings'	=
-					'announce_myself'	: true
+					'announce'	: true
 					# TODO
 				..'secrets'		= []
 				..'contacts'	= []
@@ -100,7 +100,7 @@ function Wrapper (async-eventer)
 		 * @param {boolean} online
 		 */
 		'set_online' : (online) !->
-			@_local_state.online = online
+			@_local_state.online = !!online
 			@'fire'('online_changed')
 		/**
 		 * @return {boolean}
@@ -111,19 +111,19 @@ function Wrapper (async-eventer)
 		 * @param {boolean} announced
 		 */
 		'set_announced' : (announced) !->
-			@_local_state.announced = announced
+			@_local_state.announced = !!announced
 			@'fire'('announced_changed')
 		/**
 		 * @return {boolean}
 		 */
-		'get_settings_announce_myself' : ->
-			@_state['settings']['announce_myself']
+		'get_settings_announce' : ->
+			@_state['settings']['announce']
 		/**
-		 * @param {boolean} announce_myself
+		 * @param {boolean} announce
 		 */
-		'set_settings_announce_myself' : (announce_myself) !->
-			@_state['settings']['announce_myself']	= announce_myself
-			@'fire'('settings_announce_myself_changed')
+		'set_settings_announce' : (announce) !->
+			@_state['settings']['announce']	= !!announce
+			@'fire'('settings_announce_changed')
 		/**
 		 * @return {!Array<!Object>}
 		 */

@@ -17,6 +17,15 @@ dom-module(id="detox-chat-app-sidebar")
 					label Name:
 					csw-textarea: textarea(value="{{name}}")
 			#settings
-				| TODO: Settings
+				csw-form: form
+					label Announce to the network*:
+					csw-group
+						csw-label-button(value="{{settings_announce}}"): label
+							input(type="radio" value="0")
+							| No
+						csw-label-button: label
+							input(type="radio" value="1")
+							| Yes
+				p * Settings require application restart in order to take effect
 		detox-chat-app-sidebar-status(chat-id="[[chat-id]]")
 	script(src="script.js")

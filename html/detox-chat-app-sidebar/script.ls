@@ -9,27 +9,42 @@ Polymer(
 		detox-chat-app.behaviors.state
 	]
 	properties	:
-		id_base58	: String
-		name		:
+		id_base58			: String
+		name				:
 			observer	: '_name_changed'
 			type		: String
+		settings_announce	:
+			observer	: '_settings_announce_changed'
+			type		: Number
 	ready : !->
 		Promise.all([
 			require(['@detox/crypto', '@detox/utils'])
 			@_state_instance_ready
 		]).then ([[detox-crypto, detox-utils]]) !~>
 			<~! detox-crypto.ready
-			state		= @_state_instance
-			@id_base58	= detox-utils['base58_encode'](
+			state				= @_state_instance
+			@id_base58			= detox-utils['base58_encode'](
 				detox-crypto.create_keypair(state.get_seed()).ed25519.public
 			)
-			@name		= state.get_name()
-			state.on('name_changed', !~>
-				new_name	= state.get_name()
-				if @name != new_name
-					@name	= new_name
-			)
+			@name				= state.get_name()
+			@settings_announce	= @_bool_to_int(state.get_settings_announce())
+			state
+				.on('name_changed', !~>
+					new_name	= state.get_name()
+					if @name != new_name
+						@name	= new_name
+				)
+				.on('settings_announce_changed', !~>
+					new_settings_announce	= state.get_settings_announce()
+					if @settings_announce !~= new_settings_announce
+						@settings_announce	= @_bool_to_int(new_settings_announce)
+				)
+	_bool_to_int : (value) ->
+		if value then 1 else 0
 	_name_changed : !->
 		if @name != @_state_instance.get_name()
 			@_state_instance.set_name(@name)
+	_settings_announce_changed : !->
+		if @settings_announce !~= @_state_instance.get_settings_announce()
+			@_state_instance.set_settings_announce(@settings_announce ~= 1)
 )
