@@ -9,4 +9,3 @@ Polymer(
 		detox-chat-app.behaviors.state
 	]
 )
-
