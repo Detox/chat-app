@@ -6,3 +6,16 @@
 :host {
 	display : block;
 }
+
+csw-group {
+	display    : block;
+	margin-top : 1em;
+
+	csw-button {
+		width : 100%;
+
+		button {
+			justify-content : flex-start;
+		}
+	}
+}
