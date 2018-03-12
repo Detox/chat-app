@@ -25,7 +25,7 @@
   Polymer({
     is: 'detox-chat-app',
     behaviors: [detoxChatApp.behaviors.state],
-    ready: function(){
+    created: function(){
       var this$ = this;
       Promise.all([require(['@detox/chat', '@detox/core']), this._state_instance_ready]).then(function(arg$){
         var ref$, detoxChat, detoxCore;

@@ -9,7 +9,7 @@ window.{}detox-chat-app.{}behaviors
 			chat-id	:
 				type	: String
 				value	: 'detox-chat-app'
-		ready : !->
+		created : !->
 			@'_state_instance_ready'	= require(['@detox/chat', 'state'])
 				.then ([detox-chat, state]) !~>
 					@_state_instance	= state['get_instance'](@chat-id)

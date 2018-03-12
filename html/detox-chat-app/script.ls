@@ -20,7 +20,7 @@ Polymer(
 	behaviors	: [
 		detox-chat-app.behaviors.state
 	]
-	ready : !->
+	created : !->
 		Promise.all([
 			require(['@detox/chat', '@detox/core'])
 			@_state_instance_ready

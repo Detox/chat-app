@@ -14,7 +14,7 @@
         value: 'detox-chat-app'
       }
     },
-    ready: function(){
+    created: function(){
       var this$ = this;
       this['_state_instance_ready'] = require(['@detox/chat', 'state']).then(function(arg$){
         var detoxChat, state;
