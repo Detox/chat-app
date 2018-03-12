@@ -13,7 +13,7 @@
 	"dependencies" : {
 		"@detox/chat"                    : "^0.3.0",
 		"@detox/core"                    : "^0.4.1",
-		"@detox/utils"                   : "^1.4.0",
+		"@detox/utils"                   : "^1.5.0",
 		"@polymer/polymer"               : "^2.5.0",
 		"@webcomponents/shadycss"        : "^1.1.1",
 		"@webcomponents/webcomponentsjs" : "^1.1.0",

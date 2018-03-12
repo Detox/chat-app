@@ -9,6 +9,7 @@
   requirejs.config({
     baseUrl: '/node_modules/',
     paths: {
+      '@detox/base-x': '@detox/base-x/index',
       '@detox/chat': '@detox/chat/src/index',
       '@detox/core': '@detox/core/src/index',
       '@detox/crypto': '@detox/crypto/src/index',
