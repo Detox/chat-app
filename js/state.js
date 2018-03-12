@@ -86,7 +86,7 @@
           this._ready_resolve();
           delete this._ready_resolve;
         }
-        this['fire']('seed_updated');
+        this['fire']('seed_changed');
       }
       /**
        * @return {Uint8Array} Seed if configured or `null` otherwise
@@ -99,7 +99,7 @@
        */,
       'set_name': function(name){
         this._state['name'] = String(name);
-        this['fire']('name_updated');
+        this['fire']('name_changed');
       }
       /**
        * @return {boolean}
@@ -112,7 +112,7 @@
        */,
       'set_online': function(online){
         this._local_state.online = online;
-        this['fire']('online_updated');
+        this['fire']('online_changed');
       }
       /**
        * @return {boolean}
@@ -125,7 +125,7 @@
        */,
       'set_announced': function(announced){
         this._local_state.announced = announced;
-        this['fire']('announced_updated');
+        this['fire']('announced_changed');
       }
       /**
        * @return {boolean}
@@ -138,7 +138,7 @@
        */,
       'set_settings_announce_myself': function(announce_myself){
         this._state['settings']['announce_myself'] = announce_myself;
-        this['fire']('settings_announce_myself_updated');
+        this['fire']('settings_announce_myself_changed');
       }
       /**
        * @return {!Array<!Object>}

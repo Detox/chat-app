@@ -9,7 +9,11 @@
     is: 'detox-chat-app-sidebar',
     behaviors: [detoxChatApp.behaviors.state],
     properties: {
-      id_base58: String
+      id_base58: String,
+      name: {
+        observer: '_name_changed',
+        type: String
+      }
     },
     ready: function(){
       var this$ = this;
@@ -20,8 +24,21 @@
           var state;
           state = this$._state_instance;
           this$.id_base58 = detoxUtils['base58_encode'](detoxCrypto.create_keypair(state.get_seed()).ed25519['public']);
+          this$.name = state.get_name();
+          state.on('name_changed', function(){
+            var new_name;
+            new_name = state.get_name();
+            if (this$.name !== new_name) {
+              this$.name = new_name;
+            }
+          });
         });
       });
+    },
+    _name_changed: function(){
+      if (this.name !== this._state_instance.get_name()) {
+        this._state_instance.set_name(this.name);
+      }
     }
   });
 }).call(this);

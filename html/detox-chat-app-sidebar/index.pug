@@ -13,7 +13,9 @@ dom-module(id="detox-chat-app-sidebar")
 			#profile
 				csw-form: form
 					label ID:
-					csw-textarea: textarea(readonly, value="[[id_base58]]")
+					csw-textarea: textarea(readonly value="[[id_base58]]")
+					label Name:
+					csw-textarea: textarea(value="{{name}}")
 			#settings
 				| TODO: Settings
 		detox-chat-app-sidebar-status(chat-id="[[chat-id]]")

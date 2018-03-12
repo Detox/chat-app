@@ -79,7 +79,7 @@ function Wrapper (async-eventer)
 			if @_ready_resolve
 				@_ready_resolve()
 				delete @_ready_resolve
-			@'fire'('seed_updated')
+			@'fire'('seed_changed')
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
@@ -90,7 +90,7 @@ function Wrapper (async-eventer)
 		 */
 		'set_name' : (name) !->
 			@_state['name']	= String(name)
-			@'fire'('name_updated')
+			@'fire'('name_changed')
 		/**
 		 * @return {boolean}
 		 */
@@ -101,7 +101,7 @@ function Wrapper (async-eventer)
 		 */
 		'set_online' : (online) !->
 			@_local_state.online = online
-			@'fire'('online_updated')
+			@'fire'('online_changed')
 		/**
 		 * @return {boolean}
 		 */
@@ -112,7 +112,7 @@ function Wrapper (async-eventer)
 		 */
 		'set_announced' : (announced) !->
 			@_local_state.announced = announced
-			@'fire'('announced_updated')
+			@'fire'('announced_changed')
 		/**
 		 * @return {boolean}
 		 */
@@ -123,7 +123,7 @@ function Wrapper (async-eventer)
 		 */
 		'set_settings_announce_myself' : (announce_myself) !->
 			@_state['settings']['announce_myself']	= announce_myself
-			@'fire'('settings_announce_myself_updated')
+			@'fire'('settings_announce_myself_changed')
 		/**
 		 * @return {!Array<!Object>}
 		 */

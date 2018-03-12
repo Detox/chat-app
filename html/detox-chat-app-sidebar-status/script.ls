@@ -28,10 +28,10 @@ Polymer(
 		]).then ([[detox-state]]) !~>
 			state	= @_state_instance
 			state
-				.on('online_updated', !~>
+				.on('online_changed', !~>
 					@network_connected	= state.get_online()
 				)
-				.on('announced_updated', !~>
+				.on('announced_changed', !~>
 					@announced	= state.get_announced()
 				)
 	_network_state : (network_connected) ->

@@ -32,9 +32,9 @@
         var detoxState, state;
         detoxState = arg$[0][0];
         state = this$._state_instance;
-        state.on('online_updated', function(){
+        state.on('online_changed', function(){
           this$.network_connected = state.get_online();
-        }).on('announced_updated', function(){
+        }).on('announced_changed', function(){
           this$.announced = state.get_announced();
         });
       });
