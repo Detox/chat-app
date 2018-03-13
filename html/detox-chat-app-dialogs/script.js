@@ -23,10 +23,12 @@
         state = this$._state_instance;
         state.on('ui_active_contact_changed', function(new_active_contact){
           this$.active_contact = true;
-          this$.messages = state.get_contact_messages(new_active_contact);
+          this$.messages = state.get_contact_messages(new_active_contact).slice();
+          this$.notifyPath('messages');
         }).on('contact_messages_changed', function(public_key){
           if (detoxUtils.are_arrays_equal(public_key, state.get_ui_active_contact())) {
-            this$.messages = state.get_contact_messages(public_key);
+            this$.messages = state.get_contact_messages(public_key).slice();
+            this$.notifyPath('messages');
           }
         });
       });

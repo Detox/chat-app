@@ -22,10 +22,12 @@ Polymer(
 			state
 				.on('ui_active_contact_changed', (new_active_contact) !~>
 					@active_contact	= true
-					@messages		= state.get_contact_messages(new_active_contact)
+					@messages		= state.get_contact_messages(new_active_contact).slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed
+					@notifyPath('messages')
 				)
 				.on('contact_messages_changed', (public_key) !~>
 					if detox-utils.are_arrays_equal(public_key, state.get_ui_active_contact())
-						@messages		= state.get_contact_messages(public_key)
+						@messages	= state.get_contact_messages(public_key).slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed
+						@notifyPath('messages')
 				)
 )
