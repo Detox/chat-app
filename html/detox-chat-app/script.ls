@@ -42,6 +42,10 @@ Polymer(
 			.once('announced', !->
 				state.set_announced(true)
 			)
+		state
+			.on('contact_added', (new_contact) !~>
+				# TODO: Actual contact addition
+			)
 		@_core_instance	= core
 		@_chat_instance	= chat
 )

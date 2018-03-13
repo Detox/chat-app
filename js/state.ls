@@ -46,8 +46,8 @@ function Wrapper (detox-utils, async-eventer)
 					[
 						[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125]
 						'Fake contact'
-						(+Date)
-						(+Date)
+						0
+						0
 					]
 				]
 
@@ -171,6 +171,15 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'get_contacts' : ->
 			@_state['contacts']
+		/**
+		 * @param {!Uint8Array}	id
+		 * @param {string}		name
+		 */
+		'add_contact' : (id, name) !->
+			new_contact	= [Uint8Array.from(id), name, 0, 0]
+			@_state.contacts.push(new_contact)
+			@'fire'('contact_added', new_contact)
+			@'fire'('contacts_changed')
 		/**
 		 * @param {!Uint8Array} public_key
 		 *

@@ -38,7 +38,7 @@
       });
     },
     _connect_to_the_network: function(detoxChat, detoxCore){
-      var state, core, chat;
+      var state, core, chat, this$ = this;
       state = this._state_instance;
       core = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
         state.set_online(true);
@@ -49,6 +49,7 @@
       chat = detoxChat.Chat(core, state.get_seed()).once('announced', function(){
         state.set_announced(true);
       });
+      state.on('contact_added', function(new_contact){});
       this._core_instance = core;
       this._chat_instance = chat;
     }

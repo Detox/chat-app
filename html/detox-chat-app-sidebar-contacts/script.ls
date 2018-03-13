@@ -16,8 +16,33 @@ Polymer(
 		@contacts	= state.get_contacts()
 		state
 			.on('contacts_changed', !~>
-				@contacts	= state.get_contacts()
+				contacts	= state.get_contacts().slice()
+				# TODO: Sort contacts
+				@contacts	= contacts
 			)
 	_set_active_contact : (e) !->
 		@_state_instance.set_ui_active_contact(e.model.item[0])
+	_add_contact : !->
+		modal	= csw.functions.confirm("""
+			<csw-form>
+				<form>
+					<label>
+						<csw-textarea>
+							<textarea id="id" placeholder="ID"></textarea>
+						</csw-textarea>
+					</label>
+					<label>
+						<csw-textarea>
+							<textarea id="name" placeholder="Name (optional)"></textarea>
+						</csw-textarea>
+					</label>
+				</form>
+			</csw-form>
+		""", !~>
+			id_base58		= modal.querySelector('#id').value
+			name			= modal.querySelector('#name').value
+			([detox-utils])	<~! require(['@detox/utils']).then
+			# TODO: Checksum should be added in order to prevent accidental typos
+			@_state_instance.add_contact(detox-utils.base58_decode(id_base58), name)
+		)
 )

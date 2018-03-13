@@ -18,12 +18,27 @@
         state = this$._state_instance;
         this$.contacts = state.get_contacts();
         state.on('contacts_changed', function(){
-          this$.contacts = state.get_contacts();
+          var contacts;
+          contacts = state.get_contacts().slice();
+          this$.contacts = contacts;
         });
       });
     },
     _set_active_contact: function(e){
       this._state_instance.set_ui_active_contact(e.model.item[0]);
+    },
+    _add_contact: function(){
+      var modal, this$ = this;
+      modal = csw.functions.confirm("<csw-form>\n	<form>\n		<label>\n			<csw-textarea>\n				<textarea id=\"id\" placeholder=\"ID\"></textarea>\n			</csw-textarea>\n		</label>\n		<label>\n			<csw-textarea>\n				<textarea id=\"name\" placeholder=\"Name (optional)\"></textarea>\n			</csw-textarea>\n		</label>\n	</form>\n</csw-form>", function(){
+        var id_base58, name;
+        id_base58 = modal.querySelector('#id').value;
+        name = modal.querySelector('#name').value;
+        require(['@detox/utils']).then(function(arg$){
+          var detoxUtils;
+          detoxUtils = arg$[0];
+          this$._state_instance.add_contact(detoxUtils.base58_decode(id_base58), name);
+        });
+      });
     }
   });
 }).call(this);

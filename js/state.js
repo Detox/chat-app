@@ -38,7 +38,7 @@
           'announce': true
         };
         x$['secrets'] = [];
-        x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', +Date, +Date]];
+        x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', 0, 0]];
       }
       if (this._state['seed']) {
         this._state['seed'] = Uint8Array.from(this._state['seed']);
@@ -177,6 +177,17 @@
        */,
       'get_contacts': function(){
         return this._state['contacts'];
+      }
+      /**
+       * @param {!Uint8Array}	id
+       * @param {string}		name
+       */,
+      'add_contact': function(id, name){
+        var new_contact;
+        new_contact = [Uint8Array.from(id), name, 0, 0];
+        this._state.contacts.push(new_contact);
+        this['fire']('contact_added', new_contact);
+        this['fire']('contacts_changed');
       }
       /**
        * @param {!Uint8Array} public_key
