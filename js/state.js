@@ -152,7 +152,7 @@
       'set_ui_active_contact': function(public_key){
         var old_active_contact, new_active_contact;
         old_active_contact = this._local_state.ui.active_contact;
-        new_active_contact = Uint8Array.from(new_active_contact);
+        new_active_contact = Uint8Array.from(public_key);
         this._local_state.ui.active_contact = new_active_contact;
         this['fire']('ui_active_contact_changed', new_active_contact, old_active_contact);
       }

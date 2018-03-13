@@ -150,7 +150,7 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'set_ui_active_contact' : (public_key) !->
 			old_active_contact				= @_local_state.ui.active_contact
-			new_active_contact				= Uint8Array.from(new_active_contact)
+			new_active_contact				= Uint8Array.from(public_key)
 			@_local_state.ui.active_contact = new_active_contact
 			@'fire'('ui_active_contact_changed', new_active_contact, old_active_contact)
 		/**
