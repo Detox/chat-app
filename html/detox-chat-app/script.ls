@@ -22,13 +22,13 @@ Polymer(
 	]
 	created : !->
 		Promise.all([
-			require(['@detox/chat', '@detox/core'])
+			require(['@detox/chat', '@detox/core', '@detox/utils'])
 			@_state_instance_ready
-		]).then ([[detox-chat, detox-core]]) !~>
+		]).then ([[detox-chat, detox-core, detox-utils]]) !~>
 			<~! detox-chat.ready
 			<~! detox-core.ready
-			@_connect_to_the_network(detox-chat, detox-core)
-	_connect_to_the_network : (detox-chat, detox-core) !->
+			@_connect_to_the_network(detox-chat, detox-core, detox-utils)
+	_connect_to_the_network : (detox-chat, detox-core, detox-utils) !->
 		# TODO: For now we are using defaults and hardcoded constants for Chat and Core instances, but in future this will be configurable
 		state	= @_state_instance
 		core	= detox-core.Core(detox-core.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second)
@@ -42,9 +42,23 @@ Polymer(
 			.once('announced', !->
 				state.set_announced(true)
 			)
+			.on('secret', (friend_id, secret) !->
+				# TODO
+			)
+			.on('secret_received', (friend_id) !->
+				# TODO
+			)
+			.on('connected', (friend_id) !~>
+				# TODO: Update connection and current online statuses
+				state.add_online_contact(friend_id)
+			)
+			.on('disconnected', (friend_id) !~>
+				state.del_online_contact(friend_id)
+			)
 		state
 			.on('contact_added', (new_contact) !~>
-				# TODO: Actual contact addition
+				# TODO: Secrets support
+				chat.connect_to(new_contact[0], new Uint8Array(0))
 			)
 		@_core_instance	= core
 		@_chat_instance	= chat

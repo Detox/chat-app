@@ -27,17 +27,17 @@
     behaviors: [detoxChatApp.behaviors.state],
     created: function(){
       var this$ = this;
-      Promise.all([require(['@detox/chat', '@detox/core']), this._state_instance_ready]).then(function(arg$){
-        var ref$, detoxChat, detoxCore;
-        ref$ = arg$[0], detoxChat = ref$[0], detoxCore = ref$[1];
+      Promise.all([require(['@detox/chat', '@detox/core', '@detox/utils']), this._state_instance_ready]).then(function(arg$){
+        var ref$, detoxChat, detoxCore, detoxUtils;
+        ref$ = arg$[0], detoxChat = ref$[0], detoxCore = ref$[1], detoxUtils = ref$[2];
         detoxChat.ready(function(){
           detoxCore.ready(function(){
-            this$._connect_to_the_network(detoxChat, detoxCore);
+            this$._connect_to_the_network(detoxChat, detoxCore, detoxUtils);
           });
         });
       });
     },
-    _connect_to_the_network: function(detoxChat, detoxCore){
+    _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){
       var state, core, chat, this$ = this;
       state = this._state_instance;
       core = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
@@ -48,8 +48,14 @@
       });
       chat = detoxChat.Chat(core, state.get_seed()).once('announced', function(){
         state.set_announced(true);
+      }).on('secret', function(friend_id, secret){}).on('secret_received', function(friend_id){}).on('connected', function(friend_id){
+        state.add_online_contact(friend_id);
+      }).on('disconnected', function(friend_id){
+        state.del_online_contact(friend_id);
       });
-      state.on('contact_added', function(new_contact){});
+      state.on('contact_added', function(new_contact){
+        chat.connect_to(new_contact[0], new Uint8Array(0));
+      });
       this._core_instance = core;
       this._chat_instance = chat;
     }

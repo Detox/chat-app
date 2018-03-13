@@ -4,7 +4,11 @@
  * @license 0BSD
  */
 function Wrapper (detox-utils, async-eventer)
-	global_state	= Object.create(null)
+	are_arrays_equal	= detox-utils['are_arrays_equal']
+	ArrayMap			= detox-utils['ArrayMap']
+	ArraySet			= detox-utils['ArraySet']
+
+	global_state		= Object.create(null)
 	!function State (name, initial_state)
 		if !(@ instanceof State)
 			return new State(name, initial_state)
@@ -24,12 +28,13 @@ function Wrapper (detox-utils, async-eventer)
 
 		# State that is only valid for current session
 		@_local_state =
-			online		: false
-			announced	: false
-			messages	: detox-utils.ArrayMap()
-			ui			:
+			online			: false
+			announced		: false
+			messages		: ArrayMap()
+			ui				:
 				active_contact	: null
 				# TODO
+			online_contacts	: ArraySet()
 
 		# v0 of the state structure
 		if !('version' of @_state)
@@ -56,7 +61,7 @@ function Wrapper (detox-utils, async-eventer)
 			@_state['seed']	= Uint8Array.from(@_state['seed'])
 		for secret in @_state['secrets']
 			secret['secret']	= Uint8Array.from(secret['secret'])
-		# Each contact item is an array `[public_key, name, last_time_active, last_read_message]`
+		# Each contact item is an array `[friend_id, name, last_time_active, last_read_message]`
 		for contact in @_state['contacts']
 			contact[0]	= Uint8Array.from(contact[0])
 
@@ -146,11 +151,11 @@ function Wrapper (detox-utils, async-eventer)
 		'get_ui_active_contact' : ->
 			@_local_state.ui.active_contact
 		/**
-		 * @param {!Uint8Array} public_key
+		 * @param {!Uint8Array} friend_id
 		 */
-		'set_ui_active_contact' : (public_key) !->
+		'set_ui_active_contact' : (friend_id) !->
 			old_active_contact				= @_local_state.ui.active_contact
-			new_active_contact				= Uint8Array.from(public_key)
+			new_active_contact				= Uint8Array.from(friend_id)
 			@_local_state.ui.active_contact = new_active_contact
 			@'fire'('ui_active_contact_changed', new_active_contact, old_active_contact)
 		/**
@@ -172,35 +177,77 @@ function Wrapper (detox-utils, async-eventer)
 		'get_contacts' : ->
 			@_state['contacts']
 		/**
-		 * @param {!Uint8Array}	id
+		 * @param {!Uint8Array}	friend_id
 		 * @param {string}		name
 		 */
-		'add_contact' : (id, name) !->
-			new_contact	= [Uint8Array.from(id), name, 0, 0]
-			@_state.contacts.push(new_contact)
+		'add_contact' : (friend_id, name) !->
+			# TODO: Secrets support
+			new_contact	= [Uint8Array.from(friend_id), name, 0, 0]
+			@_state['contacts'].push(new_contact)
 			@'fire'('contact_added', new_contact)
 			@'fire'('contacts_changed')
 		/**
-		 * @param {!Uint8Array} public_key
+		 * @param {!Uint8Array} friend_id
+		 */
+		'has_contact' : (friend_id) ->
+			for contact in @_state['contacts']
+				if are_arrays_equal(friend_id, contact[0])
+					return true
+			false
+		/**
+		 * @param {!Uint8Array} friend_id
+		 */
+		'del_contact' : (friend_id) !->
+			for contact in @_state['contacts']
+				if are_arrays_equal(friend_id, contact[0])
+					@_state['contacts'].splice(i, 1)
+					@'fire'('contact_deleted', contact)
+					@'fire'('contacts_changed')
+		/**
+		 * @return {!Array<!Uint8Array>}
+		 */
+		'get_online_contacts' : ->
+			Array.from(@_local_state.online_contacts)
+		/**
+		 * @param {!Uint8Array} friend_id
+		 */
+		'add_online_contact' : (friend_id) ->
+			@_local_state.online_contacts.add(friend_id)
+			@'fire'('contact_online', friend_id)
+			@'fire'('online_contacts_changed')
+		/**
+		 * @param {!Uint8Array} friend_id
+		 */
+		'has_online_contact' : (friend_id) ->
+			@_local_state.online_contacts.has(friend_id)
+		/**
+		 * @param {!Uint8Array} friend_id
+		 */
+		'del_online_contact' : (friend_id) ->
+			@_local_state.online_contacts.delete(friend_id)
+			@'fire'('contact_offline', friend_id)
+			@'fire'('online_contacts_changed')
+		/**
+		 * @param {!Uint8Array} friend_id
 		 *
 		 * @return {!Array<!Array>} Each inner array is `[from, date, text]`, where `received` is `true` if message was received and `false` if sent to a friend
 		 */
-		'get_contact_messages' : (public_key) ->
-			@_local_state.messages.get(public_key) || []
+		'get_contact_messages' : (friend_id) ->
+			@_local_state.messages.get(friend_id) || []
 		/**
-		 * @param {!Uint8Array}	public_key
+		 * @param {!Uint8Array}	friend_id
 		 * @param {boolean}		from		`true` if message was received and `false` if sent to a friend
 		 * @param {number}		date
 		 * @param {string} 		text
 		 */
-		'add_contact_message' : (public_key, from, date, text) !->
-			if !@_local_state.messages.has(public_key)
-				@_local_state.messages.set(public_key, [])
-			public_key	= Uint8Array.from(public_key)
-			messages	= @_local_state.messages.get(public_key)
+		'add_contact_message' : (friend_id, from, date, text) !->
+			if !@_local_state.messages.has(friend_id)
+				@_local_state.messages.set(friend_id, [])
+			friend_id	= Uint8Array.from(friend_id)
+			messages	= @_local_state.messages.get(friend_id)
 			message		= [from, date, text]
 			messages.push(message)
-			@'fire'('contact_messages_changed', public_key, message)
+			@'fire'('contact_messages_changed', friend_id, message)
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)

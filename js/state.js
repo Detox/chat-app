@@ -6,7 +6,10 @@
  */
 (function(){
   function Wrapper(detoxUtils, asyncEventer){
-    var global_state;
+    var are_arrays_equal, ArrayMap, ArraySet, global_state;
+    are_arrays_equal = detoxUtils['are_arrays_equal'];
+    ArrayMap = detoxUtils['ArrayMap'];
+    ArraySet = detoxUtils['ArraySet'];
     global_state = Object.create(null);
     function State(name, initial_state){
       var x$, i$, ref$, len$, secret, contact, this$ = this;
@@ -24,10 +27,11 @@
       this._local_state = {
         online: false,
         announced: false,
-        messages: detoxUtils.ArrayMap(),
+        messages: ArrayMap(),
         ui: {
           active_contact: null
-        }
+        },
+        online_contacts: ArraySet()
       };
       if (!('version' in this._state)) {
         x$ = this._state;
@@ -147,12 +151,12 @@
         return this._local_state.ui.active_contact;
       }
       /**
-       * @param {!Uint8Array} public_key
+       * @param {!Uint8Array} friend_id
        */,
-      'set_ui_active_contact': function(public_key){
+      'set_ui_active_contact': function(friend_id){
         var old_active_contact, new_active_contact;
         old_active_contact = this._local_state.ui.active_contact;
-        new_active_contact = Uint8Array.from(public_key);
+        new_active_contact = Uint8Array.from(friend_id);
         this._local_state.ui.active_contact = new_active_contact;
         this['fire']('ui_active_contact_changed', new_active_contact, old_active_contact);
       }
@@ -179,40 +183,95 @@
         return this._state['contacts'];
       }
       /**
-       * @param {!Uint8Array}	id
+       * @param {!Uint8Array}	friend_id
        * @param {string}		name
        */,
-      'add_contact': function(id, name){
+      'add_contact': function(friend_id, name){
         var new_contact;
-        new_contact = [Uint8Array.from(id), name, 0, 0];
-        this._state.contacts.push(new_contact);
+        new_contact = [Uint8Array.from(friend_id), name, 0, 0];
+        this._state['contacts'].push(new_contact);
         this['fire']('contact_added', new_contact);
         this['fire']('contacts_changed');
       }
       /**
-       * @param {!Uint8Array} public_key
+       * @param {!Uint8Array} friend_id
+       */,
+      'has_contact': function(friend_id){
+        var i$, ref$, len$, contact;
+        for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
+          contact = ref$[i$];
+          if (are_arrays_equal(friend_id, contact[0])) {
+            return true;
+          }
+        }
+        return false;
+      }
+      /**
+       * @param {!Uint8Array} friend_id
+       */,
+      'del_contact': function(friend_id){
+        var i$, ref$, len$, contact;
+        for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
+          contact = ref$[i$];
+          if (are_arrays_equal(friend_id, contact[0])) {
+            this._state['contacts'].splice(i, 1);
+            this['fire']('contact_deleted', contact);
+            this['fire']('contacts_changed');
+          }
+        }
+      }
+      /**
+       * @return {!Array<!Uint8Array>}
+       */,
+      'get_online_contacts': function(){
+        return Array.from(this._local_state.online_contacts);
+      }
+      /**
+       * @param {!Uint8Array} friend_id
+       */,
+      'add_online_contact': function(friend_id){
+        this._local_state.online_contacts.add(friend_id);
+        this['fire']('contact_online', friend_id);
+        return this['fire']('online_contacts_changed');
+      }
+      /**
+       * @param {!Uint8Array} friend_id
+       */,
+      'has_online_contact': function(friend_id){
+        return this._local_state.online_contacts.has(friend_id);
+      }
+      /**
+       * @param {!Uint8Array} friend_id
+       */,
+      'del_online_contact': function(friend_id){
+        this._local_state.online_contacts['delete'](friend_id);
+        this['fire']('contact_offline', friend_id);
+        return this['fire']('online_contacts_changed');
+      }
+      /**
+       * @param {!Uint8Array} friend_id
        *
        * @return {!Array<!Array>} Each inner array is `[from, date, text]`, where `received` is `true` if message was received and `false` if sent to a friend
        */,
-      'get_contact_messages': function(public_key){
-        return this._local_state.messages.get(public_key) || [];
+      'get_contact_messages': function(friend_id){
+        return this._local_state.messages.get(friend_id) || [];
       }
       /**
-       * @param {!Uint8Array}	public_key
+       * @param {!Uint8Array}	friend_id
        * @param {boolean}		from		`true` if message was received and `false` if sent to a friend
        * @param {number}		date
        * @param {string} 		text
        */,
-      'add_contact_message': function(public_key, from, date, text){
+      'add_contact_message': function(friend_id, from, date, text){
         var messages, message;
-        if (!this._local_state.messages.has(public_key)) {
-          this._local_state.messages.set(public_key, []);
+        if (!this._local_state.messages.has(friend_id)) {
+          this._local_state.messages.set(friend_id, []);
         }
-        public_key = Uint8Array.from(public_key);
-        messages = this._local_state.messages.get(public_key);
+        friend_id = Uint8Array.from(friend_id);
+        messages = this._local_state.messages.get(friend_id);
         message = [from, date, text];
         messages.push(message);
-        this['fire']('contact_messages_changed', public_key, message);
+        this['fire']('contact_messages_changed', friend_id, message);
       }
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);
