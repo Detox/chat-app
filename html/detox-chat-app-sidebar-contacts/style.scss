@@ -16,6 +16,11 @@ csw-group {
 
 		button {
 			justify-content : flex-start;
+
+			div {
+				text-overflow : ellipsis;
+				overflow      : hidden;
+			}
 		}
 	}
 }
