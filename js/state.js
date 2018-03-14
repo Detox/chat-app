@@ -223,6 +223,7 @@
             this._state['contacts'].splice(i, 1);
             this['fire']('contact_deleted', contact);
             this['fire']('contacts_changed');
+            break;
           }
         }
       }

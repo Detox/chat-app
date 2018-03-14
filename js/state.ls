@@ -206,6 +206,7 @@ function Wrapper (detox-utils, async-eventer)
 					@_state['contacts'].splice(i, 1)
 					@'fire'('contact_deleted', contact)
 					@'fire'('contacts_changed')
+					break
 		/**
 		 * @return {!Array<!Uint8Array>}
 		 */
