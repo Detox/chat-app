@@ -38,7 +38,9 @@
       });
     },
     _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){
-      var state, core, chat, this$ = this;
+      var ArrayMap, secrets_exchange_statuses, state, core, chat, this$ = this;
+      ArrayMap = detoxUtils.ArrayMap;
+      secrets_exchange_statuses = ArrayMap();
       state = this._state_instance;
       core = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
         state.set_online(true);
@@ -48,9 +50,31 @@
       });
       chat = detoxChat.Chat(core, state.get_seed()).once('announced', function(){
         state.set_announced(true);
-      }).on('secret', function(friend_id, secret){}).on('secret_received', function(friend_id){}).on('connected', function(friend_id){
-        state.add_online_contact(friend_id);
+      }).on('secret', function(friend_id, secret){
+        var secrets_exchange_status;
+        secrets_exchange_status = secrets_exchange_statuses.get(friend_id);
+        secrets_exchange_status.received = true;
+        if (secrets_exchange_status.received && secrets_exchange_status.sent) {
+          state.add_online_contact(friend_id);
+        }
+      }).on('secret_received', function(friend_id){
+        var secrets_exchange_status;
+        secrets_exchange_status = secrets_exchange_statuses.get(friend_id);
+        secrets_exchange_status.sent = true;
+        if (secrets_exchange_status.received && secrets_exchange_status.sent) {
+          state.add_online_contact(friend_id);
+        }
+      }).on('connected', function(friend_id){
+        if (!state.has_contact(friend_id)) {
+          state.add_contact(friend_id, detoxUtils.base58_encode(friend_id));
+        }
+        secrets_exchange_statuses.set(friend_id, {
+          received: false,
+          sent: false
+        });
+        chat.secret(friend_id, detoxChat.generate_secret());
       }).on('disconnected', function(friend_id){
+        secrets_exchange_statuses['delete'](friend_id);
         state.del_online_contact(friend_id);
       });
       state.on('contact_added', function(new_contact){

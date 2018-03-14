@@ -182,6 +182,9 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'add_contact' : (friend_id, name) !->
 			# TODO: Secrets support
+			for contact in @_state['contacts']
+				if are_arrays_equal(friend_id, contact[0])
+					return
 			new_contact	= [Uint8Array.from(friend_id), name, 0, 0]
 			@_state['contacts'].push(new_contact)
 			@'fire'('contact_added', new_contact)

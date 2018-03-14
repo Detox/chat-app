@@ -29,6 +29,8 @@ Polymer(
 			<~! detox-core.ready
 			@_connect_to_the_network(detox-chat, detox-core, detox-utils)
 	_connect_to_the_network : (detox-chat, detox-core, detox-utils) !->
+		ArrayMap					= detox-utils.ArrayMap
+		secrets_exchange_statuses	= ArrayMap()
 		# TODO: For now we are using defaults and hardcoded constants for Chat and Core instances, but in future this will be configurable
 		state	= @_state_instance
 		core	= detox-core.Core(detox-core.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second)
@@ -43,21 +45,33 @@ Polymer(
 				state.set_announced(true)
 			)
 			.on('secret', (friend_id, secret) !->
-				# TODO
+				# TODO: Check secret
+				secrets_exchange_status				= secrets_exchange_statuses.get(friend_id)
+				secrets_exchange_status.received	= true
+				if secrets_exchange_status.received && secrets_exchange_status.sent
+					state.add_online_contact(friend_id)
 			)
 			.on('secret_received', (friend_id) !->
-				# TODO
+				secrets_exchange_status				= secrets_exchange_statuses.get(friend_id)
+				secrets_exchange_status.sent		= true
+				if secrets_exchange_status.received && secrets_exchange_status.sent
+					state.add_online_contact(friend_id)
 			)
 			.on('connected', (friend_id) !~>
-				# TODO: Update connection and current online statuses
-				state.add_online_contact(friend_id)
+				if !state.has_contact(friend_id)
+					state.add_contact(friend_id, detox-utils.base58_encode(friend_id))
+				secrets_exchange_statuses.set(friend_id, {received: false, sent: false})
+				# TODO: Secret should be stored and expected next time
+				chat.secret(friend_id, detox-chat.generate_secret())
 			)
 			.on('disconnected', (friend_id) !~>
+				secrets_exchange_statuses.delete(friend_id)
 				state.del_online_contact(friend_id)
 			)
 		state
 			.on('contact_added', (new_contact) !~>
 				# TODO: Secrets support
+				# TODO: Handle failed connections
 				chat.connect_to(new_contact[0], new Uint8Array(0))
 			)
 		@_core_instance	= core

@@ -187,7 +187,13 @@
        * @param {string}		name
        */,
       'add_contact': function(friend_id, name){
-        var new_contact;
+        var i$, ref$, len$, contact, new_contact;
+        for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
+          contact = ref$[i$];
+          if (are_arrays_equal(friend_id, contact[0])) {
+            return;
+          }
+        }
         new_contact = [Uint8Array.from(friend_id), name, 0, 0];
         this._state['contacts'].push(new_contact);
         this['fire']('contact_added', new_contact);
