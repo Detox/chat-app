@@ -36,7 +36,7 @@
       if (!('version' in this._state)) {
         x$ = this._state;
         x$['version'] = 0;
-        x$['name'] = '';
+        x$['nickname'] = '';
         x$['seed'] = null;
         x$['settings'] = {
           'announce': true
@@ -99,18 +99,18 @@
       /**
        * @return {Uint8Array} Seed if configured or `null` otherwise
        */,
-      'get_name': function(){
-        return this._state['name'];
+      'get_nickname': function(){
+        return this._state['nickname'];
       }
       /**
-       * @param {string} name
+       * @param {string} nickname
        */,
-      'set_name': function(name){
-        var old_name, new_name;
-        old_name = this._state['name'];
-        new_name = String(name);
-        this._state['name'] = new_name;
-        this['fire']('name_changed', new_name, old_name);
+      'set_nickname': function(nickname){
+        var old_nickname, new_nickname;
+        old_nickname = this._state['nickname'];
+        new_nickname = String(nickname);
+        this._state['nickname'] = new_nickname;
+        this['fire']('nickname_changed', new_nickname, old_nickname);
       }
       /**
        * @return {boolean}
@@ -184,9 +184,9 @@
       }
       /**
        * @param {!Uint8Array}	friend_id
-       * @param {string}		name
+       * @param {string}		nickname
        */,
-      'add_contact': function(friend_id, name){
+      'add_contact': function(friend_id, nickname){
         var i$, ref$, len$, contact, new_contact;
         for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
           contact = ref$[i$];
@@ -194,7 +194,7 @@
             return;
           }
         }
-        new_contact = [Uint8Array.from(friend_id), name, 0, 0];
+        new_contact = [Uint8Array.from(friend_id), nickname, 0, 0];
         this._state['contacts'].push(new_contact);
         this['fire']('contact_added', new_contact);
         this['fire']('contacts_changed');
@@ -213,11 +213,32 @@
         return false;
       }
       /**
+       * @param {!Uint8Array}	friend_id
+       * @param {string}		nickname
+       */,
+      'set_contact_nickname': function(friend_id, nickname){
+        var i$, ref$, len$, i, contact, old_contact, new_contact;
+        for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
+          i = i$;
+          contact = ref$[i$];
+          if (are_arrays_equal(friend_id, contact[0])) {
+            old_contact = contact.slice();
+            new_contact = contact.slice();
+            new_contact[1] = nickname;
+            this._state['contacts'][i] = new_contact;
+            this['fire']('contact_updated', new_contact, old_contact);
+            this['fire']('contacts_changed');
+            break;
+          }
+        }
+      }
+      /**
        * @param {!Uint8Array} friend_id
        */,
       'del_contact': function(friend_id){
-        var i$, ref$, len$, contact;
+        var i$, ref$, len$, i, contact;
         for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
+          i = i$;
           contact = ref$[i$];
           if (are_arrays_equal(friend_id, contact[0])) {
             this._state['contacts'].splice(i, 1);

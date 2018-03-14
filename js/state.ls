@@ -40,7 +40,7 @@ function Wrapper (detox-utils, async-eventer)
 		if !('version' of @_state)
 			@_state
 				..'version'		= 0
-				..'name'		= ''
+				..'nickname'	= ''
 				..'seed'		= null
 				..'settings'	=
 					'announce'	: true
@@ -109,16 +109,16 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
-		'get_name' : ->
-			@_state['name']
+		'get_nickname' : ->
+			@_state['nickname']
 		/**
-		 * @param {string} name
+		 * @param {string} nickname
 		 */
-		'set_name' : (name) !->
-			old_name		= @_state['name']
-			new_name		= String(name)
-			@_state['name']	= new_name
-			@'fire'('name_changed', new_name, old_name)
+		'set_nickname' : (nickname) !->
+			old_nickname		= @_state['nickname']
+			new_nickname		= String(nickname)
+			@_state['nickname']	= new_nickname
+			@'fire'('nickname_changed', new_nickname, old_nickname)
 		/**
 		 * @return {boolean}
 		 */
@@ -178,14 +178,14 @@ function Wrapper (detox-utils, async-eventer)
 			@_state['contacts']
 		/**
 		 * @param {!Uint8Array}	friend_id
-		 * @param {string}		name
+		 * @param {string}		nickname
 		 */
-		'add_contact' : (friend_id, name) !->
+		'add_contact' : (friend_id, nickname) !->
 			# TODO: Secrets support
 			for contact in @_state['contacts']
 				if are_arrays_equal(friend_id, contact[0])
 					return
-			new_contact	= [Uint8Array.from(friend_id), name, 0, 0]
+			new_contact	= [Uint8Array.from(friend_id), nickname, 0, 0]
 			@_state['contacts'].push(new_contact)
 			@'fire'('contact_added', new_contact)
 			@'fire'('contacts_changed')
@@ -198,10 +198,24 @@ function Wrapper (detox-utils, async-eventer)
 					return true
 			false
 		/**
+		 * @param {!Uint8Array}	friend_id
+		 * @param {string}		nickname
+		 */
+		'set_contact_nickname' : (friend_id, nickname) !->
+			for contact, i in @_state['contacts']
+				if are_arrays_equal(friend_id, contact[0])
+					old_contact				= contact.slice()
+					new_contact				= contact.slice()
+					new_contact[1]			= nickname
+					@_state['contacts'][i]	= new_contact
+					@'fire'('contact_updated', new_contact, old_contact)
+					@'fire'('contacts_changed')
+					break
+		/**
 		 * @param {!Uint8Array} friend_id
 		 */
 		'del_contact' : (friend_id) !->
-			for contact in @_state['contacts']
+			for contact, i in @_state['contacts']
 				if are_arrays_equal(friend_id, contact[0])
 					@_state['contacts'].splice(i, 1)
 					@'fire'('contact_deleted', contact)

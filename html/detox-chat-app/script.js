@@ -41,6 +41,17 @@
       var ArrayMap, secrets_exchange_statuses, state, core, chat, this$ = this;
       ArrayMap = detoxUtils.ArrayMap;
       secrets_exchange_statuses = ArrayMap();
+      function check_and_add_to_online(friend_id){
+        var secrets_exchange_status, nickname;
+        secrets_exchange_status = secrets_exchange_statuses.get(friend_id);
+        if (secrets_exchange_status.received && secrets_exchange_status.sent) {
+          state.add_online_contact(friend_id);
+          nickname = state.get_nickname();
+          if (nickname) {
+            chat.nickname(friend_id, nickname);
+          }
+        }
+      }
       state = this._state_instance;
       core = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
         state.set_online(true);
@@ -50,20 +61,6 @@
       });
       chat = detoxChat.Chat(core, state.get_seed()).once('announced', function(){
         state.set_announced(true);
-      }).on('secret', function(friend_id, secret){
-        var secrets_exchange_status;
-        secrets_exchange_status = secrets_exchange_statuses.get(friend_id);
-        secrets_exchange_status.received = true;
-        if (secrets_exchange_status.received && secrets_exchange_status.sent) {
-          state.add_online_contact(friend_id);
-        }
-      }).on('secret_received', function(friend_id){
-        var secrets_exchange_status;
-        secrets_exchange_status = secrets_exchange_statuses.get(friend_id);
-        secrets_exchange_status.sent = true;
-        if (secrets_exchange_status.received && secrets_exchange_status.sent) {
-          state.add_online_contact(friend_id);
-        }
       }).on('connected', function(friend_id){
         if (!state.has_contact(friend_id)) {
           state.add_contact(friend_id, detoxUtils.base58_encode(friend_id));
@@ -73,6 +70,14 @@
           sent: false
         });
         chat.secret(friend_id, detoxChat.generate_secret());
+      }).on('secret', function(friend_id, secret){
+        secrets_exchange_statuses.get(friend_id).received = true;
+        check_and_add_to_online(friend_id);
+      }).on('secret_received', function(friend_id){
+        secrets_exchange_statuses.get(friend_id).sent = true;
+        check_and_add_to_online(friend_id);
+      }).on('nickname', function(friend_id, nickname){
+        state.set_contact_nickname(friend_id, nickname);
       }).on('disconnected', function(friend_id){
         secrets_exchange_statuses['delete'](friend_id);
         state.del_online_contact(friend_id);

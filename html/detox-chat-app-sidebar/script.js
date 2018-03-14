@@ -11,7 +11,7 @@
     properties: {
       id_base58: String,
       name: {
-        observer: '_name_changed',
+        observer: '_nickname_changed',
         type: String
       },
       settings_announce: {
@@ -28,9 +28,9 @@
           var state;
           state = this$._state_instance;
           this$.id_base58 = detoxUtils['base58_encode'](detoxCrypto.create_keypair(state.get_seed()).ed25519['public']);
-          this$.name = state.get_name();
+          this$.name = state.get_nickname();
           this$.settings_announce = this$._bool_to_int(state.get_settings_announce());
-          state.on('name_changed', function(new_name){
+          state.on('nickname_changed', function(new_name){
             if (this$.name !== new_name) {
               this$.name = new_name;
             }
@@ -49,9 +49,9 @@
         return 0;
       }
     },
-    _name_changed: function(){
-      if (this.name !== this._state_instance.get_name()) {
-        this._state_instance.set_name(this.name);
+    _nickname_changed: function(){
+      if (this.name !== this._state_instance.get_nickname()) {
+        this._state_instance.set_nickname(this.name);
       }
     },
     _settings_announce_changed: function(){

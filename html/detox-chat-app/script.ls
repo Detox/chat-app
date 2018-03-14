@@ -30,7 +30,17 @@ Polymer(
 			@_connect_to_the_network(detox-chat, detox-core, detox-utils)
 	_connect_to_the_network : (detox-chat, detox-core, detox-utils) !->
 		ArrayMap					= detox-utils.ArrayMap
+
 		secrets_exchange_statuses	= ArrayMap()
+
+		!function check_and_add_to_online (friend_id)
+			secrets_exchange_status	= secrets_exchange_statuses.get(friend_id)
+			if secrets_exchange_status.received && secrets_exchange_status.sent
+				state.add_online_contact(friend_id)
+				nickname	= state.get_nickname()
+				if nickname
+					chat.nickname(friend_id, nickname)
+
 		# TODO: For now we are using defaults and hardcoded constants for Chat and Core instances, but in future this will be configurable
 		state	= @_state_instance
 		core	= detox-core.Core(detox-core.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second)
@@ -44,25 +54,24 @@ Polymer(
 			.once('announced', !->
 				state.set_announced(true)
 			)
-			.on('secret', (friend_id, secret) !->
-				# TODO: Check secret
-				secrets_exchange_status				= secrets_exchange_statuses.get(friend_id)
-				secrets_exchange_status.received	= true
-				if secrets_exchange_status.received && secrets_exchange_status.sent
-					state.add_online_contact(friend_id)
-			)
-			.on('secret_received', (friend_id) !->
-				secrets_exchange_status				= secrets_exchange_statuses.get(friend_id)
-				secrets_exchange_status.sent		= true
-				if secrets_exchange_status.received && secrets_exchange_status.sent
-					state.add_online_contact(friend_id)
-			)
 			.on('connected', (friend_id) !~>
 				if !state.has_contact(friend_id)
 					state.add_contact(friend_id, detox-utils.base58_encode(friend_id))
 				secrets_exchange_statuses.set(friend_id, {received: false, sent: false})
 				# TODO: Secret should be stored and expected next time
 				chat.secret(friend_id, detox-chat.generate_secret())
+			)
+			.on('secret', (friend_id, secret) !->
+				# TODO: Check secret
+				secrets_exchange_statuses.get(friend_id).received	= true
+				check_and_add_to_online(friend_id)
+			)
+			.on('secret_received', (friend_id) !->
+				secrets_exchange_statuses.get(friend_id).sent		= true
+				check_and_add_to_online(friend_id)
+			)
+			.on('nickname', (friend_id, nickname) !->
+				state.set_contact_nickname(friend_id, nickname)
 			)
 			.on('disconnected', (friend_id) !~>
 				secrets_exchange_statuses.delete(friend_id)

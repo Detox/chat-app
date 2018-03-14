@@ -11,7 +11,7 @@ Polymer(
 	properties	:
 		id_base58			: String
 		name				:
-			observer	: '_name_changed'
+			observer	: '_nickname_changed'
 			type		: String
 		settings_announce	:
 			observer	: '_settings_announce_changed'
@@ -26,10 +26,10 @@ Polymer(
 			@id_base58			= detox-utils['base58_encode'](
 				detox-crypto.create_keypair(state.get_seed()).ed25519.public
 			)
-			@name				= state.get_name()
+			@name				= state.get_nickname()
 			@settings_announce	= @_bool_to_int(state.get_settings_announce())
 			state
-				.on('name_changed', (new_name) !~>
+				.on('nickname_changed', (new_name) !~>
 					if @name != new_name
 						@name	= new_name
 				)
@@ -39,9 +39,9 @@ Polymer(
 				)
 	_bool_to_int : (value) ->
 		if value then 1 else 0
-	_name_changed : !->
-		if @name != @_state_instance.get_name()
-			@_state_instance.set_name(@name)
+	_nickname_changed : !->
+		if @name != @_state_instance.get_nickname()
+			@_state_instance.set_nickname(@name)
 	_settings_announce_changed : !->
 		if @settings_announce !~= @_state_instance.get_settings_announce()
 			@_state_instance.set_settings_announce(@settings_announce ~= 1)
