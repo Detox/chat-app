@@ -54,6 +54,9 @@ Polymer(
 			.once('announced', !->
 				state.set_announced(true)
 			)
+			.on('introduction', (friend_id, secret) !->
+				# TODO: Check secret
+			)
 			.on('connected', (friend_id) !~>
 				if !state.has_contact(friend_id)
 					state.add_contact(friend_id, detox-utils.base58_encode(friend_id))
@@ -73,6 +76,12 @@ Polymer(
 			.on('nickname', (friend_id, nickname) !->
 				state.set_contact_nickname(friend_id, nickname)
 			)
+			.on('text_message', (friend_id, date, text_message) !->
+				state.add_contact_message(friend_id, true, date, text_message)
+			)
+			.on('text_message_received', (friend_id, date) !->
+				# TODO: Track messages that were actually received
+			)
 			.on('disconnected', (friend_id) !~>
 				secrets_exchange_statuses.delete(friend_id)
 				state.del_online_contact(friend_id)
@@ -82,6 +91,11 @@ Polymer(
 				# TODO: Secrets support
 				# TODO: Handle failed connections
 				chat.connect_to(new_contact[0], new Uint8Array(0))
+			)
+			.on('contact_message_added', (friend_id, message) !->
+				if message[0] # Message was received
+					return
+				chat.text_message(friend_id, message[2])
 			)
 		@_core_instance	= core
 		@_chat_instance	= chat

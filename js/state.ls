@@ -265,7 +265,8 @@ function Wrapper (detox-utils, async-eventer)
 			messages	= @_local_state.messages.get(friend_id)
 			message		= [from, date, text]
 			messages.push(message)
-			@'fire'('contact_messages_changed', friend_id, message)
+			@'fire'('contact_message_added', friend_id, message)
+			@'fire'('contact_messages_changed', friend_id)
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)

@@ -61,7 +61,7 @@
       });
       chat = detoxChat.Chat(core, state.get_seed()).once('announced', function(){
         state.set_announced(true);
-      }).on('connected', function(friend_id){
+      }).on('introduction', function(friend_id, secret){}).on('connected', function(friend_id){
         if (!state.has_contact(friend_id)) {
           state.add_contact(friend_id, detoxUtils.base58_encode(friend_id));
         }
@@ -78,12 +78,19 @@
         check_and_add_to_online(friend_id);
       }).on('nickname', function(friend_id, nickname){
         state.set_contact_nickname(friend_id, nickname);
-      }).on('disconnected', function(friend_id){
+      }).on('text_message', function(friend_id, date, text_message){
+        state.add_contact_message(friend_id, true, date, text_message);
+      }).on('text_message_received', function(friend_id, date){}).on('disconnected', function(friend_id){
         secrets_exchange_statuses['delete'](friend_id);
         state.del_online_contact(friend_id);
       });
       state.on('contact_added', function(new_contact){
         chat.connect_to(new_contact[0], new Uint8Array(0));
+      }).on('contact_message_added', function(friend_id, message){
+        if (message[0]) {
+          return;
+        }
+        chat.text_message(friend_id, message[2]);
       });
       this._core_instance = core;
       this._chat_instance = chat;

@@ -25,9 +25,19 @@ Polymer(
 					@messages		= state.get_contact_messages(new_active_contact).slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed
 					@notifyPath('messages')
 				)
-				.on('contact_messages_changed', (public_key) !~>
-					if detox-utils.are_arrays_equal(public_key, state.get_ui_active_contact())
-						@messages	= state.get_contact_messages(public_key).slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed
+				.on('contact_messages_changed', (friend_id) !~>
+					if detox-utils.are_arrays_equal(friend_id, state.get_ui_active_contact())
+						@messages	= state.get_contact_messages(friend_id).slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed
 						@notifyPath('messages')
 				)
+				.on('ui_active_contact_changed', (friend_id) !~>
+					@$['send-form']querySelector('textarea').value	= ''
+				)
+	_send : !->
+		state			= @_state_instance
+		textarea		= @$['send-form']querySelector('textarea')
+		text_message	= textarea.value
+		textarea.value	= ''
+		friend_id		= state.get_ui_active_contact()
+		state.add_contact_message(friend_id, false, +(new Date), text_message)
 )

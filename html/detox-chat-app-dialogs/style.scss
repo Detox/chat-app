@@ -22,6 +22,10 @@
 	align-items : stretch;
 	display     : flex;
 
+	&[hidden] {
+		display : none;
+	}
+
 	csw-textarea {
 		flex-grow : 1;
 

@@ -299,7 +299,8 @@
         messages = this._local_state.messages.get(friend_id);
         message = [from, date, text];
         messages.push(message);
-        this['fire']('contact_messages_changed', friend_id, message);
+        this['fire']('contact_message_added', friend_id, message);
+        this['fire']('contact_messages_changed', friend_id);
       }
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);
