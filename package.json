@@ -10,6 +10,12 @@
 		"url"  : "git://github.com/Detox/chat-app.git"
 	},
 	"license"      : "0BSD",
+	"files"        : [
+		"css",
+		"html",
+		"js",
+		"index.html"
+	],
 	"dependencies" : {
 		"@detox/chat"                    : "^0.3.1",
 		"@detox/core"                    : "^0.4.2",
