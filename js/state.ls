@@ -9,6 +9,9 @@ function Wrapper (detox-utils, async-eventer)
 	ArraySet			= detox-utils['ArraySet']
 
 	global_state		= Object.create(null)
+	/**
+	 * @constructor
+	 */
 	!function State (name, initial_state)
 		if !(@ instanceof State)
 			return new State(name, initial_state)
@@ -62,12 +65,13 @@ function Wrapper (detox-utils, async-eventer)
 		for secret in @_state['secrets']
 			secret['secret']	= Uint8Array.from(secret['secret'])
 		# Each contact item is an array `[friend_id, name, last_time_active, last_read_message]`
-		for contact in @_state['contacts']
+		@_state['contacts']	= @_state['contacts'].map (contact) ->
 			contact[0]	= Uint8Array.from(contact[0])
+			Contact(contact)
 
 		# TODO: This is just for demo purposes
 		@_local_state.messages.set(
-			@_state['contacts'][0][0],
+			@_state['contacts'][0]['id'],
 			[
 				[true, +(new Date), 'Received message']
 				[false, +(new Date), 'Sent message']
@@ -183,9 +187,9 @@ function Wrapper (detox-utils, async-eventer)
 		'add_contact' : (friend_id, nickname) !->
 			# TODO: Secrets support
 			for contact in @_state['contacts']
-				if are_arrays_equal(friend_id, contact[0])
+				if are_arrays_equal(friend_id, contact['id'])
 					return
-			new_contact	= [Uint8Array.from(friend_id), nickname, 0, 0]
+			new_contact	= Contact([Uint8Array.from(friend_id), nickname, 0, 0])
 			@_state['contacts'].push(new_contact)
 			@'fire'('contact_added', new_contact)
 			@'fire'('contacts_changed')
@@ -194,7 +198,7 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'has_contact' : (friend_id) ->
 			for contact in @_state['contacts']
-				if are_arrays_equal(friend_id, contact[0])
+				if are_arrays_equal(friend_id, contact['id'])
 					return true
 			false
 		/**
@@ -202,11 +206,10 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {string}		nickname
 		 */
 		'set_contact_nickname' : (friend_id, nickname) !->
-			for contact, i in @_state['contacts']
-				if are_arrays_equal(friend_id, contact[0])
-					old_contact				= contact.slice()
-					new_contact				= contact.slice()
-					new_contact[1]			= nickname
+			for old_contact, i in @_state['contacts']
+				if are_arrays_equal(friend_id, old_contact['id'])
+					new_contact				= Contact(old_contact.as_array().slice())
+					new_contact['nickname']	= nickname
 					@_state['contacts'][i]	= new_contact
 					@'fire'('contact_updated', new_contact, old_contact)
 					@'fire'('contacts_changed')
@@ -216,7 +219,7 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'del_contact' : (friend_id) !->
 			for contact, i in @_state['contacts']
-				if are_arrays_equal(friend_id, contact[0])
+				if are_arrays_equal(friend_id, contact['id'])
 					@_state['contacts'].splice(i, 1)
 					@'fire'('contact_deleted', contact)
 					@'fire'('contacts_changed')
@@ -272,8 +275,31 @@ function Wrapper (detox-utils, async-eventer)
 	State:: = Object.assign(Object.create(async-eventer::), State::)
 	Object.defineProperty(State::, 'constructor', {enumerable: false, value: State})
 
+	/**
+	 * @constructor
+	 */
+	!function Contact (contact_array)
+		if !(@ instanceof Contact)
+			return new Contact(contact_array)
+
+		@'array'	= contact_array
+
+	Object.defineProperty(Contact::, 'id',
+		get	: ->
+			@'array'[0]
+		set	: (id) !->
+			@'array'[0]	= id
+	)
+	Object.defineProperty(Contact::, 'nickname',
+		get	: ->
+			@'array'[1]
+		set	: (nickname) !->
+			@'array'[1]	= nickname
+	)
+
 	{
 		'State'			: State
+		'Contact'		: Contact
 		/**
 		 * @param {string}	name
 		 * @param {!Object}	initial_state

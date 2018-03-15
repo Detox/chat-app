@@ -22,7 +22,7 @@ Polymer(
 				@notifyPath('contacts')
 			)
 	_set_active_contact : (e) !->
-		@_state_instance.set_ui_active_contact(e.model.item[0])
+		@_state_instance.set_ui_active_contact(e.model.item.id)
 	_add_contact : !->
 		modal	= csw.functions.confirm("""
 			<csw-form>

@@ -26,7 +26,7 @@
       });
     },
     _set_active_contact: function(e){
-      this._state_instance.set_ui_active_contact(e.model.item[0]);
+      this._state_instance.set_ui_active_contact(e.model.item.id);
     },
     _add_contact: function(){
       var modal, this$ = this;

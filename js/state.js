@@ -11,8 +11,11 @@
     ArrayMap = detoxUtils['ArrayMap'];
     ArraySet = detoxUtils['ArraySet'];
     global_state = Object.create(null);
+    /**
+     * @constructor
+     */
     function State(name, initial_state){
-      var x$, i$, ref$, len$, secret, contact, this$ = this;
+      var x$, i$, ref$, len$, secret, this$ = this;
       if (!(this instanceof State)) {
         return new State(name, initial_state);
       }
@@ -51,11 +54,11 @@
         secret = ref$[i$];
         secret['secret'] = Uint8Array.from(secret['secret']);
       }
-      for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
-        contact = ref$[i$];
+      this._state['contacts'] = this._state['contacts'].map(function(contact){
         contact[0] = Uint8Array.from(contact[0]);
-      }
-      this._local_state.messages.set(this._state['contacts'][0][0], [[true, +new Date, 'Received message'], [false, +new Date, 'Sent message']]);
+        return Contact(contact);
+      });
+      this._local_state.messages.set(this._state['contacts'][0]['id'], [[true, +new Date, 'Received message'], [false, +new Date, 'Sent message']]);
       this._ready = new Promise(function(resolve){
         if (this$._state['seed']) {
           resolve();
@@ -190,11 +193,11 @@
         var i$, ref$, len$, contact, new_contact;
         for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
           contact = ref$[i$];
-          if (are_arrays_equal(friend_id, contact[0])) {
+          if (are_arrays_equal(friend_id, contact['id'])) {
             return;
           }
         }
-        new_contact = [Uint8Array.from(friend_id), nickname, 0, 0];
+        new_contact = Contact([Uint8Array.from(friend_id), nickname, 0, 0]);
         this._state['contacts'].push(new_contact);
         this['fire']('contact_added', new_contact);
         this['fire']('contacts_changed');
@@ -206,7 +209,7 @@
         var i$, ref$, len$, contact;
         for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
           contact = ref$[i$];
-          if (are_arrays_equal(friend_id, contact[0])) {
+          if (are_arrays_equal(friend_id, contact['id'])) {
             return true;
           }
         }
@@ -217,14 +220,13 @@
        * @param {string}		nickname
        */,
       'set_contact_nickname': function(friend_id, nickname){
-        var i$, ref$, len$, i, contact, old_contact, new_contact;
+        var i$, ref$, len$, i, old_contact, new_contact;
         for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
           i = i$;
-          contact = ref$[i$];
-          if (are_arrays_equal(friend_id, contact[0])) {
-            old_contact = contact.slice();
-            new_contact = contact.slice();
-            new_contact[1] = nickname;
+          old_contact = ref$[i$];
+          if (are_arrays_equal(friend_id, old_contact['id'])) {
+            new_contact = Contact(old_contact.as_array().slice());
+            new_contact['nickname'] = nickname;
             this._state['contacts'][i] = new_contact;
             this['fire']('contact_updated', new_contact, old_contact);
             this['fire']('contacts_changed');
@@ -240,7 +242,7 @@
         for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
           i = i$;
           contact = ref$[i$];
-          if (are_arrays_equal(friend_id, contact[0])) {
+          if (are_arrays_equal(friend_id, contact['id'])) {
             this._state['contacts'].splice(i, 1);
             this['fire']('contact_deleted', contact);
             this['fire']('contacts_changed');
@@ -308,8 +310,34 @@
       enumerable: false,
       value: State
     });
+    /**
+     * @constructor
+     */
+    function Contact(contact_array){
+      if (!(this instanceof Contact)) {
+        return new Contact(contact_array);
+      }
+      this['array'] = contact_array;
+    }
+    Object.defineProperty(Contact.prototype, 'id', {
+      get: function(){
+        return this['array'][0];
+      },
+      set: function(id){
+        this['array'][0] = id;
+      }
+    });
+    Object.defineProperty(Contact.prototype, 'nickname', {
+      get: function(){
+        return this['array'][1];
+      },
+      set: function(nickname){
+        this['array'][1] = nickname;
+      }
+    });
     return {
-      'State': State
+      'State': State,
+      'Contact': Contact
       /**
        * @param {string}	name
        * @param {!Object}	initial_state
