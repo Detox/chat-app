@@ -232,10 +232,11 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @param {!Uint8Array} friend_id
 		 */
-		'add_online_contact' : (friend_id) ->
+		'add_online_contact' : (friend_id) !->
 			@_local_state.online_contacts.add(friend_id)
 			@'fire'('contact_online', friend_id)
 			@'fire'('online_contacts_changed')
+			@_contact_update_last_active(friend_id)
 		/**
 		 * @param {!Uint8Array} friend_id
 		 */
@@ -244,10 +245,21 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @param {!Uint8Array} friend_id
 		 */
-		'del_online_contact' : (friend_id) ->
+		'del_online_contact' : (friend_id) !->
 			@_local_state.online_contacts.delete(friend_id)
 			@'fire'('contact_offline', friend_id)
 			@'fire'('online_contacts_changed')
+			@_contact_update_last_active(friend_id)
+		/**
+		 * @param {!Uint8Array} friend_id
+		 */
+		_contact_update_last_active : (friend_id) !->
+			old_contact						= @_state['contacts'].get(friend_id)
+			new_contact						= old_contact['clone']()
+			new_contact['last_time_active']	= +(new Date)
+			@_state['contacts'].set(friend_id, new_contact)
+			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contacts_changed')
 		/**
 		 * @param {!Uint8Array} friend_id
 		 *
@@ -270,6 +282,8 @@ function Wrapper (detox-utils, async-eventer)
 			messages.push(message)
 			@'fire'('contact_message_added', friend_id, message)
 			@'fire'('contact_messages_changed', friend_id)
+			if from
+				@_contact_update_last_active(friend_id)
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)

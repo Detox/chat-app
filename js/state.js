@@ -251,7 +251,8 @@
       'add_online_contact': function(friend_id){
         this._local_state.online_contacts.add(friend_id);
         this['fire']('contact_online', friend_id);
-        return this['fire']('online_contacts_changed');
+        this['fire']('online_contacts_changed');
+        this._contact_update_last_active(friend_id);
       }
       /**
        * @param {!Uint8Array} friend_id
@@ -265,7 +266,20 @@
       'del_online_contact': function(friend_id){
         this._local_state.online_contacts['delete'](friend_id);
         this['fire']('contact_offline', friend_id);
-        return this['fire']('online_contacts_changed');
+        this['fire']('online_contacts_changed');
+        this._contact_update_last_active(friend_id);
+      }
+      /**
+       * @param {!Uint8Array} friend_id
+       */,
+      _contact_update_last_active: function(friend_id){
+        var old_contact, new_contact;
+        old_contact = this._state['contacts'].get(friend_id);
+        new_contact = old_contact['clone']();
+        new_contact['last_time_active'] = +new Date;
+        this._state['contacts'].set(friend_id, new_contact);
+        this['fire']('contact_updated', new_contact, old_contact);
+        this['fire']('contacts_changed');
       }
       /**
        * @param {!Uint8Array} friend_id
@@ -292,6 +306,9 @@
         messages.push(message);
         this['fire']('contact_message_added', friend_id, message);
         this['fire']('contact_messages_changed', friend_id);
+        if (from) {
+          this._contact_update_last_active(friend_id);
+        }
       }
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);
