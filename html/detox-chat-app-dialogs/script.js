@@ -42,7 +42,7 @@
       text_message = textarea.value;
       textarea.value = '';
       friend_id = state.get_ui_active_contact();
-      state.add_contact_message(friend_id, false, +new Date, text_message);
+      state.add_contact_message(friend_id, false, +new Date, 0, text_message);
     }
   });
 }).call(this);

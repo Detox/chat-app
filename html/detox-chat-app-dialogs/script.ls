@@ -39,5 +39,6 @@ Polymer(
 		text_message	= textarea.value
 		textarea.value	= ''
 		friend_id		= state.get_ui_active_contact()
-		state.add_contact_message(friend_id, false, +(new Date), text_message)
+		# TODO: Sent date should be updated
+		state.add_contact_message(friend_id, false, +(new Date), 0, text_message)
 )

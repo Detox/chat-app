@@ -76,8 +76,8 @@ function Wrapper (detox-utils, async-eventer)
 		@_local_state.messages.set(
 			Array.from(@_state['contacts'].keys())[0],
 			[
-				Message([true, +(new Date), 'Received message'])
-				Message([false, +(new Date), 'Sent message'])
+				Message([true, +(new Date), +(new Date), 'Received message'])
+				Message([false, +(new Date), +(new Date), 'Sent message'])
 			]
 		)
 
@@ -269,16 +269,17 @@ function Wrapper (detox-utils, async-eventer)
 			@_local_state.messages.get(friend_id) || []
 		/**
 		 * @param {!Uint8Array}	friend_id
-		 * @param {boolean}		from		`true` if message was received and `false` if sent to a friend
-		 * @param {number}		date
+		 * @param {boolean}		from			`true` if message was received and `false` if sent to a friend
+		 * @param {number}		date_written	When message was written
+		 * @param {number}		date_sent		When message was sent
 		 * @param {string} 		text
 		 */
-		'add_contact_message' : (friend_id, from, date, text) !->
+		'add_contact_message' : (friend_id, from, date_written, date_sent, text) !->
 			if !@_local_state.messages.has(friend_id)
 				@_local_state.messages.set(friend_id, [])
 			friend_id	= Uint8Array.from(friend_id)
 			messages	= @_local_state.messages.get(friend_id)
-			message		= Message([from, date, text])
+			message		= Message([from, date_written, date_sent, text])
 			messages.push(message)
 			@'fire'('contact_message_added', friend_id, message)
 			@'fire'('contact_messages_changed', friend_id)
@@ -375,7 +376,7 @@ function Wrapper (detox-utils, async-eventer)
 		set	: (from) !->
 			@array[0]	= from
 	)
-	Object.defineProperty(Message::, 'date',
+	Object.defineProperty(Message::, 'date_sent',
 		/**
 		 * @return {number}
 		 */
@@ -387,17 +388,29 @@ function Wrapper (detox-utils, async-eventer)
 		set	: (date) !->
 			@array[1]	= date
 	)
+	Object.defineProperty(Message::, 'date_received',
+		/**
+		 * @return {number}
+		 */
+		get	: ->
+			@array[2]
+		/**
+		 * @param {number} text
+		 */
+		set	: (received) !->
+			@array[2]	= received
+	)
 	Object.defineProperty(Message::, 'text',
 		/**
 		 * @return {string}
 		 */
 		get	: ->
-			@array[2]
+			@array[3]
 		/**
 		 * @param {string} text
 		 */
 		set	: (text) !->
-			@array[2]	= text
+			@array[3]	= text
 	)
 
 	{

@@ -17,7 +17,7 @@
 		"index.html"
 	],
 	"dependencies" : {
-		"@detox/chat"                    : "^0.3.1",
+		"@detox/chat"                    : "^0.4.0",
 		"@detox/core"                    : "^0.4.2",
 		"@detox/utils"                   : "^1.6.0",
 		"@polymer/polymer"               : "^2.5.0",

@@ -63,7 +63,7 @@
         }
         return results$;
       }.call(this)));
-      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([true, +new Date, 'Received message']), Message([false, +new Date, 'Sent message'])]);
+      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([true, +new Date, +new Date, 'Received message']), Message([false, +new Date, +new Date, 'Sent message'])]);
       this._ready = new Promise(function(resolve){
         if (this$._state['seed']) {
           resolve();
@@ -291,18 +291,19 @@
       }
       /**
        * @param {!Uint8Array}	friend_id
-       * @param {boolean}		from		`true` if message was received and `false` if sent to a friend
-       * @param {number}		date
+       * @param {boolean}		from			`true` if message was received and `false` if sent to a friend
+       * @param {number}		date_written	When message was written
+       * @param {number}		date_sent		When message was sent
        * @param {string} 		text
        */,
-      'add_contact_message': function(friend_id, from, date, text){
+      'add_contact_message': function(friend_id, from, date_written, date_sent, text){
         var messages, message;
         if (!this._local_state.messages.has(friend_id)) {
           this._local_state.messages.set(friend_id, []);
         }
         friend_id = Uint8Array.from(friend_id);
         messages = this._local_state.messages.get(friend_id);
-        message = Message([from, date, text]);
+        message = Message([from, date_written, date_sent, text]);
         messages.push(message);
         this['fire']('contact_message_added', friend_id, message);
         this['fire']('contact_messages_changed', friend_id);
@@ -412,7 +413,7 @@
         this.array[0] = from;
       }
     });
-    Object.defineProperty(Message.prototype, 'date', {
+    Object.defineProperty(Message.prototype, 'date_sent', {
       /**
        * @return {number}
        */
@@ -426,18 +427,32 @@
         this.array[1] = date;
       }
     });
-    Object.defineProperty(Message.prototype, 'text', {
+    Object.defineProperty(Message.prototype, 'date_received', {
       /**
-       * @return {string}
+       * @return {number}
        */
       get: function(){
         return this.array[2];
       }
       /**
+       * @param {number} text
+       */,
+      set: function(received){
+        this.array[2] = received;
+      }
+    });
+    Object.defineProperty(Message.prototype, 'text', {
+      /**
+       * @return {string}
+       */
+      get: function(){
+        return this.array[3];
+      }
+      /**
        * @param {string} text
        */,
       set: function(text){
-        this.array[2] = text;
+        this.array[3] = text;
       }
     });
     return {

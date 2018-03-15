@@ -78,8 +78,8 @@
         check_and_add_to_online(friend_id);
       }).on('nickname', function(friend_id, nickname){
         state.set_contact_nickname(friend_id, nickname);
-      }).on('text_message', function(friend_id, date, text_message){
-        state.add_contact_message(friend_id, true, date, text_message);
+      }).on('text_message', function(friend_id, date_written, date_sent, text_message){
+        state.add_contact_message(friend_id, true, date_written, date_sent, text_message);
       }).on('text_message_received', function(friend_id, date){}).on('disconnected', function(friend_id){
         secrets_exchange_statuses['delete'](friend_id);
         state.del_online_contact(friend_id);
