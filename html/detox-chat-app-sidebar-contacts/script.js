@@ -18,10 +18,7 @@
         state = this$._state_instance;
         this$.contacts = state.get_contacts();
         state.on('contacts_changed', function(){
-          var contacts;
-          contacts = state.get_contacts();
-          this$.contacts = contacts.slice();
-          this$.notifyPath('contacts');
+          this$.contacts = state.get_contacts();
         });
       });
     },

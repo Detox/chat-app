@@ -59,24 +59,28 @@ function Wrapper (detox-utils, async-eventer)
 					]
 				]
 
-		# Normalize state after deserialization
+		# Denormalize state after deserialization
 		if @_state['seed']
 			@_state['seed']	= Uint8Array.from(@_state['seed'])
+
 		for secret in @_state['secrets']
 			secret['secret']	= Uint8Array.from(secret['secret'])
-		# Each contact item is an array `[friend_id, name, last_time_active, last_read_message]`
-		@_state['contacts']	= @_state['contacts'].map (contact) ->
-			contact[0]	= Uint8Array.from(contact[0])
-			Contact(contact)
+
+		@_state['contacts']	= ArrayMap(
+			for contact in @_state['contacts']
+				contact = Contact(contact)
+				[contact['id'], contact]
+		)
 
 		# TODO: This is just for demo purposes
 		@_local_state.messages.set(
-			@_state['contacts'][0]['id'],
+			Array.from(@_state['contacts'].keys())[0],
 			[
-				[true, +(new Date), 'Received message']
-				[false, +(new Date), 'Sent message']
+				Message([true, +(new Date), 'Received message'])
+				Message([false, +(new Date), 'Sent message'])
 			]
 		)
+
 		@_ready = new Promise (resolve) !~>
 			# Seed is necessary for operation
 			if @_state['seed']
@@ -176,19 +180,18 @@ function Wrapper (detox-utils, async-eventer)
 			@_state['settings']['announce']	= new_announce
 			@'fire'('settings_announce_changed')
 		/**
-		 * @return {!Array<!Object>}
+		 * @return {!Contact[]}
 		 */
 		'get_contacts' : ->
-			@_state['contacts']
+			Array.from(@_state['contacts'].values())
 		/**
 		 * @param {!Uint8Array}	friend_id
 		 * @param {string}		nickname
 		 */
 		'add_contact' : (friend_id, nickname) !->
 			# TODO: Secrets support
-			for contact in @_state['contacts']
-				if are_arrays_equal(friend_id, contact['id'])
-					return
+			if @_state['contacts'].has(friend_id)
+				return
 			new_contact	= Contact([Uint8Array.from(friend_id), nickname, 0, 0])
 			@_state['contacts'].push(new_contact)
 			@'fire'('contact_added', new_contact)
@@ -197,35 +200,32 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {!Uint8Array} friend_id
 		 */
 		'has_contact' : (friend_id) ->
-			for contact in @_state['contacts']
-				if are_arrays_equal(friend_id, contact['id'])
-					return true
-			false
+			@_state['contacts'].has(friend_id)
 		/**
 		 * @param {!Uint8Array}	friend_id
 		 * @param {string}		nickname
 		 */
 		'set_contact_nickname' : (friend_id, nickname) !->
-			for old_contact, i in @_state['contacts']
-				if are_arrays_equal(friend_id, old_contact['id'])
-					new_contact				= Contact(old_contact.as_array().slice())
-					new_contact['nickname']	= nickname
-					@_state['contacts'][i]	= new_contact
-					@'fire'('contact_updated', new_contact, old_contact)
-					@'fire'('contacts_changed')
-					break
+			old_contact	= @_state['contacts'].get(friend_id)
+			if !old_contact
+				return
+			new_contact				= old_contact['clone']()
+			new_contact['nickname']	= nickname
+			@_state['contacts'].set(friend_id, new_contact)
+			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contacts_changed')
 		/**
 		 * @param {!Uint8Array} friend_id
 		 */
 		'del_contact' : (friend_id) !->
-			for contact, i in @_state['contacts']
-				if are_arrays_equal(friend_id, contact['id'])
-					@_state['contacts'].splice(i, 1)
-					@'fire'('contact_deleted', contact)
-					@'fire'('contacts_changed')
-					break
+			old_contact	= @_state['contacts'].get(friend_id)
+			if !old_contact
+				return
+			@_state['contacts'].delete(friend_id)
+			@'fire'('contact_deleted', contact)
+			@'fire'('contacts_changed')
 		/**
-		 * @return {!Array<!Uint8Array>}
+		 * @return {!Uint8Array[]}
 		 */
 		'get_online_contacts' : ->
 			Array.from(@_local_state.online_contacts)
@@ -251,7 +251,7 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @param {!Uint8Array} friend_id
 		 *
-		 * @return {!Array<!Array>} Each inner array is `[from, date, text]`, where `received` is `true` if message was received and `false` if sent to a friend
+		 * @return {!Message[]}
 		 */
 		'get_contact_messages' : (friend_id) ->
 			@_local_state.messages.get(friend_id) || []
@@ -266,40 +266,130 @@ function Wrapper (detox-utils, async-eventer)
 				@_local_state.messages.set(friend_id, [])
 			friend_id	= Uint8Array.from(friend_id)
 			messages	= @_local_state.messages.get(friend_id)
-			message		= [from, date, text]
+			message		= Message([from, date, text])
 			messages.push(message)
 			@'fire'('contact_message_added', friend_id, message)
 			@'fire'('contact_messages_changed', friend_id)
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)
-	Object.defineProperty(State::, 'constructor', {enumerable: false, value: State})
+	Object.defineProperty(State::, 'constructor', {value: State})
 
 	/**
 	 * @constructor
 	 */
-	!function Contact (contact_array)
+	!function Contact (array)
 		if !(@ instanceof Contact)
-			return new Contact(contact_array)
+			return new Contact(array)
 
-		@'array'	= contact_array
+		array[0]	= Uint8Array.from(array[0])
+		@array		= array
+		@'array'	= array
 
+	Contact::'clone'	= ->
+		Contact(@array.slice())
 	Object.defineProperty(Contact::, 'id',
+		/**
+		 * @return {!Uint8Array}
+		 */
 		get	: ->
-			@'array'[0]
+			@array[0]
+		/**
+		 * @param {!Uint8Array} id
+		 */
 		set	: (id) !->
-			@'array'[0]	= id
+			@array[0]	= id
 	)
 	Object.defineProperty(Contact::, 'nickname',
+		/**
+		 * @return {string}
+		 */
 		get	: ->
-			@'array'[1]
+			@array[1]
+		/**
+		 * @param {string} nickname
+		 */
 		set	: (nickname) !->
-			@'array'[1]	= nickname
+			@array[1]	= nickname
+	)
+	Object.defineProperty(Contact::, 'last_time_active',
+		/**
+		 * @return {number}
+		 */
+		get	: ->
+			@array[2]
+		/**
+		 * @param {number} last_time_active
+		 */
+		set	: (last_time_active) !->
+			@array[2]	= last_time_active
+	)
+	Object.defineProperty(Contact::, 'last_read_message',
+		/**
+		 * @return {number}
+		 */
+		get	: ->
+			@array[3]
+		/**
+		 * @param {number} last_read_message
+		 */
+		set	: (last_read_message) !->
+			@array[3]	= last_read_message
+	)
+
+	/**
+	 * @constructor
+	 */
+	!function Message (array)
+		if !(@ instanceof Message)
+			return new Message(array)
+
+		@array		= array
+		@'array'	= array
+
+	Message::'clone'	= ->
+		Message(@array.slice())
+	Object.defineProperty(Message::, 'from',
+		/**
+		 * @return {boolean} `true` if message was received and `false` if sent to a friend
+		 */
+		get	: ->
+			@array[0]
+		/**
+		 * @param {boolean} from
+		 */
+		set	: (from) !->
+			@array[0]	= from
+	)
+	Object.defineProperty(Message::, 'date',
+		/**
+		 * @return {number}
+		 */
+		get	: ->
+			@array[1]
+		/**
+		 * @param {number} date
+		 */
+		set	: (date) !->
+			@array[1]	= date
+	)
+	Object.defineProperty(Message::, 'text',
+		/**
+		 * @return {string}
+		 */
+		get	: ->
+			@array[2]
+		/**
+		 * @param {string} text
+		 */
+		set	: (text) !->
+			@array[2]	= text
 	)
 
 	{
-		'State'			: State
 		'Contact'		: Contact
+		'Message'		: Message
+		'State'			: State
 		/**
 		 * @param {string}	name
 		 * @param {!Object}	initial_state

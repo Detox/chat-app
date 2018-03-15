@@ -15,7 +15,7 @@
      * @constructor
      */
     function State(name, initial_state){
-      var x$, i$, ref$, len$, secret, this$ = this;
+      var x$, i$, ref$, len$, secret, contact, this$ = this;
       if (!(this instanceof State)) {
         return new State(name, initial_state);
       }
@@ -54,11 +54,16 @@
         secret = ref$[i$];
         secret['secret'] = Uint8Array.from(secret['secret']);
       }
-      this._state['contacts'] = this._state['contacts'].map(function(contact){
-        contact[0] = Uint8Array.from(contact[0]);
-        return Contact(contact);
-      });
-      this._local_state.messages.set(this._state['contacts'][0]['id'], [[true, +new Date, 'Received message'], [false, +new Date, 'Sent message']]);
+      this._state['contacts'] = ArrayMap((function(){
+        var i$, ref$, len$, results$ = [];
+        for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
+          contact = ref$[i$];
+          contact = Contact(contact);
+          results$.push([contact['id'], contact]);
+        }
+        return results$;
+      }.call(this)));
+      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([true, +new Date, 'Received message']), Message([false, +new Date, 'Sent message'])]);
       this._ready = new Promise(function(resolve){
         if (this$._state['seed']) {
           resolve();
@@ -180,22 +185,19 @@
         this['fire']('settings_announce_changed');
       }
       /**
-       * @return {!Array<!Object>}
+       * @return {!Contact[]}
        */,
       'get_contacts': function(){
-        return this._state['contacts'];
+        return Array.from(this._state['contacts'].values());
       }
       /**
        * @param {!Uint8Array}	friend_id
        * @param {string}		nickname
        */,
       'add_contact': function(friend_id, nickname){
-        var i$, ref$, len$, contact, new_contact;
-        for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
-          contact = ref$[i$];
-          if (are_arrays_equal(friend_id, contact['id'])) {
-            return;
-          }
+        var new_contact;
+        if (this._state['contacts'].has(friend_id)) {
+          return;
         }
         new_contact = Contact([Uint8Array.from(friend_id), nickname, 0, 0]);
         this._state['contacts'].push(new_contact);
@@ -206,52 +208,39 @@
        * @param {!Uint8Array} friend_id
        */,
       'has_contact': function(friend_id){
-        var i$, ref$, len$, contact;
-        for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
-          contact = ref$[i$];
-          if (are_arrays_equal(friend_id, contact['id'])) {
-            return true;
-          }
-        }
-        return false;
+        return this._state['contacts'].has(friend_id);
       }
       /**
        * @param {!Uint8Array}	friend_id
        * @param {string}		nickname
        */,
       'set_contact_nickname': function(friend_id, nickname){
-        var i$, ref$, len$, i, old_contact, new_contact;
-        for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
-          i = i$;
-          old_contact = ref$[i$];
-          if (are_arrays_equal(friend_id, old_contact['id'])) {
-            new_contact = Contact(old_contact.as_array().slice());
-            new_contact['nickname'] = nickname;
-            this._state['contacts'][i] = new_contact;
-            this['fire']('contact_updated', new_contact, old_contact);
-            this['fire']('contacts_changed');
-            break;
-          }
+        var old_contact, new_contact;
+        old_contact = this._state['contacts'].get(friend_id);
+        if (!old_contact) {
+          return;
         }
+        new_contact = old_contact['clone']();
+        new_contact['nickname'] = nickname;
+        this._state['contacts'].set(friend_id, new_contact);
+        this['fire']('contact_updated', new_contact, old_contact);
+        this['fire']('contacts_changed');
       }
       /**
        * @param {!Uint8Array} friend_id
        */,
       'del_contact': function(friend_id){
-        var i$, ref$, len$, i, contact;
-        for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
-          i = i$;
-          contact = ref$[i$];
-          if (are_arrays_equal(friend_id, contact['id'])) {
-            this._state['contacts'].splice(i, 1);
-            this['fire']('contact_deleted', contact);
-            this['fire']('contacts_changed');
-            break;
-          }
+        var old_contact;
+        old_contact = this._state['contacts'].get(friend_id);
+        if (!old_contact) {
+          return;
         }
+        this._state['contacts']['delete'](friend_id);
+        this['fire']('contact_deleted', contact);
+        this['fire']('contacts_changed');
       }
       /**
-       * @return {!Array<!Uint8Array>}
+       * @return {!Uint8Array[]}
        */,
       'get_online_contacts': function(){
         return Array.from(this._local_state.online_contacts);
@@ -281,7 +270,7 @@
       /**
        * @param {!Uint8Array} friend_id
        *
-       * @return {!Array<!Array>} Each inner array is `[from, date, text]`, where `received` is `true` if message was received and `false` if sent to a friend
+       * @return {!Message[]}
        */,
       'get_contact_messages': function(friend_id){
         return this._local_state.messages.get(friend_id) || [];
@@ -299,7 +288,7 @@
         }
         friend_id = Uint8Array.from(friend_id);
         messages = this._local_state.messages.get(friend_id);
-        message = [from, date, text];
+        message = Message([from, date, text]);
         messages.push(message);
         this['fire']('contact_message_added', friend_id, message);
         this['fire']('contact_messages_changed', friend_id);
@@ -307,37 +296,137 @@
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);
     Object.defineProperty(State.prototype, 'constructor', {
-      enumerable: false,
       value: State
     });
     /**
      * @constructor
      */
-    function Contact(contact_array){
+    function Contact(array){
       if (!(this instanceof Contact)) {
-        return new Contact(contact_array);
+        return new Contact(array);
       }
-      this['array'] = contact_array;
+      array[0] = Uint8Array.from(array[0]);
+      this.array = array;
+      this['array'] = array;
     }
+    Contact.prototype['clone'] = function(){
+      return Contact(this.array.slice());
+    };
     Object.defineProperty(Contact.prototype, 'id', {
+      /**
+       * @return {!Uint8Array}
+       */
       get: function(){
-        return this['array'][0];
-      },
+        return this.array[0];
+      }
+      /**
+       * @param {!Uint8Array} id
+       */,
       set: function(id){
-        this['array'][0] = id;
+        this.array[0] = id;
       }
     });
     Object.defineProperty(Contact.prototype, 'nickname', {
+      /**
+       * @return {string}
+       */
       get: function(){
-        return this['array'][1];
-      },
+        return this.array[1];
+      }
+      /**
+       * @param {string} nickname
+       */,
       set: function(nickname){
-        this['array'][1] = nickname;
+        this.array[1] = nickname;
+      }
+    });
+    Object.defineProperty(Contact.prototype, 'last_time_active', {
+      /**
+       * @return {number}
+       */
+      get: function(){
+        return this.array[2];
+      }
+      /**
+       * @param {number} last_time_active
+       */,
+      set: function(last_time_active){
+        this.array[2] = last_time_active;
+      }
+    });
+    Object.defineProperty(Contact.prototype, 'last_read_message', {
+      /**
+       * @return {number}
+       */
+      get: function(){
+        return this.array[3];
+      }
+      /**
+       * @param {number} last_read_message
+       */,
+      set: function(last_read_message){
+        this.array[3] = last_read_message;
+      }
+    });
+    /**
+     * @constructor
+     */
+    function Message(array){
+      if (!(this instanceof Message)) {
+        return new Message(array);
+      }
+      this.array = array;
+      this['array'] = array;
+    }
+    Message.prototype['clone'] = function(){
+      return Message(this.array.slice());
+    };
+    Object.defineProperty(Message.prototype, 'from', {
+      /**
+       * @return {boolean} `true` if message was received and `false` if sent to a friend
+       */
+      get: function(){
+        return this.array[0];
+      }
+      /**
+       * @param {boolean} from
+       */,
+      set: function(from){
+        this.array[0] = from;
+      }
+    });
+    Object.defineProperty(Message.prototype, 'date', {
+      /**
+       * @return {number}
+       */
+      get: function(){
+        return this.array[1];
+      }
+      /**
+       * @param {number} date
+       */,
+      set: function(date){
+        this.array[1] = date;
+      }
+    });
+    Object.defineProperty(Message.prototype, 'text', {
+      /**
+       * @return {string}
+       */
+      get: function(){
+        return this.array[2];
+      }
+      /**
+       * @param {string} text
+       */,
+      set: function(text){
+        this.array[2] = text;
       }
     });
     return {
-      'State': State,
-      'Contact': Contact
+      'Contact': Contact,
+      'Message': Message,
+      'State': State
       /**
        * @param {string}	name
        * @param {!Object}	initial_state

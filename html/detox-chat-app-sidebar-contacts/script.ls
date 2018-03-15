@@ -16,10 +16,8 @@ Polymer(
 		@contacts	= state.get_contacts()
 		state
 			.on('contacts_changed', !~>
-				contacts	= state.get_contacts()
 				# TODO: Sort contacts
-				@contacts	= contacts.slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed
-				@notifyPath('contacts')
+				@contacts	= state.get_contacts()
 			)
 	_set_active_contact : (e) !->
 		@_state_instance.set_ui_active_contact(e.model.item.id)

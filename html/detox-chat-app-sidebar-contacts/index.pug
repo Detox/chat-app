@@ -3,7 +3,7 @@ dom-module(id="detox-chat-app-sidebar-contacts")
 	template
 		csw-button(icon="plus"): button(on-click="_add_contact") Add new contact
 		csw-group(vertical)
-			template(is="dom-repeat" items="{{contacts}}" mutable-data)
+			template(is="dom-repeat" items="{{contacts}}")
 				csw-button: button(type="button" on-click="_set_active_contact")
 					div [[item.nickname]]
 	script(src="script.js")
