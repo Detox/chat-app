@@ -94,7 +94,11 @@ Polymer(
 				chat.connect_to(new_contact.id, new Uint8Array(0))
 			)
 			.on('contact_message_added', (friend_id, message) !->
-				if message.from # Message was received
+				if (
+					message.from || # Message was received from a friend
+					message.date_received || # Message was received by a friend
+					!state.has_online_contact(friend_id) # Friend is not currently connected
+				)
 					return
 				chat.text_message(friend_id, message.text)
 			)
