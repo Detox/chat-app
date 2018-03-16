@@ -98,6 +98,7 @@ Polymer(
 			)
 			.on('disconnected', (friend_id) !~>
 				secrets_exchange_statuses.delete(friend_id)
+				sent_messages_map.delete(friend_id)
 				state.del_online_contact(friend_id)
 			)
 		state
