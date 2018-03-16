@@ -87,10 +87,10 @@
       state.on('contact_added', function(new_contact){
         chat.connect_to(new_contact.id, new Uint8Array(0));
       }).on('contact_message_added', function(friend_id, message){
-        if (message[0]) {
+        if (message.from) {
           return;
         }
-        chat.text_message(friend_id, message[2]);
+        chat.text_message(friend_id, message.text);
       });
       this._core_instance = core;
       this._chat_instance = chat;

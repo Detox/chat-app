@@ -94,9 +94,9 @@ Polymer(
 				chat.connect_to(new_contact.id, new Uint8Array(0))
 			)
 			.on('contact_message_added', (friend_id, message) !->
-				if message[0] # Message was received
+				if message.from # Message was received
 					return
-				chat.text_message(friend_id, message[2])
+				chat.text_message(friend_id, message.text)
 			)
 		@_core_instance	= core
 		@_chat_instance	= chat
