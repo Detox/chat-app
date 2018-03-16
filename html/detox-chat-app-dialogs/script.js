@@ -26,7 +26,9 @@
           this$.messages = state.get_contact_messages(new_active_contact).slice();
           this$.notifyPath('messages');
         }).on('contact_messages_changed', function(friend_id){
-          if (detoxUtils.are_arrays_equal(friend_id, state.get_ui_active_contact())) {
+          var active_contact;
+          active_contact = state.get_ui_active_contact();
+          if (active_contact && detoxUtils.are_arrays_equal(friend_id, active_contact)) {
             this$.messages = state.get_contact_messages(friend_id).slice();
             this$.notifyPath('messages');
           }

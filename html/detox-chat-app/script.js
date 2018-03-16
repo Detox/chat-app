@@ -38,11 +38,12 @@
       });
     },
     _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){
-      var ArrayMap, secrets_exchange_statuses, state, core, chat, this$ = this;
+      var ArrayMap, secrets_exchange_statuses, sent_messages_map, state, core, chat, this$ = this;
       ArrayMap = detoxUtils.ArrayMap;
       secrets_exchange_statuses = ArrayMap();
+      sent_messages_map = ArrayMap();
       function check_and_add_to_online(friend_id){
-        var secrets_exchange_status, nickname;
+        var secrets_exchange_status, nickname, i$, ref$, len$, message;
         secrets_exchange_status = secrets_exchange_statuses.get(friend_id);
         if (secrets_exchange_status.received && secrets_exchange_status.sent) {
           state.add_online_contact(friend_id);
@@ -50,7 +51,19 @@
           if (nickname) {
             chat.nickname(friend_id, nickname);
           }
+          for (i$ = 0, len$ = (ref$ = state.get_contact_messages_to_be_sent(friend_id)).length; i$ < len$; ++i$) {
+            message = ref$[i$];
+            send_message(friend_id, message);
+          }
         }
+      }
+      function send_message(friend_id, message){
+        var date_sent;
+        date_sent = chat.text_message(friend_id, message.date_written, message.text);
+        if (!sent_messages_map.has(friend_id)) {
+          sent_messages_map.set(friend_id, new Map);
+        }
+        sent_messages_map.get(friend_id).set(date_sent, message.id);
       }
       state = this._state_instance;
       core = detoxCore.Core(detoxCore.generate_seed(), [bootstrap_node_info], ice_servers, packets_per_second).once('ready', function(){
@@ -80,7 +93,14 @@
         state.set_contact_nickname(friend_id, nickname);
       }).on('text_message', function(friend_id, date_written, date_sent, text_message){
         state.add_contact_message(friend_id, true, date_written, date_sent, text_message);
-      }).on('text_message_received', function(friend_id, date){}).on('disconnected', function(friend_id){
+      }).on('text_message_received', function(friend_id, date_sent){
+        var id, ref$;
+        id = (ref$ = sent_messages_map.get(friend_id)) != null ? ref$.get(date_sent) : void 8;
+        if (id) {
+          sent_messages_map.get(friend_id)['delete'](date_sent);
+          state.set_contact_message_sent(friend_id, id, date_sent);
+        }
+      }).on('disconnected', function(friend_id){
         secrets_exchange_statuses['delete'](friend_id);
         state.del_online_contact(friend_id);
       });
@@ -90,7 +110,7 @@
         if (message.from || message.date_received || !state.has_online_contact(friend_id)) {
           return;
         }
-        chat.text_message(friend_id, message.text);
+        send_message(friend_id, message);
       });
       this._core_instance = core;
       this._chat_instance = chat;

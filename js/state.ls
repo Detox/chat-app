@@ -38,13 +38,14 @@ function Wrapper (detox-utils, async-eventer)
 
 		# State that is only valid for current session
 		@_local_state =
-			online			: false
-			announced		: false
-			messages		: ArrayMap()
-			ui				:
+			online							: false
+			announced						: false
+			messages						: ArrayMap()
+			ui								:
 				active_contact	: null
 				# TODO
-			online_contacts	: ArraySet()
+			online_contacts					: ArraySet()
+			contacts_with_pending_messages	: ArraySet()
 
 		# v0 of the state structure
 		if !('version' of @_state)
@@ -75,7 +76,8 @@ function Wrapper (detox-utils, async-eventer)
 
 		@_state['contacts']	= ArrayMap(
 			for contact in @_state['contacts']
-				contact = Contact(contact)
+				contact[0]	= Uint8Array.from(contact[0])
+				contact 	= Contact(contact)
 				[contact['id'], contact]
 		)
 
@@ -83,10 +85,13 @@ function Wrapper (detox-utils, async-eventer)
 		@_local_state.messages.set(
 			Array.from(@_state['contacts'].keys())[0],
 			[
-				Message([true, +(new Date), +(new Date), 'Received message'])
-				Message([false, +(new Date), +(new Date), 'Sent message'])
+				Message([0, true, +(new Date), +(new Date), 'Received message'])
+				Message([1, false, +(new Date), +(new Date), 'Sent message'])
 			]
 		)
+
+		for contact_id in Array.from(@_state['contacts'].keys())
+			@_update_contact_with_pending_messages(contact_id)
 
 		@_ready = new Promise (resolve) !~>
 			# Seed is necessary for operation
@@ -113,9 +118,8 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @param {!Uint8Array} seed
 		 */
-		'set_seed' : (seed) !->
+		'set_seed' : (new_seed) !->
 			old_seed		= @_state['seed']
-			new_seed		= Uint8Array.from(seed)
 			@_state['seed']	= new_seed
 			if @_ready_resolve
 				@_ready_resolve()
@@ -168,9 +172,8 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @param {!Uint8Array} friend_id
 		 */
-		'set_ui_active_contact' : (friend_id) !->
+		'set_ui_active_contact' : (new_active_contact) !->
 			old_active_contact				= @_local_state.ui.active_contact
-			new_active_contact				= Uint8Array.from(friend_id)
 			@_local_state.ui.active_contact = new_active_contact
 			@'fire'('ui_active_contact_changed', new_active_contact, old_active_contact)
 		/**
@@ -192,6 +195,11 @@ function Wrapper (detox-utils, async-eventer)
 		'get_contacts' : ->
 			Array.from(@_state['contacts'].values())
 		/**
+		 * @return {!Uint8Array[]}
+		 */
+		'get_contacts_with_pending_messages' : ->
+			@_local_state.contacts_with_pending_messages
+		/**
 		 * @param {!Uint8Array}	friend_id
 		 * @param {string}		nickname
 		 */
@@ -199,8 +207,8 @@ function Wrapper (detox-utils, async-eventer)
 			# TODO: Secrets support
 			if @_state['contacts'].has(friend_id)
 				return
-			new_contact	= Contact([Uint8Array.from(friend_id), nickname, 0, 0])
-			@_state['contacts'].push(new_contact)
+			new_contact	= Contact([friend_id, nickname, 0, 0])
+			@_state['contacts'].set(new_contact['id'], new_contact)
 			@'fire'('contact_added', new_contact)
 			@'fire'('contacts_changed')
 		/**
@@ -257,6 +265,14 @@ function Wrapper (detox-utils, async-eventer)
 			@'fire'('contact_offline', friend_id)
 			@'fire'('online_contacts_changed')
 			@_contact_update_last_active(friend_id)
+			@_update_contact_with_pending_messages(friend_id)
+		/**
+		 * @param {!Uint8Array} friend_id
+		 */
+		_update_contact_with_pending_messages : (friend_id) !->
+			for message in @'get_contact_messages'(friend_id)
+				if !message.from && !message.date_sent
+					@_local_state.contacts_with_pending_messages.add(friend_id)
 		/**
 		 * @param {!Uint8Array} friend_id
 		 */
@@ -275,23 +291,48 @@ function Wrapper (detox-utils, async-eventer)
 		'get_contact_messages' : (friend_id) ->
 			@_local_state.messages.get(friend_id) || []
 		/**
+		 * @param {!Uint8Array} friend_id
+		 *
+		 * @return {!Message[]}
+		 */
+		'get_contact_messages_to_be_sent' : (friend_id) ->
+			(@_local_state.messages.get(friend_id) || []).filter (message) ->
+				!message.sent
+		/**
 		 * @param {!Uint8Array}	friend_id
 		 * @param {boolean}		from			`true` if message was received and `false` if sent to a friend
 		 * @param {number}		date_written	When message was written
 		 * @param {number}		date_sent		When message was sent
 		 * @param {string} 		text
+		 *
+		 * @return {number} Message ID
 		 */
 		'add_contact_message' : (friend_id, from, date_written, date_sent, text) !->
 			if !@_local_state.messages.has(friend_id)
 				@_local_state.messages.set(friend_id, [])
-			friend_id	= Uint8Array.from(friend_id)
 			messages	= @_local_state.messages.get(friend_id)
-			message		= Message([from, date_written, date_sent, text])
+			id			= if messages.length then messages[messages.length - 1]['id'] + 1 else 0
+			message		= Message([id, from, date_written, date_sent, text])
 			messages.push(message)
 			@'fire'('contact_message_added', friend_id, message)
 			@'fire'('contact_messages_changed', friend_id)
 			if from
 				@_contact_update_last_active(friend_id)
+			else
+				if !@'has_online_contact'(friend_id)
+					@_local_state.contacts_with_pending_messages.add(friend_id)
+		/**
+		 * @param {!Uint8Array}	friend_id
+		 * @param {number}		id			Message ID
+		 * @param {number}		date		Date when message was sent
+		 */
+		'set_contact_message_sent' : (friend_id, id, date) !->
+			messages	= @_local_state.messages.get(friend_id)
+			for message in messages by -1 # Should be faster to start from the end
+				if message['id'] == id
+					message['date_sent']	= date
+					@_update_contact_with_pending_messages(friend_id)
+					break
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)
@@ -304,7 +345,6 @@ function Wrapper (detox-utils, async-eventer)
 		if !(@ instanceof Contact)
 			return new Contact(array)
 
-		array[0]	= Uint8Array.from(array[0])
 		@'array'	= array
 
 	Contact::'clone'	= ->
@@ -325,10 +365,11 @@ function Wrapper (detox-utils, async-eventer)
 
 	Message::'clone'	= ->
 		Message(@array.slice())
-	define_array_property(Message::, 'from', 0)
-	define_array_property(Message::, 'date_sent', 1)
-	define_array_property(Message::, 'date_received', 2)
-	define_array_property(Message::, 'text', 3)
+	define_array_property(Message::, 'id', 0)
+	define_array_property(Message::, 'from', 1)
+	define_array_property(Message::, 'date_sent', 2)
+	define_array_property(Message::, 'date_received', 3)
+	define_array_property(Message::, 'text', 4)
 
 	{
 		'Contact'		: Contact

@@ -32,6 +32,7 @@ Polymer(
 		ArrayMap					= detox-utils.ArrayMap
 
 		secrets_exchange_statuses	= ArrayMap()
+		sent_messages_map			= ArrayMap()
 
 		!function check_and_add_to_online (friend_id)
 			secrets_exchange_status	= secrets_exchange_statuses.get(friend_id)
@@ -40,6 +41,15 @@ Polymer(
 				nickname	= state.get_nickname()
 				if nickname
 					chat.nickname(friend_id, nickname)
+				# TODO: In addition to this we need to scan for contacts with such messages and actively try to connect to them
+				for message in state.get_contact_messages_to_be_sent(friend_id)
+					send_message(friend_id, message)
+
+		!function send_message (friend_id, message)
+			date_sent	= chat.text_message(friend_id, message.date_written, message.text)
+			if !sent_messages_map.has(friend_id)
+				sent_messages_map.set(friend_id, new Map)
+			sent_messages_map.get(friend_id).set(date_sent, message.id)
 
 		# TODO: For now we are using defaults and hardcoded constants for Chat and Core instances, but in future this will be configurable
 		state	= @_state_instance
@@ -80,8 +90,11 @@ Polymer(
 				# TODO: Check date_written and date_sent
 				state.add_contact_message(friend_id, true, date_written, date_sent, text_message)
 			)
-			.on('text_message_received', (friend_id, date) !->
-				# TODO: Track messages that were actually received
+			.on('text_message_received', (friend_id, date_sent) !->
+				id	= sent_messages_map.get(friend_id)?.get(date_sent)
+				if id
+					sent_messages_map.get(friend_id).delete(date_sent)
+					state.set_contact_message_sent(friend_id, id, date_sent)
 			)
 			.on('disconnected', (friend_id) !~>
 				secrets_exchange_statuses.delete(friend_id)
@@ -100,7 +113,7 @@ Polymer(
 					!state.has_online_contact(friend_id) # Friend is not currently connected
 				)
 					return
-				chat.text_message(friend_id, message.text)
+				send_message(friend_id, message)
 			)
 		@_core_instance	= core
 		@_chat_instance	= chat

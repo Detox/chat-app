@@ -25,7 +25,7 @@
      * @constructor
      */
     function State(name, initial_state){
-      var x$, i$, ref$, len$, secret, contact, this$ = this;
+      var x$, i$, ref$, len$, secret, contact, contact_id, this$ = this;
       if (!(this instanceof State)) {
         return new State(name, initial_state);
       }
@@ -44,7 +44,8 @@
         ui: {
           active_contact: null
         },
-        online_contacts: ArraySet()
+        online_contacts: ArraySet(),
+        contacts_with_pending_messages: ArraySet()
       };
       if (!('version' in this._state)) {
         x$ = this._state;
@@ -68,12 +69,17 @@
         var i$, ref$, len$, results$ = [];
         for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
           contact = ref$[i$];
+          contact[0] = Uint8Array.from(contact[0]);
           contact = Contact(contact);
           results$.push([contact['id'], contact]);
         }
         return results$;
       }.call(this)));
-      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([true, +new Date, +new Date, 'Received message']), Message([false, +new Date, +new Date, 'Sent message'])]);
+      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([0, true, +new Date, +new Date, 'Received message']), Message([1, false, +new Date, +new Date, 'Sent message'])]);
+      for (i$ = 0, len$ = (ref$ = Array.from(this._state['contacts'].keys())).length; i$ < len$; ++i$) {
+        contact_id = ref$[i$];
+        this._update_contact_with_pending_messages(contact_id);
+      }
       this._ready = new Promise(function(resolve){
         if (this$._state['seed']) {
           resolve();
@@ -103,10 +109,9 @@
       /**
        * @param {!Uint8Array} seed
        */,
-      'set_seed': function(seed){
-        var old_seed, new_seed;
+      'set_seed': function(new_seed){
+        var old_seed;
         old_seed = this._state['seed'];
-        new_seed = Uint8Array.from(seed);
         this._state['seed'] = new_seed;
         if (this._ready_resolve) {
           this._ready_resolve();
@@ -171,10 +176,9 @@
       /**
        * @param {!Uint8Array} friend_id
        */,
-      'set_ui_active_contact': function(friend_id){
-        var old_active_contact, new_active_contact;
+      'set_ui_active_contact': function(new_active_contact){
+        var old_active_contact;
         old_active_contact = this._local_state.ui.active_contact;
-        new_active_contact = Uint8Array.from(friend_id);
         this._local_state.ui.active_contact = new_active_contact;
         this['fire']('ui_active_contact_changed', new_active_contact, old_active_contact);
       }
@@ -201,6 +205,12 @@
         return Array.from(this._state['contacts'].values());
       }
       /**
+       * @return {!Uint8Array[]}
+       */,
+      'get_contacts_with_pending_messages': function(){
+        return this._local_state.contacts_with_pending_messages;
+      }
+      /**
        * @param {!Uint8Array}	friend_id
        * @param {string}		nickname
        */,
@@ -209,8 +219,8 @@
         if (this._state['contacts'].has(friend_id)) {
           return;
         }
-        new_contact = Contact([Uint8Array.from(friend_id), nickname, 0, 0]);
-        this._state['contacts'].push(new_contact);
+        new_contact = Contact([friend_id, nickname, 0, 0]);
+        this._state['contacts'].set(new_contact['id'], new_contact);
         this['fire']('contact_added', new_contact);
         this['fire']('contacts_changed');
       }
@@ -278,6 +288,19 @@
         this['fire']('contact_offline', friend_id);
         this['fire']('online_contacts_changed');
         this._contact_update_last_active(friend_id);
+        this._update_contact_with_pending_messages(friend_id);
+      }
+      /**
+       * @param {!Uint8Array} friend_id
+       */,
+      _update_contact_with_pending_messages: function(friend_id){
+        var i$, ref$, len$, message;
+        for (i$ = 0, len$ = (ref$ = this['get_contact_messages'](friend_id)).length; i$ < len$; ++i$) {
+          message = ref$[i$];
+          if (!message.from && !message.date_sent) {
+            this._local_state.contacts_with_pending_messages.add(friend_id);
+          }
+        }
       }
       /**
        * @param {!Uint8Array} friend_id
@@ -300,25 +323,58 @@
         return this._local_state.messages.get(friend_id) || [];
       }
       /**
+       * @param {!Uint8Array} friend_id
+       *
+       * @return {!Message[]}
+       */,
+      'get_contact_messages_to_be_sent': function(friend_id){
+        return (this._local_state.messages.get(friend_id) || []).filter(function(message){
+          return !message.sent;
+        });
+      }
+      /**
        * @param {!Uint8Array}	friend_id
        * @param {boolean}		from			`true` if message was received and `false` if sent to a friend
        * @param {number}		date_written	When message was written
        * @param {number}		date_sent		When message was sent
        * @param {string} 		text
+       *
+       * @return {number} Message ID
        */,
       'add_contact_message': function(friend_id, from, date_written, date_sent, text){
-        var messages, message;
+        var messages, id, message;
         if (!this._local_state.messages.has(friend_id)) {
           this._local_state.messages.set(friend_id, []);
         }
-        friend_id = Uint8Array.from(friend_id);
         messages = this._local_state.messages.get(friend_id);
-        message = Message([from, date_written, date_sent, text]);
+        id = messages.length ? messages[messages.length - 1]['id'] + 1 : 0;
+        message = Message([id, from, date_written, date_sent, text]);
         messages.push(message);
         this['fire']('contact_message_added', friend_id, message);
         this['fire']('contact_messages_changed', friend_id);
         if (from) {
           this._contact_update_last_active(friend_id);
+        } else {
+          if (!this['has_online_contact'](friend_id)) {
+            this._local_state.contacts_with_pending_messages.add(friend_id);
+          }
+        }
+      }
+      /**
+       * @param {!Uint8Array}	friend_id
+       * @param {number}		id			Message ID
+       * @param {number}		date		Date when message was sent
+       */,
+      'set_contact_message_sent': function(friend_id, id, date){
+        var messages, i$, message;
+        messages = this._local_state.messages.get(friend_id);
+        for (i$ = messages.length - 1; i$ >= 0; --i$) {
+          message = messages[i$];
+          if (message['id'] === id) {
+            message['date_sent'] = date;
+            this._update_contact_with_pending_messages(friend_id);
+            break;
+          }
         }
       }
     };
@@ -333,7 +389,6 @@
       if (!(this instanceof Contact)) {
         return new Contact(array);
       }
-      array[0] = Uint8Array.from(array[0]);
       this['array'] = array;
     }
     Contact.prototype['clone'] = function(){
@@ -355,10 +410,11 @@
     Message.prototype['clone'] = function(){
       return Message(this.array.slice());
     };
-    define_array_property(Message.prototype, 'from', 0);
-    define_array_property(Message.prototype, 'date_sent', 1);
-    define_array_property(Message.prototype, 'date_received', 2);
-    define_array_property(Message.prototype, 'text', 3);
+    define_array_property(Message.prototype, 'id', 0);
+    define_array_property(Message.prototype, 'from', 1);
+    define_array_property(Message.prototype, 'date_sent', 2);
+    define_array_property(Message.prototype, 'date_received', 3);
+    define_array_property(Message.prototype, 'text', 4);
     return {
       'Contact': Contact,
       'Message': Message,

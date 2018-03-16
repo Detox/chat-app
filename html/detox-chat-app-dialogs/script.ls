@@ -26,7 +26,8 @@ Polymer(
 					@notifyPath('messages')
 				)
 				.on('contact_messages_changed', (friend_id) !~>
-					if detox-utils.are_arrays_equal(friend_id, state.get_ui_active_contact())
+					active_contact	= state.get_ui_active_contact()
+					if active_contact && detox-utils.are_arrays_equal(friend_id, active_contact)
 						@messages	= state.get_contact_messages(friend_id).slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed
 						@notifyPath('messages')
 				)
