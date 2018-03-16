@@ -5,18 +5,37 @@
  * @license 0BSD
  */
 (function(){
-  function define_array_property(prototype, property_name, array_index){
-    return Object.defineProperty(prototype, property_name, {
-      get: function(){
-        return this['array'][array_index];
-      },
-      set: function(value){
-        this.array[array_index] = value;
+  function create_array_object(properties_list){
+    /**
+     * @constructor
+     */
+    var i$, len$;
+    function ArrayObject(array){
+      if (!(this instanceof ArrayObject)) {
+        return new ArrayObject(array);
       }
-    });
+      this['array'] = array;
+    }
+    ArrayObject.prototype['clone'] = function(){
+      return ArrayObject(this['array'].slice());
+    };
+    for (i$ = 0, len$ = properties_list.length; i$ < len$; ++i$) {
+      (fn$.call(this, i$, properties_list[i$]));
+    }
+    return ArrayObject;
+    function fn$(array_index, property){
+      Object.defineProperty(ArrayObject.prototype, property, {
+        get: function(){
+          return this['array'][array_index];
+        },
+        set: function(value){
+          this['array'][array_index] = value;
+        }
+      });
+    }
   }
   function Wrapper(detoxUtils, asyncEventer){
-    var are_arrays_equal, ArrayMap, ArraySet, global_state;
+    var are_arrays_equal, ArrayMap, ArraySet, global_state, Contact, Message;
     are_arrays_equal = detoxUtils['are_arrays_equal'];
     ArrayMap = detoxUtils['ArrayMap'];
     ArraySet = detoxUtils['ArraySet'];
@@ -382,39 +401,8 @@
     Object.defineProperty(State.prototype, 'constructor', {
       value: State
     });
-    /**
-     * @constructor
-     */
-    function Contact(array){
-      if (!(this instanceof Contact)) {
-        return new Contact(array);
-      }
-      this['array'] = array;
-    }
-    Contact.prototype['clone'] = function(){
-      return Contact(this.array.slice());
-    };
-    define_array_property(Contact.prototype, 'id', 0);
-    define_array_property(Contact.prototype, 'nickname', 1);
-    define_array_property(Contact.prototype, 'last_time_active', 2);
-    define_array_property(Contact.prototype, 'last_read_message', 3);
-    /**
-     * @constructor
-     */
-    function Message(array){
-      if (!(this instanceof Message)) {
-        return new Message(array);
-      }
-      this['array'] = array;
-    }
-    Message.prototype['clone'] = function(){
-      return Message(this.array.slice());
-    };
-    define_array_property(Message.prototype, 'id', 0);
-    define_array_property(Message.prototype, 'from', 1);
-    define_array_property(Message.prototype, 'date_sent', 2);
-    define_array_property(Message.prototype, 'date_received', 3);
-    define_array_property(Message.prototype, 'text', 4);
+    Contact = create_array_object('id', 'nickname', 'last_time_active', 'last_read_message');
+    Message = create_array_object('id', 'from', 'date_sent', 'date_received', 'text');
     return {
       'Contact': Contact,
       'Message': Message,

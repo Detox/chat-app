@@ -3,13 +3,28 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-function define_array_property (prototype, property_name, array_index)
-	Object.defineProperty(prototype, property_name,
-		get	: ->
-			@'array'[array_index]
-		set	: (value) !->
-			@array[array_index]	= value
-	)
+function create_array_object (properties_list)
+	/**
+	 * @constructor
+	 */
+	!function ArrayObject (array)
+		if !(@ instanceof ArrayObject)
+			return new ArrayObject(array)
+
+		@'array'	= array
+
+	ArrayObject::'clone'	= ->
+		ArrayObject(@'array'slice())
+
+	for let property, array_index in properties_list
+		Object.defineProperty(ArrayObject::, property,
+			get	: ->
+				@'array'[array_index]
+			set	: (value) !->
+				@'array'[array_index]	= value
+		)
+	ArrayObject
+
 function Wrapper (detox-utils, async-eventer)
 	are_arrays_equal	= detox-utils['are_arrays_equal']
 	ArrayMap			= detox-utils['ArrayMap']
@@ -338,38 +353,9 @@ function Wrapper (detox-utils, async-eventer)
 	State:: = Object.assign(Object.create(async-eventer::), State::)
 	Object.defineProperty(State::, 'constructor', {value: State})
 
-	/**
-	 * @constructor
-	 */
-	!function Contact (array)
-		if !(@ instanceof Contact)
-			return new Contact(array)
+	Contact	= create_array_object('id', 'nickname', 'last_time_active', 'last_read_message')
 
-		@'array'	= array
-
-	Contact::'clone'	= ->
-		Contact(@array.slice())
-	define_array_property(Contact::, 'id', 0)
-	define_array_property(Contact::, 'nickname', 1)
-	define_array_property(Contact::, 'last_time_active', 2)
-	define_array_property(Contact::, 'last_read_message', 3)
-
-	/**
-	 * @constructor
-	 */
-	!function Message (array)
-		if !(@ instanceof Message)
-			return new Message(array)
-
-		@'array'	= array
-
-	Message::'clone'	= ->
-		Message(@array.slice())
-	define_array_property(Message::, 'id', 0)
-	define_array_property(Message::, 'from', 1)
-	define_array_property(Message::, 'date_sent', 2)
-	define_array_property(Message::, 'date_received', 3)
-	define_array_property(Message::, 'text', 4)
+	Message	= create_array_object('id', 'from', 'date_sent', 'date_received', 'text')
 
 	{
 		'Contact'		: Contact
