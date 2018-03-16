@@ -3,6 +3,13 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
+function define_array_property (prototype, property_name, array_index)
+	Object.defineProperty(prototype, property_name,
+		get	: ->
+			@'array'[array_index]
+		set	: (value) !->
+			@array[array_index]	= value
+	)
 function Wrapper (detox-utils, async-eventer)
 	are_arrays_equal	= detox-utils['are_arrays_equal']
 	ArrayMap			= detox-utils['ArrayMap']
@@ -298,59 +305,14 @@ function Wrapper (detox-utils, async-eventer)
 			return new Contact(array)
 
 		array[0]	= Uint8Array.from(array[0])
-		@array		= array
 		@'array'	= array
 
 	Contact::'clone'	= ->
 		Contact(@array.slice())
-	Object.defineProperty(Contact::, 'id',
-		/**
-		 * @return {!Uint8Array}
-		 */
-		get	: ->
-			@array[0]
-		/**
-		 * @param {!Uint8Array} id
-		 */
-		set	: (id) !->
-			@array[0]	= id
-	)
-	Object.defineProperty(Contact::, 'nickname',
-		/**
-		 * @return {string}
-		 */
-		get	: ->
-			@array[1]
-		/**
-		 * @param {string} nickname
-		 */
-		set	: (nickname) !->
-			@array[1]	= nickname
-	)
-	Object.defineProperty(Contact::, 'last_time_active',
-		/**
-		 * @return {number}
-		 */
-		get	: ->
-			@array[2]
-		/**
-		 * @param {number} last_time_active
-		 */
-		set	: (last_time_active) !->
-			@array[2]	= last_time_active
-	)
-	Object.defineProperty(Contact::, 'last_read_message',
-		/**
-		 * @return {number}
-		 */
-		get	: ->
-			@array[3]
-		/**
-		 * @param {number} last_read_message
-		 */
-		set	: (last_read_message) !->
-			@array[3]	= last_read_message
-	)
+	define_array_property(Contact::, 'id', 0)
+	define_array_property(Contact::, 'nickname', 1)
+	define_array_property(Contact::, 'last_time_active', 2)
+	define_array_property(Contact::, 'last_read_message', 3)
 
 	/**
 	 * @constructor
@@ -359,59 +321,14 @@ function Wrapper (detox-utils, async-eventer)
 		if !(@ instanceof Message)
 			return new Message(array)
 
-		@array		= array
 		@'array'	= array
 
 	Message::'clone'	= ->
 		Message(@array.slice())
-	Object.defineProperty(Message::, 'from',
-		/**
-		 * @return {boolean} `true` if message was received and `false` if sent to a friend
-		 */
-		get	: ->
-			@array[0]
-		/**
-		 * @param {boolean} from
-		 */
-		set	: (from) !->
-			@array[0]	= from
-	)
-	Object.defineProperty(Message::, 'date_sent',
-		/**
-		 * @return {number}
-		 */
-		get	: ->
-			@array[1]
-		/**
-		 * @param {number} date
-		 */
-		set	: (date) !->
-			@array[1]	= date
-	)
-	Object.defineProperty(Message::, 'date_received',
-		/**
-		 * @return {number}
-		 */
-		get	: ->
-			@array[2]
-		/**
-		 * @param {number} text
-		 */
-		set	: (received) !->
-			@array[2]	= received
-	)
-	Object.defineProperty(Message::, 'text',
-		/**
-		 * @return {string}
-		 */
-		get	: ->
-			@array[3]
-		/**
-		 * @param {string} text
-		 */
-		set	: (text) !->
-			@array[3]	= text
-	)
+	define_array_property(Message::, 'from', 0)
+	define_array_property(Message::, 'date_sent', 1)
+	define_array_property(Message::, 'date_received', 2)
+	define_array_property(Message::, 'text', 3)
 
 	{
 		'Contact'		: Contact

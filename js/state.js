@@ -5,6 +5,16 @@
  * @license 0BSD
  */
 (function(){
+  function define_array_property(prototype, property_name, array_index){
+    return Object.defineProperty(prototype, property_name, {
+      get: function(){
+        return this['array'][array_index];
+      },
+      set: function(value){
+        this.array[array_index] = value;
+      }
+    });
+  }
   function Wrapper(detoxUtils, asyncEventer){
     var are_arrays_equal, ArrayMap, ArraySet, global_state;
     are_arrays_equal = detoxUtils['are_arrays_equal'];
@@ -324,68 +334,15 @@
         return new Contact(array);
       }
       array[0] = Uint8Array.from(array[0]);
-      this.array = array;
       this['array'] = array;
     }
     Contact.prototype['clone'] = function(){
       return Contact(this.array.slice());
     };
-    Object.defineProperty(Contact.prototype, 'id', {
-      /**
-       * @return {!Uint8Array}
-       */
-      get: function(){
-        return this.array[0];
-      }
-      /**
-       * @param {!Uint8Array} id
-       */,
-      set: function(id){
-        this.array[0] = id;
-      }
-    });
-    Object.defineProperty(Contact.prototype, 'nickname', {
-      /**
-       * @return {string}
-       */
-      get: function(){
-        return this.array[1];
-      }
-      /**
-       * @param {string} nickname
-       */,
-      set: function(nickname){
-        this.array[1] = nickname;
-      }
-    });
-    Object.defineProperty(Contact.prototype, 'last_time_active', {
-      /**
-       * @return {number}
-       */
-      get: function(){
-        return this.array[2];
-      }
-      /**
-       * @param {number} last_time_active
-       */,
-      set: function(last_time_active){
-        this.array[2] = last_time_active;
-      }
-    });
-    Object.defineProperty(Contact.prototype, 'last_read_message', {
-      /**
-       * @return {number}
-       */
-      get: function(){
-        return this.array[3];
-      }
-      /**
-       * @param {number} last_read_message
-       */,
-      set: function(last_read_message){
-        this.array[3] = last_read_message;
-      }
-    });
+    define_array_property(Contact.prototype, 'id', 0);
+    define_array_property(Contact.prototype, 'nickname', 1);
+    define_array_property(Contact.prototype, 'last_time_active', 2);
+    define_array_property(Contact.prototype, 'last_read_message', 3);
     /**
      * @constructor
      */
@@ -393,68 +350,15 @@
       if (!(this instanceof Message)) {
         return new Message(array);
       }
-      this.array = array;
       this['array'] = array;
     }
     Message.prototype['clone'] = function(){
       return Message(this.array.slice());
     };
-    Object.defineProperty(Message.prototype, 'from', {
-      /**
-       * @return {boolean} `true` if message was received and `false` if sent to a friend
-       */
-      get: function(){
-        return this.array[0];
-      }
-      /**
-       * @param {boolean} from
-       */,
-      set: function(from){
-        this.array[0] = from;
-      }
-    });
-    Object.defineProperty(Message.prototype, 'date_sent', {
-      /**
-       * @return {number}
-       */
-      get: function(){
-        return this.array[1];
-      }
-      /**
-       * @param {number} date
-       */,
-      set: function(date){
-        this.array[1] = date;
-      }
-    });
-    Object.defineProperty(Message.prototype, 'date_received', {
-      /**
-       * @return {number}
-       */
-      get: function(){
-        return this.array[2];
-      }
-      /**
-       * @param {number} text
-       */,
-      set: function(received){
-        this.array[2] = received;
-      }
-    });
-    Object.defineProperty(Message.prototype, 'text', {
-      /**
-       * @return {string}
-       */
-      get: function(){
-        return this.array[3];
-      }
-      /**
-       * @param {string} text
-       */,
-      set: function(text){
-        this.array[3] = text;
-      }
-    });
+    define_array_property(Message.prototype, 'from', 0);
+    define_array_property(Message.prototype, 'date_sent', 1);
+    define_array_property(Message.prototype, 'date_received', 2);
+    define_array_property(Message.prototype, 'text', 3);
     return {
       'Contact': Contact,
       'Message': Message,
