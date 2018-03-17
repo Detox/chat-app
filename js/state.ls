@@ -67,11 +67,19 @@ function Wrapper (detox-utils, async-eventer)
 		if !('version' of @_state)
 			@_state
 				..'version'		= 0
-				..'offline'		= false
 				..'nickname'	= ''
 				..'seed'		= null
 				..'settings'	=
-					'announce'	: true
+					'announce'			: true
+					'bootstrap_nodes'	: [
+						# TODO: This is just for demo purposes, in future must change to real bootstrap node(s)
+						{
+							'node_id'	: '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29'
+							'host'		: '127.0.0.1'
+							'port'		: 16882
+						}
+					]
+					'online'			: true
 					# TODO
 				..'secrets'		= []
 				..'contacts'	= [
@@ -127,18 +135,6 @@ function Wrapper (detox-utils, async-eventer)
 			if callback
 				@_ready.then(callback)
 			Boolean(@_state['seed'])
-		/**
-		 * @return {boolean} `true` if application works completely offline
-		 */
-		'get_offline' : ->
-			@_state['offline']
-		/**
-		 * @param {boolean} offline
-		 */
-		'set_offline' : (offline) !->
-			old_offline			= @_state['offline']
-			@_state['offline']	= offline
-			@'fire'('offline_changed', offline, old_offline)
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
@@ -218,6 +214,43 @@ function Wrapper (detox-utils, async-eventer)
 			new_announce					= !!announce
 			@_state['settings']['announce']	= new_announce
 			@'fire'('settings_announce_changed')
+		/**
+		 * @return {boolean} `false` if application works completely offline
+		 */
+		'get_settings_online' : ->
+			@_state['settings']['online']
+		/**
+		 * @param {boolean} online
+		 */
+		'set_settings_online' : (online) !->
+			old_online						= @_state['online']
+			@_state['settings']['online']	= online
+			@'fire'('settings_online_changed', online, old_online)
+		/**
+		 * @return {!Array<!Object>}
+		 */
+		'get_settings_bootstrap_nodes' : ->
+			@_state['settings']['bootstrap_nodes']
+		/**
+		 * @param {string}		node_id
+		 * @param {string}		host
+		 * @param {number}		port
+		 */
+		'add_settings_bootstrap_node' : (node_id, host, port) !->
+			bootstrap_node	=
+				'node_id'	: node_id
+				'host'		: host
+				'port'		: port
+			@_state['settings']['bootstrap_nodes'].push(bootstrap_node)
+			@'fire'('settings_bootstrap_node_added', bootstrap_node)
+			@'fire'('settings_bootstrap_nodes_changed')
+		/**
+		 * @param {!Array<!Object>} bootstrap_nodes
+		 */
+		'set_settings_bootstrap_nodes' : (bootstrap_nodes) !->
+			old_bootstrap_nodes						= @_state['settings']['bootstrap_nodes']
+			@_state['settings']['bootstrap_nodes']	= bootstrap_nodes
+			@'fire'('settings_bootstrap_nodes_changed')
 		/**
 		 * @return {!Contact[]}
 		 */

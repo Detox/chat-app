@@ -70,11 +70,16 @@
       if (!('version' in this._state)) {
         x$ = this._state;
         x$['version'] = 0;
-        x$['offline'] = false;
         x$['nickname'] = '';
         x$['seed'] = null;
         x$['settings'] = {
-          'announce': true
+          'announce': true,
+          'bootstrap_nodes': [{
+            'node_id': '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29',
+            'host': '127.0.0.1',
+            'port': 16882
+          }],
+          'online': true
         };
         x$['secrets'] = [];
         x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', 0, 0]];
@@ -120,21 +125,6 @@
           this._ready.then(callback);
         }
         return Boolean(this._state['seed']);
-      }
-      /**
-       * @return {boolean} `true` if application works completely offline
-       */,
-      'get_offline': function(){
-        return this._state['offline'];
-      }
-      /**
-       * @param {boolean} offline
-       */,
-      'set_offline': function(offline){
-        var old_offline;
-        old_offline = this._state['offline'];
-        this._state['offline'] = offline;
-        this['fire']('offline_changed', offline, old_offline);
       }
       /**
        * @return {Uint8Array} Seed if configured or `null` otherwise
@@ -233,6 +223,52 @@
         new_announce = !!announce;
         this._state['settings']['announce'] = new_announce;
         this['fire']('settings_announce_changed');
+      }
+      /**
+       * @return {boolean} `false` if application works completely offline
+       */,
+      'get_settings_online': function(){
+        return this._state['settings']['online'];
+      }
+      /**
+       * @param {boolean} online
+       */,
+      'set_settings_online': function(online){
+        var old_online;
+        old_online = this._state['online'];
+        this._state['settings']['online'] = online;
+        this['fire']('settings_online_changed', online, old_online);
+      }
+      /**
+       * @return {!Array<!Object>}
+       */,
+      'get_settings_bootstrap_nodes': function(){
+        return this._state['settings']['bootstrap_nodes'];
+      }
+      /**
+       * @param {string}		node_id
+       * @param {string}		host
+       * @param {number}		port
+       */,
+      'add_settings_bootstrap_node': function(node_id, host, port){
+        var bootstrap_node;
+        bootstrap_node = {
+          'node_id': node_id,
+          'host': host,
+          'port': port
+        };
+        this._state['settings']['bootstrap_nodes'].push(bootstrap_node);
+        this['fire']('settings_bootstrap_node_added', bootstrap_node);
+        this['fire']('settings_bootstrap_nodes_changed');
+      }
+      /**
+       * @param {!Array<!Object>} bootstrap_nodes
+       */,
+      'set_settings_bootstrap_nodes': function(bootstrap_nodes){
+        var old_bootstrap_nodes;
+        old_bootstrap_nodes = this._state['settings']['bootstrap_nodes'];
+        this._state['settings']['bootstrap_nodes'] = bootstrap_nodes;
+        this['fire']('settings_bootstrap_nodes_changed');
       }
       /**
        * @return {!Contact[]}
