@@ -42,8 +42,7 @@ Polymer(
 			name			= modal.querySelector('#name').value
 			([detox-chat])	<~! require(['@detox/chat']).then
 			try
-				# TODO: Secret is currently unused
 				[public_key, secret]	= detox-chat.id_decode(id_base58)
-				@_state_instance.add_contact(public_key, name)
+				@_state_instance.add_contact(public_key, name, secret)
 		)
 )

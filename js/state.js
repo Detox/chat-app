@@ -94,7 +94,7 @@
           'packets_per_second': 5,
           'reconnects_intervals': [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]]
         };
-        x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', 0, 0]];
+        x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', 0, 0, null, null, null]];
         x$['secrets'] = [];
       }
       if (this._state['seed']) {
@@ -409,8 +409,9 @@
       /**
        * @param {!Uint8Array}	friend_id
        * @param {string}		nickname
+       * @param {!Uint8Array}	remote_secret
        */,
-      'add_contact': function(friend_id, nickname){
+      'add_contact': function(friend_id, nickname, remote_secret){
         var new_contact;
         if (this._state['contacts'].has(friend_id)) {
           return;
@@ -418,7 +419,7 @@
         if (!nickname) {
           nickname = base58_encode(friend_id);
         }
-        new_contact = Contact([friend_id, nickname, 0, 0]);
+        new_contact = Contact([friend_id, nickname, 0, 0, remote_secret, null, null]);
         this._state['contacts'].set(new_contact['id'], new_contact);
         this['fire']('contact_added', new_contact);
         this['fire']('contacts_changed');
@@ -621,7 +622,12 @@
     Object.defineProperty(State.prototype, 'constructor', {
       value: State
     });
-    Contact = create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message']);
+    /**
+     * Remote secret is used by us to connect to remote friend.
+     * Local secret is used by remote friend to connect to us.
+     * Old local secret is kept in addition to local secret until it is proven that remote friend updated its remote secret.
+     */
+    Contact = create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret']);
     Message = create_array_object(['id', 'from', 'date_sent', 'date_received', 'text']);
     Secret = create_array_object(['secret', 'name']);
     return {

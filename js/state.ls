@@ -105,6 +105,9 @@ function Wrapper (detox-utils, async-eventer)
 						'Fake contact'
 						0
 						0
+						null
+						null
+						null
 					]
 				]
 				..'secrets'		= []
@@ -369,14 +372,15 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @param {!Uint8Array}	friend_id
 		 * @param {string}		nickname
+		 * @param {!Uint8Array}	remote_secret
 		 */
-		'add_contact' : (friend_id, nickname) !->
+		'add_contact' : (friend_id, nickname, remote_secret) !->
 			# TODO: Secrets support
 			if @_state['contacts'].has(friend_id)
 				return
 			if !nickname
 				nickname = base58_encode(friend_id)
-			new_contact	= Contact([friend_id, nickname, 0, 0])
+			new_contact	= Contact([friend_id, nickname, 0, 0, remote_secret, null, null])
 			@_state['contacts'].set(new_contact['id'], new_contact)
 			@'fire'('contact_added', new_contact)
 			@'fire'('contacts_changed')
@@ -539,7 +543,12 @@ function Wrapper (detox-utils, async-eventer)
 	State:: = Object.assign(Object.create(async-eventer::), State::)
 	Object.defineProperty(State::, 'constructor', {value: State})
 
-	Contact	= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message'])
+	/**
+	 * Remote secret is used by us to connect to remote friend.
+	 * Local secret is used by remote friend to connect to us.
+	 * Old local secret is kept in addition to local secret until it is proven that remote friend updated its remote secret.
+	 */
+	Contact	= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret'])
 	Message	= create_array_object(['id', 'from', 'date_sent', 'date_received', 'text'])
 	Secret	= create_array_object(['secret', 'name'])
 

@@ -104,7 +104,7 @@
           reconnects_pending['delete'](friend_id);
         }
         if (!state.has_contact(friend_id)) {
-          state.add_contact(friend_id, detoxUtils.base58_encode(friend_id));
+          state.add_contact(friend_id, detoxUtils.base58_encode(friend_id), null);
         }
         secrets_exchange_statuses.set(friend_id, {
           received: false,

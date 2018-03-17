@@ -36,7 +36,7 @@
           detoxChat = arg$[0];
           try {
             ref$ = detoxChat.id_decode(id_base58), public_key = ref$[0], secret = ref$[1];
-            this$._state_instance.add_contact(public_key, name);
+            this$._state_instance.add_contact(public_key, name, secret);
           } catch (e$) {}
         });
       });

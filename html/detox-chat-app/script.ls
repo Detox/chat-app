@@ -52,7 +52,7 @@ Polymer(
 		 * @param {!Uint8Array} friend_id
 		 */
 		!function do_reconnect_if_needed (friend_id)
-			if !state.get_contact_messages_to_be_sent(friend_id).length
+			if !state.get_contact_messages_to_be_sent(friend_id).length # TODO: Or secrets were not exchanged (never connected)
 				return
 			if !reconnects_pending.has(friend_id)
 				reconnects_pending.set(friend_id, {trial: 0, timeout: null})
@@ -99,7 +99,8 @@ Polymer(
 					clearTimeout(reconnect_pending.timeout)
 					reconnects_pending.delete(friend_id)
 				if !state.has_contact(friend_id)
-					state.add_contact(friend_id, detox-utils.base58_encode(friend_id))
+					# TODO: This shouldn't happen, contact should be already added at this point
+					state.add_contact(friend_id, detox-utils.base58_encode(friend_id), null)
 				secrets_exchange_statuses.set(friend_id, {received: false, sent: false})
 				# TODO: Secret should be stored and expected next time
 				chat.secret(friend_id, detox-chat.generate_secret())
