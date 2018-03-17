@@ -21,7 +21,7 @@ npm run demo-http-server
 ```
 
 Open 2 tabs or browser windows at `http://127.0.0.1/` in order to connect from one to another.
-Make sure to wait until node is connected to the network and at least one of the nodes was announced to the network, so that you can actually find it)
+Make sure to wait until node is connected to the network and at least one of the nodes was announced to the network, so that you can actually find it.
 
 ## Contribution
 Feel free to create issues and send pull requests (for big changes create an issue first and link it from the PR), they are highly appreciated!
