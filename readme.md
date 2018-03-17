@@ -1,6 +1,28 @@
 # Detox chat app
 Here be dragons
 
+## Pre-alpha testing
+This is not even an alpha quality and not ready for any use, but if you feel adventurous and want to take a look, here is how you do it.
+
+Terminal 1:
+```bash
+git clone https://github.com/Detox/chat.git detox-chat
+cd detox-chat
+npm install
+npm run demo-bootstrap-node
+```
+
+Terminal 2:
+```bash
+git clone https://github.com/Detox/chat-app.git detox-chat-app
+cd detox-chat-app
+npm install
+npm run demo-http-server
+```
+
+Open 2 tabs or browser windows at `http://127.0.0.1/` in order to connect from one to another.
+Make sure to wait until node is connected to the network and at least one of the nodes was announced to the network, so that you can actually find it)
+
 ## Contribution
 Feel free to create issues and send pull requests (for big changes create an issue first and link it from the PR), they are highly appreciated!
 

@@ -17,7 +17,7 @@
 		"index.html"
 	],
 	"scripts"         : {
-		"server" : "http-server"
+		"demo-http-server" : "http-server"
 	},
 	"dependencies"    : {
 		"@detox/chat"                    : "^0.6.0",
