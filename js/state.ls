@@ -29,6 +29,7 @@ function Wrapper (detox-utils, async-eventer)
 	are_arrays_equal	= detox-utils['are_arrays_equal']
 	ArrayMap			= detox-utils['ArrayMap']
 	ArraySet			= detox-utils['ArraySet']
+	base58_encode		= detox-utils['base58_encode']
 
 	global_state		= Object.create(null)
 	/**
@@ -235,6 +236,8 @@ function Wrapper (detox-utils, async-eventer)
 			# TODO: Secrets support
 			if @_state['contacts'].has(friend_id)
 				return
+			if !nickname
+				nickname = base58_encode(friend_id)
 			new_contact	= Contact([friend_id, nickname, 0, 0])
 			@_state['contacts'].set(new_contact['id'], new_contact)
 			@'fire'('contact_added', new_contact)
@@ -252,6 +255,8 @@ function Wrapper (detox-utils, async-eventer)
 			old_contact	= @_state['contacts'].get(friend_id)
 			if !old_contact
 				return
+			if !nickname
+				nickname = base58_encode(friend_id)
 			new_contact				= old_contact['clone']()
 			new_contact['nickname']	= nickname
 			@_state['contacts'].set(friend_id, new_contact)

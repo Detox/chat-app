@@ -35,10 +35,11 @@
     }
   }
   function Wrapper(detoxUtils, asyncEventer){
-    var are_arrays_equal, ArrayMap, ArraySet, global_state, Contact, Message;
+    var are_arrays_equal, ArrayMap, ArraySet, base58_encode, global_state, Contact, Message;
     are_arrays_equal = detoxUtils['are_arrays_equal'];
     ArrayMap = detoxUtils['ArrayMap'];
     ArraySet = detoxUtils['ArraySet'];
+    base58_encode = detoxUtils['base58_encode'];
     global_state = Object.create(null);
     /**
      * @constructor
@@ -254,6 +255,9 @@
         if (this._state['contacts'].has(friend_id)) {
           return;
         }
+        if (!nickname) {
+          nickname = base58_encode(friend_id);
+        }
         new_contact = Contact([friend_id, nickname, 0, 0]);
         this._state['contacts'].set(new_contact['id'], new_contact);
         this['fire']('contact_added', new_contact);
@@ -274,6 +278,9 @@
         old_contact = this._state['contacts'].get(friend_id);
         if (!old_contact) {
           return;
+        }
+        if (!nickname) {
+          nickname = base58_encode(friend_id);
         }
         new_contact = old_contact['clone']();
         new_contact['nickname'] = nickname;
