@@ -417,8 +417,8 @@
     Object.defineProperty(State.prototype, 'constructor', {
       value: State
     });
-    Contact = create_array_object('id', 'nickname', 'last_time_active', 'last_read_message');
-    Message = create_array_object('id', 'from', 'date_sent', 'date_received', 'text');
+    Contact = create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message']);
+    Message = create_array_object(['id', 'from', 'date_sent', 'date_received', 'text']);
     return {
       'Contact': Contact,
       'Message': Message,

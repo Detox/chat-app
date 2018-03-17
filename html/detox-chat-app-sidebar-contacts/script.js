@@ -30,11 +30,17 @@
       modal = csw.functions.confirm("<csw-form>\n	<form>\n		<label>\n			<csw-textarea>\n				<textarea id=\"id\" placeholder=\"ID\"></textarea>\n			</csw-textarea>\n		</label>\n		<label>\n			<csw-textarea>\n				<textarea id=\"name\" placeholder=\"Name (optional)\"></textarea>\n			</csw-textarea>\n		</label>\n	</form>\n</csw-form>", function(){
         var id_base58, name;
         id_base58 = modal.querySelector('#id').value;
-        name = modal.querySelector('#name').value || id_base58;
-        require(['@detox/utils']).then(function(arg$){
-          var detoxUtils;
-          detoxUtils = arg$[0];
-          this$._state_instance.add_contact(detoxUtils.base58_decode(id_base58), name);
+        name = modal.querySelector('#name').value;
+        require(['@detox/chat', '@detox/utils']).then(function(arg$){
+          var detoxChat, detoxUtils, ref$, public_key, secret, name;
+          detoxChat = arg$[0], detoxUtils = arg$[1];
+          try {
+            ref$ = detoxChat.id_decode(id_base58), public_key = ref$[0], secret = ref$[1];
+            if (!name) {
+              name = detoxUtils.base58_encode(public_key);
+            }
+            this$._state_instance.add_contact(public_key, name);
+          } catch (e$) {}
         });
       });
     }

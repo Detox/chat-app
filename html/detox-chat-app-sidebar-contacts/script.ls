@@ -39,9 +39,13 @@ Polymer(
 			</csw-form>
 		""", !~>
 			id_base58		= modal.querySelector('#id').value
-			name			= modal.querySelector('#name').value || id_base58
-			([detox-utils])	<~! require(['@detox/utils']).then
-			# TODO: Checksum should be added in order to prevent accidental typos and secret for initial connection
-			@_state_instance.add_contact(detox-utils.base58_decode(id_base58), name)
+			name			= modal.querySelector('#name').value
+			([detox-chat, detox-utils])	<~! require(['@detox/chat', '@detox/utils']).then
+			try
+				# TODO: Secret is currently unused
+				[public_key, secret]	= detox-chat.id_decode(id_base58)
+				if !name
+					name	= detox-utils.base58_encode(public_key)
+				@_state_instance.add_contact(public_key, name)
 		)
 )

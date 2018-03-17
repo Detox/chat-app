@@ -366,9 +366,9 @@ function Wrapper (detox-utils, async-eventer)
 	State:: = Object.assign(Object.create(async-eventer::), State::)
 	Object.defineProperty(State::, 'constructor', {value: State})
 
-	Contact	= create_array_object('id', 'nickname', 'last_time_active', 'last_read_message')
+	Contact	= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message'])
 
-	Message	= create_array_object('id', 'from', 'date_sent', 'date_received', 'text')
+	Message	= create_array_object(['id', 'from', 'date_sent', 'date_received', 'text'])
 
 	{
 		'Contact'		: Contact

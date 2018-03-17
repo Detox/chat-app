@@ -18,13 +18,16 @@ Polymer(
 			type		: Number
 	ready : !->
 		Promise.all([
-			require(['@detox/crypto', '@detox/utils'])
+			require(['@detox/chat', '@detox/crypto'])
 			@_state_instance_ready
-		]).then ([[detox-crypto, detox-utils]]) !~>
+		]).then ([[detox-chat, detox-crypto]]) !~>
 			<~! detox-crypto.ready
+			<~! detox-chat.ready
 			state				= @_state_instance
-			@id_base58			= detox-utils['base58_encode'](
+			# TODO: Secrets and multiple textarea elements with different IDs
+			@id_base58			= detox-chat.id_encode(
 				detox-crypto.create_keypair(state.get_seed()).ed25519.public
+				new Uint8Array(0)
 			)
 			@name				= state.get_nickname()
 			@settings_announce	= @_bool_to_int(state.get_settings_announce())
