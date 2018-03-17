@@ -5,6 +5,8 @@
  * @license 0BSD
  */
 (function(){
+  var reconnects_intervals;
+  reconnects_intervals = [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]];
   Polymer({
     is: 'detox-chat-app',
     behaviors: [detoxChatApp.behaviors.state],
@@ -24,10 +26,15 @@
       });
     },
     _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){
-      var ArrayMap, secrets_exchange_statuses, sent_messages_map, state, core, chat, this$ = this;
+      var timeoutSet, ArrayMap, secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat, this$ = this;
+      timeoutSet = detoxUtils.timeoutSet;
       ArrayMap = detoxUtils.ArrayMap;
       secrets_exchange_statuses = ArrayMap();
       sent_messages_map = ArrayMap();
+      reconnects_pending = ArrayMap();
+      /**
+       * @param {!Uint8Array} friend_id
+       */
       function check_and_add_to_online(friend_id){
         var secrets_exchange_status, nickname, i$, ref$, len$, message;
         secrets_exchange_status = secrets_exchange_statuses.get(friend_id);
@@ -43,6 +50,10 @@
           }
         }
       }
+      /**
+       * @param {!Uint8Array}	friend_id
+       * @param {!Object}		message
+       */
       function send_message(friend_id, message){
         var date_sent;
         date_sent = chat.text_message(friend_id, message.date_written, message.text);
@@ -50,6 +61,33 @@
           sent_messages_map.set(friend_id, new Map);
         }
         sent_messages_map.get(friend_id).set(date_sent, message.id);
+      }
+      /**
+       * @param {!Uint8Array} friend_id
+       */
+      function do_reconnect_if_needed(friend_id){
+        var reconnect_pending, i$, ref$, len$, ref1$, reconnection_trial, time_before_next_attempt;
+        if (!state.get_contact_messages_to_be_sent(friend_id).length) {
+          return;
+        }
+        if (!reconnects_pending.has(friend_id)) {
+          reconnects_pending.set(friend_id, {
+            trial: 0,
+            timeout: null
+          });
+        }
+        reconnect_pending = reconnects_pending.get(friend_id);
+        ++reconnect_pending.trial;
+        for (i$ = 0, len$ = (ref$ = reconnects_intervals).length; i$ < len$; ++i$) {
+          ref1$ = ref$[i$], reconnection_trial = ref1$[0], time_before_next_attempt = ref1$[1];
+          if (reconnect_pending.trial <= reconnection_trial) {
+            reconnect_pending.timeout = timeoutSet(time_before_next_attempt, fn$);
+            break;
+          }
+        }
+        function fn$(){
+          chat.connect_to(friend_id, new Uint8Array(0));
+        }
       }
       state = this._state_instance;
       core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_settings_packets_per_second(), state.get_settings_bucket_size()).once('ready', function(){
@@ -61,6 +99,12 @@
       chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes()).once('announced', function(){
         state.set_announced(true);
       }).on('introduction', function(friend_id, secret){}).on('connected', function(friend_id){
+        var reconnect_pending;
+        if (reconnects_pending.has(friend_id)) {
+          reconnect_pending = reconnects_pending.get(friend_id);
+          clearTimeout(reconnect_pending.timeout);
+          reconnects_pending['delete'](friend_id);
+        }
         if (!state.has_contact(friend_id)) {
           state.add_contact(friend_id, detoxUtils.base58_encode(friend_id));
         }
@@ -69,7 +113,9 @@
           sent: false
         });
         chat.secret(friend_id, detoxChat.generate_secret());
-      }).on('connection_failed', function(friend_id){}).on('secret', function(friend_id, secret){
+      }).on('connection_failed', function(friend_id){
+        do_reconnect_if_needed(friend_id);
+      }).on('secret', function(friend_id, secret){
         secrets_exchange_statuses.get(friend_id).received = true;
         check_and_add_to_online(friend_id);
       }).on('secret_received', function(friend_id){
@@ -90,11 +136,13 @@
         secrets_exchange_statuses['delete'](friend_id);
         sent_messages_map['delete'](friend_id);
         state.del_online_contact(friend_id);
+        do_reconnect_if_needed(friend_id);
       });
       state.on('contact_added', function(new_contact){
         chat.connect_to(new_contact.id, new Uint8Array(0));
       }).on('contact_message_added', function(friend_id, message){
         if (message.from || message.date_received || !state.has_online_contact(friend_id)) {
+          do_reconnect_if_needed(friend_id);
           return;
         }
         send_message(friend_id, message);

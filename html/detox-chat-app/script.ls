@@ -3,6 +3,14 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
+# [reconnection_trial, time_before_next_attempt]
+reconnects_intervals	= [
+	[5, 30]
+	[10, 60]
+	[15, 150]
+	[100, 300]
+	[Number.MAX_SAFE_INTEGER, 600]
+]
 Polymer(
 	is			: 'detox-chat-app'
 	behaviors	: [
@@ -20,11 +28,15 @@ Polymer(
 			<~! detox-core.ready
 			@_connect_to_the_network(detox-chat, detox-core, detox-utils)
 	_connect_to_the_network : (detox-chat, detox-core, detox-utils) !->
+		timeoutSet					= detox-utils.timeoutSet
 		ArrayMap					= detox-utils.ArrayMap
 
 		secrets_exchange_statuses	= ArrayMap()
 		sent_messages_map			= ArrayMap()
-
+		reconnects_pending			= ArrayMap()
+		/**
+		 * @param {!Uint8Array} friend_id
+		 */
 		!function check_and_add_to_online (friend_id)
 			secrets_exchange_status	= secrets_exchange_statuses.get(friend_id)
 			if secrets_exchange_status.received && secrets_exchange_status.sent
@@ -35,12 +47,32 @@ Polymer(
 				# TODO: In addition to this we need to scan for contacts with such messages and actively try to connect to them
 				for message in state.get_contact_messages_to_be_sent(friend_id)
 					send_message(friend_id, message)
-
+		/**
+		 * @param {!Uint8Array}	friend_id
+		 * @param {!Object}		message
+		 */
 		!function send_message (friend_id, message)
 			date_sent	= chat.text_message(friend_id, message.date_written, message.text)
 			if !sent_messages_map.has(friend_id)
 				sent_messages_map.set(friend_id, new Map)
 			sent_messages_map.get(friend_id).set(date_sent, message.id)
+		/**
+		 * @param {!Uint8Array} friend_id
+		 */
+		!function do_reconnect_if_needed (friend_id)
+			if !state.get_contact_messages_to_be_sent(friend_id).length
+				return
+			if !reconnects_pending.has(friend_id)
+				reconnects_pending.set(friend_id, {trial: 0, timeout: null})
+			reconnect_pending	= reconnects_pending.get(friend_id)
+			++reconnect_pending.trial
+			for [reconnection_trial, time_before_next_attempt] in reconnects_intervals
+				if reconnect_pending.trial <= reconnection_trial
+					reconnect_pending.timeout	= timeoutSet(time_before_next_attempt, !->
+						# TODO: Secrets support
+						chat.connect_to(friend_id, new Uint8Array(0))
+					)
+					break
 
 		# TODO: For now we are using defaults and hardcoded constants for Chat and Core instances, but in future this will be configurable
 		state	= @_state_instance
@@ -70,6 +102,10 @@ Polymer(
 				# TODO: Check secret
 			)
 			.on('connected', (friend_id) !~>
+				if reconnects_pending.has(friend_id)
+					reconnect_pending	= reconnects_pending.get(friend_id)
+					clearTimeout(reconnect_pending.timeout)
+					reconnects_pending.delete(friend_id)
 				if !state.has_contact(friend_id)
 					state.add_contact(friend_id, detox-utils.base58_encode(friend_id))
 				secrets_exchange_statuses.set(friend_id, {received: false, sent: false})
@@ -77,7 +113,7 @@ Polymer(
 				chat.secret(friend_id, detox-chat.generate_secret())
 			)
 			.on('connection_failed', (friend_id) !~>
-				# TODO: Reconnect
+				do_reconnect_if_needed(friend_id)
 			)
 			.on('secret', (friend_id, secret) !->
 				# TODO: Check secret
@@ -105,6 +141,8 @@ Polymer(
 				secrets_exchange_statuses.delete(friend_id)
 				sent_messages_map.delete(friend_id)
 				state.del_online_contact(friend_id)
+
+				do_reconnect_if_needed(friend_id)
 			)
 		state
 			.on('contact_added', (new_contact) !~>
@@ -118,6 +156,7 @@ Polymer(
 					message.date_received || # Message was received by a friend
 					!state.has_online_contact(friend_id) # Friend is not currently connected
 				)
+					do_reconnect_if_needed(friend_id)
 					return
 				send_message(friend_id, message)
 			)
