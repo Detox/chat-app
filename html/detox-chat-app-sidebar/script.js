@@ -60,6 +60,9 @@
       if (this.settings_announce != this._state_instance.get_settings_announce()) {
         this._state_instance.set_settings_announce(this.settings_announce == 1);
       }
+    },
+    _id_click: function(e){
+      e.target.select();
     }
   });
 }).call(this);

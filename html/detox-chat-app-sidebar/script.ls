@@ -48,4 +48,6 @@ Polymer(
 	_settings_announce_changed : !->
 		if @settings_announce !~= @_state_instance.get_settings_announce()
 			@_state_instance.set_settings_announce(@settings_announce ~= 1)
+	_id_click : (e) !->
+		e.target.select()
 )
