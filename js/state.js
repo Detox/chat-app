@@ -35,7 +35,7 @@
     }
   }
   function Wrapper(detoxUtils, asyncEventer){
-    var are_arrays_equal, ArrayMap, ArraySet, base58_encode, global_state, Contact, Message;
+    var are_arrays_equal, ArrayMap, ArraySet, base58_encode, global_state, Contact, Message, Secret;
     are_arrays_equal = detoxUtils['are_arrays_equal'];
     ArrayMap = detoxUtils['ArrayMap'];
     ArraySet = detoxUtils['ArraySet'];
@@ -45,7 +45,7 @@
      * @constructor
      */
     function State(name, initial_state){
-      var x$, i$, ref$, len$, secret, contact, contact_id, this$ = this;
+      var x$, contact, secret, i$, ref$, len$, contact_id, this$ = this;
       if (!(this instanceof State)) {
         return new State(name, initial_state);
       }
@@ -93,15 +93,11 @@
           'online': true,
           'packets_per_second': 5
         };
-        x$['secrets'] = [];
         x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', 0, 0]];
+        x$['secrets'] = [];
       }
       if (this._state['seed']) {
         this._state['seed'] = Uint8Array.from(this._state['seed']);
-      }
-      for (i$ = 0, len$ = (ref$ = this._state['secrets']).length; i$ < len$; ++i$) {
-        secret = ref$[i$];
-        secret['secret'] = Uint8Array.from(secret['secret']);
       }
       this._state['contacts'] = ArrayMap((function(){
         var i$, ref$, len$, results$ = [];
@@ -110,6 +106,16 @@
           contact[0] = Uint8Array.from(contact[0]);
           contact = Contact(contact);
           results$.push([contact['id'], contact]);
+        }
+        return results$;
+      }.call(this)));
+      this._state['secrets'] = ArrayMap((function(){
+        var i$, ref$, len$, results$ = [];
+        for (i$ = 0, len$ = (ref$ = this._state['secrets']).length; i$ < len$; ++i$) {
+          secret = ref$[i$];
+          secret[0] = Uint8Array.from(secret[0]);
+          secret = Secret(secret);
+          results$.push([secret['secret'], secret]);
         }
         return results$;
       }.call(this)));
@@ -265,7 +271,7 @@
         var old_bootstrap_nodes;
         old_bootstrap_nodes = this._state['settings']['bootstrap_nodes'];
         this._state['settings']['bootstrap_nodes'] = bootstrap_nodes;
-        this['fire']('settings_bootstrap_nodes_changed');
+        this['fire']('settings_bootstrap_nodes_changed', bootstrap_nodes, old_bootstrap_nodes);
       }
       /**
        * @return {number}
@@ -295,7 +301,7 @@
         var old_ice_servers;
         old_ice_servers = this._state['settings']['ice_servers'];
         this._state['settings']['ice_servers'] = ice_servers;
-        this['fire']('settings_ice_servers_changed');
+        this['fire']('settings_ice_servers_changed', ice_servers, old_ice_servers);
       }
       /**
        * @return {number}
@@ -436,7 +442,7 @@
           return;
         }
         this._state['contacts']['delete'](friend_id);
-        this['fire']('contact_deleted', contact);
+        this['fire']('contact_deleted', old_contact);
         this['fire']('contacts_changed');
       }
       /**
@@ -557,6 +563,43 @@
           }
         }
       }
+      /**
+       * @return {!Array<!Object>}
+       */,
+      'get_secrets': function(){
+        return Array.from(this._state['secrets'].values());
+      }
+      /**
+       * @param {!Uint8Array}	secret
+       * @param {string}		name
+       */,
+      'add_secret': function(secret, name){
+        var new_secret;
+        new_secret = Secret([secret, name]);
+        this._state['secrets'].set(new_secret['secret'], new_secret);
+        this['fire']('secret_added', new_secret);
+        this['fire']('secrets_updated');
+      }
+      /**
+       * @param {!Array<!Secret>} secrets
+       */,
+      'set_secrets': function(secrets){
+        this._state['secrets'] = secrets;
+        this['fire']('secrets_updated');
+      }
+      /**
+       * @param {!Uint8Array}	secret
+       */,
+      'adel_secret': function(secret){
+        var old_secret;
+        old_secret = this._state['secrets'].get(secret);
+        if (!old_secret) {
+          return;
+        }
+        this._state['secrets']['delete'](secret);
+        this['fire']('secret_deleted', old_secret);
+        this['fire']('secrets_updated');
+      }
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);
     Object.defineProperty(State.prototype, 'constructor', {
@@ -564,9 +607,11 @@
     });
     Contact = create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message']);
     Message = create_array_object(['id', 'from', 'date_sent', 'date_received', 'text']);
+    Secret = create_array_object(['secret', 'name']);
     return {
       'Contact': Contact,
       'Message': Message,
+      'Secret': Secret,
       'State': State
       /**
        * @param {string}	name

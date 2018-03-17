@@ -90,7 +90,6 @@ function Wrapper (detox-utils, async-eventer)
 					'online'						: true
 					'packets_per_second'			: 5
 					# TODO
-				..'secrets'		= []
 				..'contacts'	= [
 					# TODO: This is just for demo purposes
 					[
@@ -100,19 +99,24 @@ function Wrapper (detox-utils, async-eventer)
 						0
 					]
 				]
+				..'secrets'		= []
 
 		# Denormalize state after deserialization
 		if @_state['seed']
 			@_state['seed']	= Uint8Array.from(@_state['seed'])
-
-		for secret in @_state['secrets']
-			secret['secret']	= Uint8Array.from(secret['secret'])
 
 		@_state['contacts']	= ArrayMap(
 			for contact in @_state['contacts']
 				contact[0]	= Uint8Array.from(contact[0])
 				contact 	= Contact(contact)
 				[contact['id'], contact]
+		)
+
+		@_state['secrets']	= ArrayMap(
+			for secret in @_state['secrets']
+				secret[0]	= Uint8Array.from(secret[0])
+				secret	 	= Secret(secret)
+				[secret['secret'], secret]
 		)
 
 		# TODO: This is just for demo purposes
@@ -247,7 +251,7 @@ function Wrapper (detox-utils, async-eventer)
 		'set_settings_bootstrap_nodes' : (bootstrap_nodes) !->
 			old_bootstrap_nodes						= @_state['settings']['bootstrap_nodes']
 			@_state['settings']['bootstrap_nodes']	= bootstrap_nodes
-			@'fire'('settings_bootstrap_nodes_changed')
+			@'fire'('settings_bootstrap_nodes_changed', bootstrap_nodes, old_bootstrap_nodes)
 		/**
 		 * @return {number}
 		 */
@@ -271,7 +275,7 @@ function Wrapper (detox-utils, async-eventer)
 		'set_settings_ice_servers' : (ice_servers) !->
 			old_ice_servers						= @_state['settings']['ice_servers']
 			@_state['settings']['ice_servers']	= ice_servers
-			@'fire'('settings_ice_servers_changed')
+			@'fire'('settings_ice_servers_changed', ice_servers, old_ice_servers)
 		/**
 		 * @return {number}
 		 */
@@ -384,7 +388,7 @@ function Wrapper (detox-utils, async-eventer)
 			if !old_contact
 				return
 			@_state['contacts'].delete(friend_id)
-			@'fire'('contact_deleted', contact)
+			@'fire'('contact_deleted', old_contact)
 			@'fire'('contacts_changed')
 		/**
 		 * @return {!Uint8Array[]}
@@ -480,18 +484,49 @@ function Wrapper (detox-utils, async-eventer)
 					message['date_sent']	= date
 					@_update_contact_with_pending_messages(friend_id)
 					break
+		/**
+		 * @return {!Array<!Object>}
+		 */
+		'get_secrets' : ->
+			Array.from(@_state['secrets'].values())
+		/**
+		 * @param {!Uint8Array}	secret
+		 * @param {string}		name
+		 */
+		'add_secret' : (secret, name) !->
+			new_secret	= Secret([secret, name])
+			@_state['secrets'].set(new_secret['secret'], new_secret)
+			@'fire'('secret_added', new_secret)
+			@'fire'('secrets_updated')
+		/**
+		 * @param {!Array<!Secret>} secrets
+		 */
+		'set_secrets' : (secrets) !->
+			@_state['secrets']	= secrets
+			@'fire'('secrets_updated')
+		/**
+		 * @param {!Uint8Array}	secret
+		 */
+		'adel_secret' : (secret) !->
+			old_secret	= @_state['secrets'].get(secret)
+			if !old_secret
+				return
+			@_state['secrets'].delete(secret)
+			@'fire'('secret_deleted', old_secret)
+			@'fire'('secrets_updated')
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)
 	Object.defineProperty(State::, 'constructor', {value: State})
 
 	Contact	= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message'])
-
 	Message	= create_array_object(['id', 'from', 'date_sent', 'date_received', 'text'])
+	Secret	= create_array_object(['secret', 'name'])
 
 	{
 		'Contact'		: Contact
 		'Message'		: Message
+		'Secret'		: Secret
 		'State'			: State
 		/**
 		 * @param {string}	name
