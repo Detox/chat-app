@@ -219,7 +219,7 @@
         return this._local_state.ui.active_contact;
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */,
       'set_ui_active_contact': function(new_active_contact){
         var old_active_contact;
@@ -407,71 +407,71 @@
         return this._local_state.contacts_with_pending_messages;
       }
       /**
-       * @param {!Uint8Array}	friend_id
+       * @param {!Uint8Array}	contact_id
        * @param {string}		nickname
        * @param {!Uint8Array}	remote_secret
        */,
-      'add_contact': function(friend_id, nickname, remote_secret){
+      'add_contact': function(contact_id, nickname, remote_secret){
         var new_contact;
-        if (this._state['contacts'].has(friend_id)) {
+        if (this._state['contacts'].has(contact_id)) {
           return;
         }
         if (!nickname) {
-          nickname = base58_encode(friend_id);
+          nickname = base58_encode(contact_id);
         }
-        new_contact = Contact([friend_id, nickname, 0, 0, remote_secret, null, null]);
+        new_contact = Contact([contact_id, nickname, 0, 0, remote_secret, null, null]);
         this._state['contacts'].set(new_contact['id'], new_contact);
         this['fire']('contact_added', new_contact);
         this['fire']('contacts_changed');
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */,
-      'has_contact': function(friend_id){
-        return this._state['contacts'].has(friend_id);
+      'has_contact': function(contact_id){
+        return this._state['contacts'].has(contact_id);
       }
       /**
-       * @param {!Uint8Array}	friend_id
+       * @param {!Uint8Array}	contact_id
        * @param {string}		nickname
        */,
-      'set_contact_nickname': function(friend_id, nickname){
+      'set_contact_nickname': function(contact_id, nickname){
         var old_contact, new_contact;
-        old_contact = this._state['contacts'].get(friend_id);
+        old_contact = this._state['contacts'].get(contact_id);
         if (!old_contact) {
           return;
         }
         if (!nickname) {
-          nickname = base58_encode(friend_id);
+          nickname = base58_encode(contact_id);
         }
         new_contact = old_contact['clone']();
         new_contact['nickname'] = nickname;
-        this._state['contacts'].set(friend_id, new_contact);
+        this._state['contacts'].set(contact_id, new_contact);
         this['fire']('contact_updated', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
-       * @param {!Uint8Array}	friend_id
+       * @param {!Uint8Array}	contact_id
        * @param {!Uint8Array}	remote_secret
        */,
-      'set_contact_remote_secret': function(friend_id, remote_secret){
+      'set_contact_remote_secret': function(contact_id, remote_secret){
         var old_contact, new_contact;
-        old_contact = this._state['contacts'].get(friend_id);
+        old_contact = this._state['contacts'].get(contact_id);
         if (!old_contact) {
           return;
         }
         new_contact = old_contact['clone']();
         new_contact['remote_secret'] = remote_secret;
-        this._state['contacts'].set(friend_id, new_contact);
+        this._state['contacts'].set(contact_id, new_contact);
         this['fire']('contact_updated', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
-       * @param {!Uint8Array}	friend_id
+       * @param {!Uint8Array}	contact_id
        * @param {!Uint8Array}	local_secret
        */,
-      'set_contact_local_secret': function(friend_id, local_secret){
+      'set_contact_local_secret': function(contact_id, local_secret){
         var old_contact, old_local_secret, new_contact;
-        old_contact = this._state['contacts'].get(friend_id);
+        old_contact = this._state['contacts'].get(contact_id);
         if (!old_contact) {
           return;
         }
@@ -479,35 +479,35 @@
         new_contact = old_contact['clone']();
         new_contact['local_secret'] = local_secret;
         new_contact['old_local_secret'] = old_local_secret;
-        this._state['contacts'].set(friend_id, new_contact);
+        this._state['contacts'].set(contact_id, new_contact);
         this['fire']('contact_updated', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
-       * @param {!Uint8Array}	friend_id
+       * @param {!Uint8Array}	contact_id
        */,
-      'del_contact_old_local_secret': function(friend_id){
+      'del_contact_old_local_secret': function(contact_id){
         var old_contact, new_contact;
-        old_contact = this._state['contacts'].get(friend_id);
+        old_contact = this._state['contacts'].get(contact_id);
         if (!old_contact) {
           return;
         }
         new_contact = old_contact['clone']();
         new_contact['old_local_secret'] = null;
-        this._state['contacts'].set(friend_id, new_contact);
+        this._state['contacts'].set(contact_id, new_contact);
         this['fire']('contact_updated', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */,
-      'del_contact': function(friend_id){
+      'del_contact': function(contact_id){
         var old_contact;
-        old_contact = this._state['contacts'].get(friend_id);
+        old_contact = this._state['contacts'].get(contact_id);
         if (!old_contact) {
           return;
         }
-        this._state['contacts']['delete'](friend_id);
+        this._state['contacts']['delete'](contact_id);
         this['fire']('contact_deleted', old_contact);
         this['fire']('contacts_changed');
       }
@@ -518,74 +518,74 @@
         return Array.from(this._local_state.online_contacts);
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */,
-      'add_online_contact': function(friend_id){
-        this._local_state.online_contacts.add(friend_id);
-        this['fire']('contact_online', friend_id);
+      'add_online_contact': function(contact_id){
+        this._local_state.online_contacts.add(contact_id);
+        this['fire']('contact_online', contact_id);
         this['fire']('online_contacts_changed');
-        this._contact_update_last_active(friend_id);
+        this._contact_update_last_active(contact_id);
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */,
-      'has_online_contact': function(friend_id){
-        return this._local_state.online_contacts.has(friend_id);
+      'has_online_contact': function(contact_id){
+        return this._local_state.online_contacts.has(contact_id);
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */,
-      'del_online_contact': function(friend_id){
-        this._local_state.online_contacts['delete'](friend_id);
-        this['fire']('contact_offline', friend_id);
+      'del_online_contact': function(contact_id){
+        this._local_state.online_contacts['delete'](contact_id);
+        this['fire']('contact_offline', contact_id);
         this['fire']('online_contacts_changed');
-        this._contact_update_last_active(friend_id);
-        this._update_contact_with_pending_messages(friend_id);
+        this._contact_update_last_active(contact_id);
+        this._update_contact_with_pending_messages(contact_id);
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */,
-      _update_contact_with_pending_messages: function(friend_id){
+      _update_contact_with_pending_messages: function(contact_id){
         var i$, ref$, len$, message;
-        for (i$ = 0, len$ = (ref$ = this['get_contact_messages'](friend_id)).length; i$ < len$; ++i$) {
+        for (i$ = 0, len$ = (ref$ = this['get_contact_messages'](contact_id)).length; i$ < len$; ++i$) {
           message = ref$[i$];
           if (!message.from && !message.date_sent) {
-            this._local_state.contacts_with_pending_messages.add(friend_id);
+            this._local_state.contacts_with_pending_messages.add(contact_id);
           }
         }
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */,
-      _contact_update_last_active: function(friend_id){
+      _contact_update_last_active: function(contact_id){
         var old_contact, new_contact;
-        old_contact = this._state['contacts'].get(friend_id);
+        old_contact = this._state['contacts'].get(contact_id);
         new_contact = old_contact['clone']();
         new_contact['last_time_active'] = +new Date;
-        this._state['contacts'].set(friend_id, new_contact);
+        this._state['contacts'].set(contact_id, new_contact);
         this['fire']('contact_updated', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        *
        * @return {!Message[]}
        */,
-      'get_contact_messages': function(friend_id){
-        return this._local_state.messages.get(friend_id) || [];
+      'get_contact_messages': function(contact_id){
+        return this._local_state.messages.get(contact_id) || [];
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        *
        * @return {!Message[]}
        */,
-      'get_contact_messages_to_be_sent': function(friend_id){
-        return (this._local_state.messages.get(friend_id) || []).filter(function(message){
+      'get_contact_messages_to_be_sent': function(contact_id){
+        return (this._local_state.messages.get(contact_id) || []).filter(function(message){
           return !message.sent;
         });
       }
       /**
-       * @param {!Uint8Array}	friend_id
+       * @param {!Uint8Array}	contact_id
        * @param {boolean}		from			`true` if message was received and `false` if sent to a friend
        * @param {number}		date_written	When message was written
        * @param {number}		date_sent		When message was sent
@@ -593,38 +593,38 @@
        *
        * @return {number} Message ID
        */,
-      'add_contact_message': function(friend_id, from, date_written, date_sent, text){
+      'add_contact_message': function(contact_id, from, date_written, date_sent, text){
         var messages, id, message;
-        if (!this._local_state.messages.has(friend_id)) {
-          this._local_state.messages.set(friend_id, []);
+        if (!this._local_state.messages.has(contact_id)) {
+          this._local_state.messages.set(contact_id, []);
         }
-        messages = this._local_state.messages.get(friend_id);
+        messages = this._local_state.messages.get(contact_id);
         id = messages.length ? messages[messages.length - 1]['id'] + 1 : 0;
         message = Message([id, from, date_written, date_sent, text]);
         messages.push(message);
         if (from) {
-          this._contact_update_last_active(friend_id);
+          this._contact_update_last_active(contact_id);
         } else {
-          if (!this['has_online_contact'](friend_id)) {
-            this._local_state.contacts_with_pending_messages.add(friend_id);
+          if (!this['has_online_contact'](contact_id)) {
+            this._local_state.contacts_with_pending_messages.add(contact_id);
           }
         }
-        this['fire']('contact_message_added', friend_id, message);
-        this['fire']('contact_messages_changed', friend_id);
+        this['fire']('contact_message_added', contact_id, message);
+        this['fire']('contact_messages_changed', contact_id);
       }
       /**
-       * @param {!Uint8Array}	friend_id
+       * @param {!Uint8Array}	contact_id
        * @param {number}		id			Message ID
        * @param {number}		date		Date when message was sent
        */,
-      'set_contact_message_sent': function(friend_id, id, date){
+      'set_contact_message_sent': function(contact_id, id, date){
         var messages, i$, message;
-        messages = this._local_state.messages.get(friend_id);
+        messages = this._local_state.messages.get(contact_id);
         for (i$ = messages.length - 1; i$ >= 0; --i$) {
           message = messages[i$];
           if (message['id'] === id) {
             message['date_sent'] = date;
-            this._update_contact_with_pending_messages(friend_id);
+            this._update_contact_with_pending_messages(contact_id);
             break;
           }
         }

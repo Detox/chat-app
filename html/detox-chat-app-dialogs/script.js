@@ -25,26 +25,26 @@
           this$.active_contact = true;
           this$.messages = state.get_contact_messages(new_active_contact).slice();
           this$.notifyPath('messages');
-        }).on('contact_messages_changed', function(friend_id){
+        }).on('contact_messages_changed', function(contact_id){
           var active_contact;
           active_contact = state.get_ui_active_contact();
-          if (active_contact && detoxUtils.are_arrays_equal(friend_id, active_contact)) {
-            this$.messages = state.get_contact_messages(friend_id).slice();
+          if (active_contact && detoxUtils.are_arrays_equal(contact_id, active_contact)) {
+            this$.messages = state.get_contact_messages(contact_id).slice();
             this$.notifyPath('messages');
           }
-        }).on('ui_active_contact_changed', function(friend_id){
+        }).on('ui_active_contact_changed', function(contact_id){
           this$.$['send-form'].querySelector('textarea').value = '';
         });
       });
     },
     _send: function(){
-      var state, textarea, text_message, friend_id;
+      var state, textarea, text_message, contact_id;
       state = this._state_instance;
       textarea = this.$['send-form'].querySelector('textarea');
       text_message = textarea.value;
       textarea.value = '';
-      friend_id = state.get_ui_active_contact();
-      state.add_contact_message(friend_id, false, +new Date, 0, text_message);
+      contact_id = state.get_ui_active_contact();
+      state.add_contact_message(contact_id, false, +new Date, 0, text_message);
     }
   });
 }).call(this);

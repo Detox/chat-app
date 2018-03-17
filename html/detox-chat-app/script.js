@@ -32,50 +32,50 @@
       sent_messages_map = ArrayMap();
       reconnects_pending = ArrayMap();
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */
-      function check_and_add_to_online(friend_id){
+      function check_and_add_to_online(contact_id){
         var secrets_exchange_status, nickname, i$, ref$, len$, message;
-        secrets_exchange_status = secrets_exchange_statuses.get(friend_id);
+        secrets_exchange_status = secrets_exchange_statuses.get(contact_id);
         if (secrets_exchange_status.received && secrets_exchange_status.sent) {
-          state.add_online_contact(friend_id);
+          state.add_online_contact(contact_id);
           nickname = state.get_nickname();
           if (nickname) {
-            chat.nickname(friend_id, nickname);
+            chat.nickname(contact_id, nickname);
           }
-          for (i$ = 0, len$ = (ref$ = state.get_contact_messages_to_be_sent(friend_id)).length; i$ < len$; ++i$) {
+          for (i$ = 0, len$ = (ref$ = state.get_contact_messages_to_be_sent(contact_id)).length; i$ < len$; ++i$) {
             message = ref$[i$];
-            send_message(friend_id, message);
+            send_message(contact_id, message);
           }
         }
       }
       /**
-       * @param {!Uint8Array}	friend_id
+       * @param {!Uint8Array}	contact_id
        * @param {!Object}		message
        */
-      function send_message(friend_id, message){
+      function send_message(contact_id, message){
         var date_sent;
-        date_sent = chat.text_message(friend_id, message.date_written, message.text);
-        if (!sent_messages_map.has(friend_id)) {
-          sent_messages_map.set(friend_id, new Map);
+        date_sent = chat.text_message(contact_id, message.date_written, message.text);
+        if (!sent_messages_map.has(contact_id)) {
+          sent_messages_map.set(contact_id, new Map);
         }
-        sent_messages_map.get(friend_id).set(date_sent, message.id);
+        sent_messages_map.get(contact_id).set(date_sent, message.id);
       }
       /**
-       * @param {!Uint8Array} friend_id
+       * @param {!Uint8Array} contact_id
        */
-      function do_reconnect_if_needed(friend_id){
+      function do_reconnect_if_needed(contact_id){
         var reconnect_pending, i$, ref$, len$, ref1$, reconnection_trial, time_before_next_attempt;
-        if (!state.get_contact_messages_to_be_sent(friend_id).length) {
+        if (!state.get_contact_messages_to_be_sent(contact_id).length) {
           return;
         }
-        if (!reconnects_pending.has(friend_id)) {
-          reconnects_pending.set(friend_id, {
+        if (!reconnects_pending.has(contact_id)) {
+          reconnects_pending.set(contact_id, {
             trial: 0,
             timeout: null
           });
         }
-        reconnect_pending = reconnects_pending.get(friend_id);
+        reconnect_pending = reconnects_pending.get(contact_id);
         if (reconnect_pending.timeout) {
           return;
         }
@@ -89,7 +89,7 @@
         }
         function fn$(){
           reconnect_pending.timeout = null;
-          chat.connect_to(friend_id, new Uint8Array(0));
+          chat.connect_to(contact_id, new Uint8Array(0));
         }
       }
       state = this._state_instance;
@@ -101,9 +101,9 @@
       });
       chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes()).once('announced', function(){
         state.set_announced(true);
-      }).on('introduction', function(friend_id, secret){
+      }).on('introduction', function(contact_id, secret){
         var contact;
-        contact = state.get_contact(friend_id);
+        contact = state.get_contact(contact_id);
         if (!contact) {
           return true;
         } else if (!contact.local_secret || are_arrays_equal(secret, contact.local_secret) || (contact.old_local_contact && are_arrays_equal(secret, contact.old_local_secret))) {
@@ -111,66 +111,66 @@
         } else {
           return false;
         }
-      }).on('connected', function(friend_id){
+      }).on('connected', function(contact_id){
         var reconnect_pending, local_secret;
-        if (reconnects_pending.has(friend_id)) {
-          reconnect_pending = reconnects_pending.get(friend_id);
+        if (reconnects_pending.has(contact_id)) {
+          reconnect_pending = reconnects_pending.get(contact_id);
           if (reconnect_pending.timeout) {
             clearTimeout(reconnect_pending.timeout);
           }
-          reconnects_pending['delete'](friend_id);
+          reconnects_pending['delete'](contact_id);
         }
-        if (!state.has_contact(friend_id)) {
+        if (!state.has_contact(contact_id)) {
           return;
         }
-        secrets_exchange_statuses.set(friend_id, {
+        secrets_exchange_statuses.set(contact_id, {
           received: false,
           sent: false
         });
         local_secret = detoxChat.generate_secret();
-        state.set_contact_local_secret(friend_id, local_secret);
-        chat.secret(friend_id, local_secret);
-      }).on('connection_failed', function(friend_id){
-        do_reconnect_if_needed(friend_id);
-      }).on('secret', function(friend_id, remote_secret){
+        state.set_contact_local_secret(contact_id, local_secret);
+        chat.secret(contact_id, local_secret);
+      }).on('connection_failed', function(contact_id){
+        do_reconnect_if_needed(contact_id);
+      }).on('secret', function(contact_id, remote_secret){
         var contact;
-        contact = state.get_contact(friend_id);
+        contact = state.get_contact(contact_id);
         if (are_arrays_equal(remote_secret, contact.remote_secret)) {
           return false;
         }
-        state.set_contact_remote_secret(friend_id, remote_secret);
-        secrets_exchange_statuses.get(friend_id).received = true;
-        check_and_add_to_online(friend_id);
+        state.set_contact_remote_secret(contact_id, remote_secret);
+        secrets_exchange_statuses.get(contact_id).received = true;
+        check_and_add_to_online(contact_id);
         return true;
-      }).on('secret_received', function(friend_id){
-        state.del_contact_old_local_secret(friend_id);
-        secrets_exchange_statuses.get(friend_id).sent = true;
-        check_and_add_to_online(friend_id);
-      }).on('nickname', function(friend_id, nickname){
-        state.set_contact_nickname(friend_id, nickname);
-      }).on('text_message', function(friend_id, date_written, date_sent, text_message){
-        state.add_contact_message(friend_id, true, date_written, date_sent, text_message);
-      }).on('text_message_received', function(friend_id, date_sent){
+      }).on('secret_received', function(contact_id){
+        state.del_contact_old_local_secret(contact_id);
+        secrets_exchange_statuses.get(contact_id).sent = true;
+        check_and_add_to_online(contact_id);
+      }).on('nickname', function(contact_id, nickname){
+        state.set_contact_nickname(contact_id, nickname);
+      }).on('text_message', function(contact_id, date_written, date_sent, text_message){
+        state.add_contact_message(contact_id, true, date_written, date_sent, text_message);
+      }).on('text_message_received', function(contact_id, date_sent){
         var id, ref$;
-        id = (ref$ = sent_messages_map.get(friend_id)) != null ? ref$.get(date_sent) : void 8;
+        id = (ref$ = sent_messages_map.get(contact_id)) != null ? ref$.get(date_sent) : void 8;
         if (id) {
-          sent_messages_map.get(friend_id)['delete'](date_sent);
-          state.set_contact_message_sent(friend_id, id, date_sent);
+          sent_messages_map.get(contact_id)['delete'](date_sent);
+          state.set_contact_message_sent(contact_id, id, date_sent);
         }
-      }).on('disconnected', function(friend_id){
-        secrets_exchange_statuses['delete'](friend_id);
-        sent_messages_map['delete'](friend_id);
-        state.del_online_contact(friend_id);
-        do_reconnect_if_needed(friend_id);
+      }).on('disconnected', function(contact_id){
+        secrets_exchange_statuses['delete'](contact_id);
+        sent_messages_map['delete'](contact_id);
+        state.del_online_contact(contact_id);
+        do_reconnect_if_needed(contact_id);
       });
       state.on('contact_added', function(new_contact){
         chat.connect_to(new_contact.id, new Uint8Array(0));
-      }).on('contact_message_added', function(friend_id, message){
-        if (message.from || message.date_received || !state.has_online_contact(friend_id)) {
-          do_reconnect_if_needed(friend_id);
+      }).on('contact_message_added', function(contact_id, message){
+        if (message.from || message.date_received || !state.has_online_contact(contact_id)) {
+          do_reconnect_if_needed(contact_id);
           return;
         }
-        send_message(friend_id, message);
+        send_message(contact_id, message);
       });
       this._core_instance = core;
       this._chat_instance = chat;

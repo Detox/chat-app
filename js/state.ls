@@ -219,7 +219,7 @@ function Wrapper (detox-utils, async-eventer)
 		'get_ui_active_contact' : ->
 			@_local_state.ui.active_contact
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
 		'set_ui_active_contact' : (new_active_contact) !->
 			old_active_contact				= @_local_state.ui.active_contact
@@ -370,88 +370,88 @@ function Wrapper (detox-utils, async-eventer)
 		'get_contacts_with_pending_messages' : ->
 			@_local_state.contacts_with_pending_messages
 		/**
-		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	contact_id
 		 * @param {string}		nickname
 		 * @param {!Uint8Array}	remote_secret
 		 */
-		'add_contact' : (friend_id, nickname, remote_secret) !->
+		'add_contact' : (contact_id, nickname, remote_secret) !->
 			# TODO: Secrets support
-			if @_state['contacts'].has(friend_id)
+			if @_state['contacts'].has(contact_id)
 				return
 			if !nickname
-				nickname = base58_encode(friend_id)
-			new_contact	= Contact([friend_id, nickname, 0, 0, remote_secret, null, null])
+				nickname = base58_encode(contact_id)
+			new_contact	= Contact([contact_id, nickname, 0, 0, remote_secret, null, null])
 			@_state['contacts'].set(new_contact['id'], new_contact)
 			@'fire'('contact_added', new_contact)
 			@'fire'('contacts_changed')
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
-		'has_contact' : (friend_id) ->
-			@_state['contacts'].has(friend_id)
+		'has_contact' : (contact_id) ->
+			@_state['contacts'].has(contact_id)
 		/**
-		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	contact_id
 		 * @param {string}		nickname
 		 */
-		'set_contact_nickname' : (friend_id, nickname) !->
-			old_contact	= @_state['contacts'].get(friend_id)
+		'set_contact_nickname' : (contact_id, nickname) !->
+			old_contact	= @_state['contacts'].get(contact_id)
 			if !old_contact
 				return
 			if !nickname
-				nickname = base58_encode(friend_id)
+				nickname = base58_encode(contact_id)
 			new_contact				= old_contact['clone']()
 			new_contact['nickname']	= nickname
-			@_state['contacts'].set(friend_id, new_contact)
+			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_updated', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
-		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	contact_id
 		 * @param {!Uint8Array}	remote_secret
 		 */
-		'set_contact_remote_secret' : (friend_id, remote_secret) !->
-			old_contact	= @_state['contacts'].get(friend_id)
+		'set_contact_remote_secret' : (contact_id, remote_secret) !->
+			old_contact	= @_state['contacts'].get(contact_id)
 			if !old_contact
 				return
 			new_contact						= old_contact['clone']()
 			new_contact['remote_secret']	= remote_secret
-			@_state['contacts'].set(friend_id, new_contact)
+			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_updated', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
-		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	contact_id
 		 * @param {!Uint8Array}	local_secret
 		 */
-		'set_contact_local_secret' : (friend_id, local_secret) !->
-			old_contact	= @_state['contacts'].get(friend_id)
+		'set_contact_local_secret' : (contact_id, local_secret) !->
+			old_contact	= @_state['contacts'].get(contact_id)
 			if !old_contact
 				return
 			old_local_secret				= old_contact['old_local_secret'] || old_contact['local_secret']
 			new_contact						= old_contact['clone']()
 			new_contact['local_secret']		= local_secret
 			new_contact['old_local_secret']	= old_local_secret
-			@_state['contacts'].set(friend_id, new_contact)
+			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_updated', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
-		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	contact_id
 		 */
-		'del_contact_old_local_secret' : (friend_id) !->
-			old_contact	= @_state['contacts'].get(friend_id)
+		'del_contact_old_local_secret' : (contact_id) !->
+			old_contact	= @_state['contacts'].get(contact_id)
 			if !old_contact
 				return
 			new_contact						= old_contact['clone']()
 			new_contact['old_local_secret']	= null
-			@_state['contacts'].set(friend_id, new_contact)
+			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_updated', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
-		'del_contact' : (friend_id) !->
-			old_contact	= @_state['contacts'].get(friend_id)
+		'del_contact' : (contact_id) !->
+			old_contact	= @_state['contacts'].get(contact_id)
 			if !old_contact
 				return
-			@_state['contacts'].delete(friend_id)
+			@_state['contacts'].delete(contact_id)
 			@'fire'('contact_deleted', old_contact)
 			@'fire'('contacts_changed')
 		/**
@@ -460,61 +460,61 @@ function Wrapper (detox-utils, async-eventer)
 		'get_online_contacts' : ->
 			Array.from(@_local_state.online_contacts)
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
-		'add_online_contact' : (friend_id) !->
-			@_local_state.online_contacts.add(friend_id)
-			@'fire'('contact_online', friend_id)
+		'add_online_contact' : (contact_id) !->
+			@_local_state.online_contacts.add(contact_id)
+			@'fire'('contact_online', contact_id)
 			@'fire'('online_contacts_changed')
-			@_contact_update_last_active(friend_id)
+			@_contact_update_last_active(contact_id)
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
-		'has_online_contact' : (friend_id) ->
-			@_local_state.online_contacts.has(friend_id)
+		'has_online_contact' : (contact_id) ->
+			@_local_state.online_contacts.has(contact_id)
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
-		'del_online_contact' : (friend_id) !->
-			@_local_state.online_contacts.delete(friend_id)
-			@'fire'('contact_offline', friend_id)
+		'del_online_contact' : (contact_id) !->
+			@_local_state.online_contacts.delete(contact_id)
+			@'fire'('contact_offline', contact_id)
 			@'fire'('online_contacts_changed')
-			@_contact_update_last_active(friend_id)
-			@_update_contact_with_pending_messages(friend_id)
+			@_contact_update_last_active(contact_id)
+			@_update_contact_with_pending_messages(contact_id)
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
-		_update_contact_with_pending_messages : (friend_id) !->
-			for message in @'get_contact_messages'(friend_id)
+		_update_contact_with_pending_messages : (contact_id) !->
+			for message in @'get_contact_messages'(contact_id)
 				if !message.from && !message.date_sent
-					@_local_state.contacts_with_pending_messages.add(friend_id)
+					@_local_state.contacts_with_pending_messages.add(contact_id)
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
-		_contact_update_last_active : (friend_id) !->
-			old_contact						= @_state['contacts'].get(friend_id)
+		_contact_update_last_active : (contact_id) !->
+			old_contact						= @_state['contacts'].get(contact_id)
 			new_contact						= old_contact['clone']()
 			new_contact['last_time_active']	= +(new Date)
-			@_state['contacts'].set(friend_id, new_contact)
+			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_updated', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 *
 		 * @return {!Message[]}
 		 */
-		'get_contact_messages' : (friend_id) ->
-			@_local_state.messages.get(friend_id) || []
+		'get_contact_messages' : (contact_id) ->
+			@_local_state.messages.get(contact_id) || []
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 *
 		 * @return {!Message[]}
 		 */
-		'get_contact_messages_to_be_sent' : (friend_id) ->
-			(@_local_state.messages.get(friend_id) || []).filter (message) ->
+		'get_contact_messages_to_be_sent' : (contact_id) ->
+			(@_local_state.messages.get(contact_id) || []).filter (message) ->
 				!message.sent
 		/**
-		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	contact_id
 		 * @param {boolean}		from			`true` if message was received and `false` if sent to a friend
 		 * @param {number}		date_written	When message was written
 		 * @param {number}		date_sent		When message was sent
@@ -522,31 +522,31 @@ function Wrapper (detox-utils, async-eventer)
 		 *
 		 * @return {number} Message ID
 		 */
-		'add_contact_message' : (friend_id, from, date_written, date_sent, text) !->
-			if !@_local_state.messages.has(friend_id)
-				@_local_state.messages.set(friend_id, [])
-			messages	= @_local_state.messages.get(friend_id)
+		'add_contact_message' : (contact_id, from, date_written, date_sent, text) !->
+			if !@_local_state.messages.has(contact_id)
+				@_local_state.messages.set(contact_id, [])
+			messages	= @_local_state.messages.get(contact_id)
 			id			= if messages.length then messages[messages.length - 1]['id'] + 1 else 0
 			message		= Message([id, from, date_written, date_sent, text])
 			messages.push(message)
 			if from
-				@_contact_update_last_active(friend_id)
+				@_contact_update_last_active(contact_id)
 			else
-				if !@'has_online_contact'(friend_id)
-					@_local_state.contacts_with_pending_messages.add(friend_id)
-			@'fire'('contact_message_added', friend_id, message)
-			@'fire'('contact_messages_changed', friend_id)
+				if !@'has_online_contact'(contact_id)
+					@_local_state.contacts_with_pending_messages.add(contact_id)
+			@'fire'('contact_message_added', contact_id, message)
+			@'fire'('contact_messages_changed', contact_id)
 		/**
-		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	contact_id
 		 * @param {number}		id			Message ID
 		 * @param {number}		date		Date when message was sent
 		 */
-		'set_contact_message_sent' : (friend_id, id, date) !->
-			messages	= @_local_state.messages.get(friend_id)
+		'set_contact_message_sent' : (contact_id, id, date) !->
+			messages	= @_local_state.messages.get(contact_id)
 			for message in messages by -1 # Should be faster to start from the end
 				if message['id'] == id
 					message['date_sent']	= date
-					@_update_contact_with_pending_messages(friend_id)
+					@_update_contact_with_pending_messages(contact_id)
 					break
 		/**
 		 * @return {!Array<!Object>}

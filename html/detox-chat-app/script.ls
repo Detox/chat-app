@@ -28,36 +28,36 @@ Polymer(
 		sent_messages_map			= ArrayMap()
 		reconnects_pending			= ArrayMap()
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
-		!function check_and_add_to_online (friend_id)
-			secrets_exchange_status	= secrets_exchange_statuses.get(friend_id)
+		!function check_and_add_to_online (contact_id)
+			secrets_exchange_status	= secrets_exchange_statuses.get(contact_id)
 			if secrets_exchange_status.received && secrets_exchange_status.sent
-				state.add_online_contact(friend_id)
+				state.add_online_contact(contact_id)
 				nickname	= state.get_nickname()
 				if nickname
-					chat.nickname(friend_id, nickname)
+					chat.nickname(contact_id, nickname)
 				# TODO: In addition to this we need to scan for contacts with such messages and actively try to connect to them
-				for message in state.get_contact_messages_to_be_sent(friend_id)
-					send_message(friend_id, message)
+				for message in state.get_contact_messages_to_be_sent(contact_id)
+					send_message(contact_id, message)
 		/**
-		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	contact_id
 		 * @param {!Object}		message
 		 */
-		!function send_message (friend_id, message)
-			date_sent	= chat.text_message(friend_id, message.date_written, message.text)
-			if !sent_messages_map.has(friend_id)
-				sent_messages_map.set(friend_id, new Map)
-			sent_messages_map.get(friend_id).set(date_sent, message.id)
+		!function send_message (contact_id, message)
+			date_sent	= chat.text_message(contact_id, message.date_written, message.text)
+			if !sent_messages_map.has(contact_id)
+				sent_messages_map.set(contact_id, new Map)
+			sent_messages_map.get(contact_id).set(date_sent, message.id)
 		/**
-		 * @param {!Uint8Array} friend_id
+		 * @param {!Uint8Array} contact_id
 		 */
-		!function do_reconnect_if_needed (friend_id)
-			if !state.get_contact_messages_to_be_sent(friend_id).length # TODO: Or secrets were not exchanged (never connected)
+		!function do_reconnect_if_needed (contact_id)
+			if !state.get_contact_messages_to_be_sent(contact_id).length # TODO: Or secrets were not exchanged (never connected)
 				return
-			if !reconnects_pending.has(friend_id)
-				reconnects_pending.set(friend_id, {trial: 0, timeout: null})
-			reconnect_pending	= reconnects_pending.get(friend_id)
+			if !reconnects_pending.has(contact_id)
+				reconnects_pending.set(contact_id, {trial: 0, timeout: null})
+			reconnect_pending	= reconnects_pending.get(contact_id)
 			if reconnect_pending.timeout
 				return
 			++reconnect_pending.trial
@@ -66,7 +66,7 @@ Polymer(
 					reconnect_pending.timeout	= timeoutSet(time_before_next_attempt, !->
 						reconnect_pending.timeout	= null
 						# TODO: Secrets support
-						chat.connect_to(friend_id, new Uint8Array(0))
+						chat.connect_to(contact_id, new Uint8Array(0))
 					)
 					break
 
@@ -94,8 +94,8 @@ Polymer(
 			.once('announced', !->
 				state.set_announced(true)
 			)
-			.on('introduction', (friend_id, secret) ->
-				contact	= state.get_contact(friend_id)
+			.on('introduction', (contact_id, secret) ->
+				contact	= state.get_contact(contact_id)
 				if !contact
 					# TODO: Check global secrets and show friendship request if it is the same as some of them, also don't connect immediately (return `false` instead of `true`)
 					true
@@ -112,56 +112,56 @@ Polymer(
 					# TODO: Notify user that friend might have been compromised, since wrong secret was used!
 					false
 			)
-			.on('connected', (friend_id) !~>
-				if reconnects_pending.has(friend_id)
-					reconnect_pending	= reconnects_pending.get(friend_id)
+			.on('connected', (contact_id) !~>
+				if reconnects_pending.has(contact_id)
+					reconnect_pending	= reconnects_pending.get(contact_id)
 					if reconnect_pending.timeout
 						clearTimeout(reconnect_pending.timeout)
-					reconnects_pending.delete(friend_id)
-				if !state.has_contact(friend_id)
+					reconnects_pending.delete(contact_id)
+				if !state.has_contact(contact_id)
 					return
-				secrets_exchange_statuses.set(friend_id, {received: false, sent: false})
+				secrets_exchange_statuses.set(contact_id, {received: false, sent: false})
 				local_secret	= detox-chat.generate_secret()
-				state.set_contact_local_secret(friend_id, local_secret)
-				chat.secret(friend_id, local_secret)
+				state.set_contact_local_secret(contact_id, local_secret)
+				chat.secret(contact_id, local_secret)
 			)
-			.on('connection_failed', (friend_id) !~>
-				do_reconnect_if_needed(friend_id)
+			.on('connection_failed', (contact_id) !~>
+				do_reconnect_if_needed(contact_id)
 			)
-			.on('secret', (friend_id, remote_secret) ->
-				contact	= state.get_contact(friend_id)
+			.on('secret', (contact_id, remote_secret) ->
+				contact	= state.get_contact(contact_id)
 				# TODO: Check secret if it was used previously (in which case also reject new secret)
 				if are_arrays_equal(remote_secret, contact.remote_secret)
 					return false
-				state.set_contact_remote_secret(friend_id, remote_secret)
-				secrets_exchange_statuses.get(friend_id).received	= true
-				check_and_add_to_online(friend_id)
+				state.set_contact_remote_secret(contact_id, remote_secret)
+				secrets_exchange_statuses.get(contact_id).received	= true
+				check_and_add_to_online(contact_id)
 				true
 			)
-			.on('secret_received', (friend_id) !->
-				state.del_contact_old_local_secret(friend_id)
-				secrets_exchange_statuses.get(friend_id).sent		= true
-				check_and_add_to_online(friend_id)
+			.on('secret_received', (contact_id) !->
+				state.del_contact_old_local_secret(contact_id)
+				secrets_exchange_statuses.get(contact_id).sent		= true
+				check_and_add_to_online(contact_id)
 			)
-			.on('nickname', (friend_id, nickname) !->
-				state.set_contact_nickname(friend_id, nickname)
+			.on('nickname', (contact_id, nickname) !->
+				state.set_contact_nickname(contact_id, nickname)
 			)
-			.on('text_message', (friend_id, date_written, date_sent, text_message) !->
+			.on('text_message', (contact_id, date_written, date_sent, text_message) !->
 				# TODO: Check date_written and date_sent
-				state.add_contact_message(friend_id, true, date_written, date_sent, text_message)
+				state.add_contact_message(contact_id, true, date_written, date_sent, text_message)
 			)
-			.on('text_message_received', (friend_id, date_sent) !->
-				id	= sent_messages_map.get(friend_id)?.get(date_sent)
+			.on('text_message_received', (contact_id, date_sent) !->
+				id	= sent_messages_map.get(contact_id)?.get(date_sent)
 				if id
-					sent_messages_map.get(friend_id).delete(date_sent)
-					state.set_contact_message_sent(friend_id, id, date_sent)
+					sent_messages_map.get(contact_id).delete(date_sent)
+					state.set_contact_message_sent(contact_id, id, date_sent)
 			)
-			.on('disconnected', (friend_id) !~>
-				secrets_exchange_statuses.delete(friend_id)
-				sent_messages_map.delete(friend_id)
-				state.del_online_contact(friend_id)
+			.on('disconnected', (contact_id) !~>
+				secrets_exchange_statuses.delete(contact_id)
+				sent_messages_map.delete(contact_id)
+				state.del_online_contact(contact_id)
 
-				do_reconnect_if_needed(friend_id)
+				do_reconnect_if_needed(contact_id)
 			)
 		state
 			.on('contact_added', (new_contact) !~>
@@ -169,15 +169,15 @@ Polymer(
 				# TODO: Handle failed connections
 				chat.connect_to(new_contact.id, new Uint8Array(0))
 			)
-			.on('contact_message_added', (friend_id, message) !->
+			.on('contact_message_added', (contact_id, message) !->
 				if (
 					message.from || # Message was received from a friend
 					message.date_received || # Message was received by a friend
-					!state.has_online_contact(friend_id) # Friend is not currently connected
+					!state.has_online_contact(contact_id) # Friend is not currently connected
 				)
-					do_reconnect_if_needed(friend_id)
+					do_reconnect_if_needed(contact_id)
 					return
-				send_message(friend_id, message)
+				send_message(contact_id, message)
 			)
 		@_core_instance	= core
 		@_chat_instance	= chat
