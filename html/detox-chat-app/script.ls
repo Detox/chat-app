@@ -3,7 +3,6 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-const packets_per_second	= 5
 Polymer(
 	is			: 'detox-chat-app'
 	behaviors	: [
@@ -49,7 +48,8 @@ Polymer(
 			detox-core.generate_seed()
 			state.get_settings_bootstrap_nodes()
 			state.get_settings_ice_servers()
-			packets_per_second
+			state.get_packets_per_second()
+			state.get_bucket_size()
 		)
 			.once('ready', !->
 				state.set_online(true)

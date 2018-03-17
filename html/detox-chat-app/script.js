@@ -5,8 +5,6 @@
  * @license 0BSD
  */
 (function(){
-  var packets_per_second;
-  packets_per_second = 5;
   Polymer({
     is: 'detox-chat-app',
     behaviors: [detoxChatApp.behaviors.state],
@@ -54,7 +52,7 @@
         sent_messages_map.get(friend_id).set(date_sent, message.id);
       }
       state = this._state_instance;
-      core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), packets_per_second).once('ready', function(){
+      core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_packets_per_second(), state.get_bucket_size()).once('ready', function(){
         state.set_online(true);
         if (state.get_settings_announce()) {
           chat.announce();

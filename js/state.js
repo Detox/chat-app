@@ -79,6 +79,7 @@
             'host': '127.0.0.1',
             'port': 16882
           }],
+          'bucket_size': 5,
           'ice_servers': [
             {
               urls: 'stun:stun.l.google.com:19302'
@@ -86,7 +87,9 @@
               urls: 'stun:global.stun.twilio.com:3478?transport=udp'
             }
           ],
-          'online': true
+          'max_pending_segments': 10,
+          'online': true,
+          'packets_per_second': 5
         };
         x$['secrets'] = [];
         x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', 0, 0]];
@@ -232,21 +235,6 @@
         this['fire']('settings_announce_changed');
       }
       /**
-       * @return {boolean} `false` if application works completely offline
-       */,
-      'get_settings_online': function(){
-        return this._state['settings']['online'];
-      }
-      /**
-       * @param {boolean} online
-       */,
-      'set_settings_online': function(online){
-        var old_online;
-        old_online = this._state['online'];
-        this._state['settings']['online'] = online;
-        this['fire']('settings_online_changed', online, old_online);
-      }
-      /**
        * @return {!Array<!Object>}
        */,
       'get_settings_bootstrap_nodes': function(){
@@ -278,6 +266,21 @@
         this['fire']('settings_bootstrap_nodes_changed');
       }
       /**
+       * @return {number}
+       */,
+      'get_settings_bucket_size': function(){
+        return this._state['settings']['bucket_size'];
+      }
+      /**
+       * @param {number} bucket_size
+       */,
+      'set_settings_bucket_size': function(bucket_size){
+        var old_bucket_size;
+        old_bucket_size = this._state['bucket_size'];
+        this._state['settings']['bucket_size'] = bucket_size;
+        this['fire']('settings_bucket_size_changed', bucket_size, old_bucket_size);
+      }
+      /**
        * @return {!Array<!Object>}
        */,
       'get_settings_ice_servers': function(){
@@ -291,6 +294,51 @@
         old_ice_servers = this._state['settings']['ice_servers'];
         this._state['settings']['ice_servers'] = ice_servers;
         this['fire']('settings_ice_servers_changed');
+      }
+      /**
+       * @return {number}
+       */,
+      'get_settings_max_pending_segments': function(){
+        return this._state['settings']['max_pending_segments'];
+      }
+      /**
+       * @param {number} max_pending_segments
+       */,
+      'set_settings_max_pending_segments': function(max_pending_segments){
+        var old_max_pending_segments;
+        old_max_pending_segments = this._state['max_pending_segments'];
+        this._state['settings']['max_pending_segments'] = max_pending_segments;
+        this['fire']('settings_max_pending_segments_changed', max_pending_segments, old_max_pending_segments);
+      }
+      /**
+       * @return {boolean} `false` if application works completely offline
+       */,
+      'get_settings_online': function(){
+        return this._state['settings']['online'];
+      }
+      /**
+       * @param {boolean} online
+       */,
+      'set_settings_online': function(online){
+        var old_online;
+        old_online = this._state['online'];
+        this._state['settings']['online'] = online;
+        this['fire']('settings_online_changed', online, old_online);
+      }
+      /**
+       * @return {number}
+       */,
+      'get_settings_packets_per_second': function(){
+        return this._state['settings']['packets_per_second'];
+      }
+      /**
+       * @param {number} packets_per_second
+       */,
+      'set_settings_packets_per_second': function(packets_per_second){
+        var old_packets_per_second;
+        old_packets_per_second = this._state['packets_per_second'];
+        this._state['settings']['packets_per_second'] = packets_per_second;
+        this['fire']('settings_packets_per_second_changed', packets_per_second, old_packets_per_second);
       }
       /**
        * @return {!Contact[]}

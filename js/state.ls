@@ -70,8 +70,8 @@ function Wrapper (detox-utils, async-eventer)
 				..'nickname'	= ''
 				..'seed'		= null
 				..'settings'	=
-					'announce'			: true
-					'bootstrap_nodes'	: [
+					'announce'				: true
+					'bootstrap_nodes'		: [
 						# TODO: This is just for demo purposes, in future must change to real bootstrap node(s)
 						{
 							'node_id'	: '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29'
@@ -79,11 +79,14 @@ function Wrapper (detox-utils, async-eventer)
 							'port'		: 16882
 						}
 					]
-					'ice_servers'		: [
+					'bucket_size'			: 5
+					'ice_servers'			: [
 						{urls: 'stun:stun.l.google.com:19302'}
 						{urls: 'stun:global.stun.twilio.com:3478?transport=udp'}
 					]
-					'online'			: true
+					'max_pending_segments'	: 10
+					'online'				: true
+					'packets_per_second'	: 5
 					# TODO
 				..'secrets'		= []
 				..'contacts'	= [
@@ -219,18 +222,6 @@ function Wrapper (detox-utils, async-eventer)
 			@_state['settings']['announce']	= new_announce
 			@'fire'('settings_announce_changed')
 		/**
-		 * @return {boolean} `false` if application works completely offline
-		 */
-		'get_settings_online' : ->
-			@_state['settings']['online']
-		/**
-		 * @param {boolean} online
-		 */
-		'set_settings_online' : (online) !->
-			old_online						= @_state['online']
-			@_state['settings']['online']	= online
-			@'fire'('settings_online_changed', online, old_online)
-		/**
 		 * @return {!Array<!Object>}
 		 */
 		'get_settings_bootstrap_nodes' : ->
@@ -256,6 +247,18 @@ function Wrapper (detox-utils, async-eventer)
 			@_state['settings']['bootstrap_nodes']	= bootstrap_nodes
 			@'fire'('settings_bootstrap_nodes_changed')
 		/**
+		 * @return {number}
+		 */
+		'get_settings_bucket_size' : ->
+			@_state['settings']['bucket_size']
+		/**
+		 * @param {number} bucket_size
+		 */
+		'set_settings_bucket_size' : (bucket_size) !->
+			old_bucket_size						= @_state['bucket_size']
+			@_state['settings']['bucket_size']	= bucket_size
+			@'fire'('settings_bucket_size_changed', bucket_size, old_bucket_size)
+		/**
 		 * @return {!Array<!Object>}
 		 */
 		'get_settings_ice_servers' : ->
@@ -267,6 +270,42 @@ function Wrapper (detox-utils, async-eventer)
 			old_ice_servers						= @_state['settings']['ice_servers']
 			@_state['settings']['ice_servers']	= ice_servers
 			@'fire'('settings_ice_servers_changed')
+		/**
+		 * @return {number}
+		 */
+		'get_settings_max_pending_segments' : ->
+			@_state['settings']['max_pending_segments']
+		/**
+		 * @param {number} max_pending_segments
+		 */
+		'set_settings_max_pending_segments' : (max_pending_segments) !->
+			old_max_pending_segments						= @_state['max_pending_segments']
+			@_state['settings']['max_pending_segments']	= max_pending_segments
+			@'fire'('settings_max_pending_segments_changed', max_pending_segments, old_max_pending_segments)
+		/**
+		 * @return {boolean} `false` if application works completely offline
+		 */
+		'get_settings_online' : ->
+			@_state['settings']['online']
+		/**
+		 * @param {boolean} online
+		 */
+		'set_settings_online' : (online) !->
+			old_online						= @_state['online']
+			@_state['settings']['online']	= online
+			@'fire'('settings_online_changed', online, old_online)
+		/**
+		 * @return {number}
+		 */
+		'get_settings_packets_per_second' : ->
+			@_state['settings']['packets_per_second']
+		/**
+		 * @param {number} packets_per_second
+		 */
+		'set_settings_packets_per_second' : (packets_per_second) !->
+			old_packets_per_second						= @_state['packets_per_second']
+			@_state['settings']['packets_per_second']	= packets_per_second
+			@'fire'('settings_packets_per_second_changed', packets_per_second, old_packets_per_second)
 		/**
 		 * @return {!Contact[]}
 		 */
