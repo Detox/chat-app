@@ -58,7 +58,7 @@
           chat.announce();
         }
       });
-      chat = detoxChat.Chat(core, state.get_seed()).once('announced', function(){
+      chat = detoxChat.Chat(core, state.get_seed(), state.get_number_of_introduction_nodes(), state.get_number_of_intermediate_nodes()).once('announced', function(){
         state.set_announced(true);
       }).on('introduction', function(friend_id, secret){}).on('connected', function(friend_id){
         if (!state.has_contact(friend_id)) {

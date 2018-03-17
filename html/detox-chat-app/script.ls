@@ -57,7 +57,12 @@ Polymer(
 				if state.get_settings_announce()
 					chat.announce()
 			)
-		chat	= detox-chat.Chat(core, state.get_seed())
+		chat	= detox-chat.Chat(
+			core
+			state.get_seed()
+			state.get_number_of_introduction_nodes()
+			state.get_number_of_intermediate_nodes()
+		)
 			.once('announced', !->
 				state.set_announced(true)
 			)

@@ -70,8 +70,8 @@ function Wrapper (detox-utils, async-eventer)
 				..'nickname'	= ''
 				..'seed'		= null
 				..'settings'	=
-					'announce'				: true
-					'bootstrap_nodes'		: [
+					'announce'						: true
+					'bootstrap_nodes'				: [
 						# TODO: This is just for demo purposes, in future must change to real bootstrap node(s)
 						{
 							'node_id'	: '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29'
@@ -79,14 +79,16 @@ function Wrapper (detox-utils, async-eventer)
 							'port'		: 16882
 						}
 					]
-					'bucket_size'			: 5
-					'ice_servers'			: [
+					'bucket_size'					: 5
+					'ice_servers'					: [
 						{urls: 'stun:stun.l.google.com:19302'}
 						{urls: 'stun:global.stun.twilio.com:3478?transport=udp'}
 					]
-					'max_pending_segments'	: 10
-					'online'				: true
-					'packets_per_second'	: 5
+					'max_pending_segments'			: 10
+					'number_of_intermediate_nodes'	: 3
+					'number_of_introduction_nodes'	: 3
+					'online'						: true
+					'packets_per_second'			: 5
 					# TODO
 				..'secrets'		= []
 				..'contacts'	= [
@@ -279,9 +281,33 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {number} max_pending_segments
 		 */
 		'set_settings_max_pending_segments' : (max_pending_segments) !->
-			old_max_pending_segments						= @_state['max_pending_segments']
+			old_max_pending_segments					= @_state['max_pending_segments']
 			@_state['settings']['max_pending_segments']	= max_pending_segments
 			@'fire'('settings_max_pending_segments_changed', max_pending_segments, old_max_pending_segments)
+		/**
+		 * @return {number}
+		 */
+		'get_settings_number_of_intermediate_nodes' : ->
+			@_state['settings']['number_of_intermediate_nodes']
+		/**
+		 * @param {number} number_of_intermediate_nodes
+		 */
+		'set_settings_number_of_intermediate_nodes' : (number_of_intermediate_nodes) !->
+			old_number_of_intermediate_nodes					= @_state['number_of_intermediate_nodes']
+			@_state['settings']['number_of_intermediate_nodes']	= number_of_intermediate_nodes
+			@'fire'('settings_number_of_intermediate_nodes_changed', number_of_intermediate_nodes, old_number_of_intermediate_nodes)
+		/**
+		 * @return {number}
+		 */
+		'get_settings_number_of_introduction_nodes' : ->
+			@_state['settings']['number_of_introduction_nodes']
+		/**
+		 * @param {number} number_of_introduction_nodes
+		 */
+		'set_settings_number_of_introduction_nodes' : (number_of_introduction_nodes) !->
+			old_number_of_introduction_nodes					= @_state['number_of_introduction_nodes']
+			@_state['settings']['number_of_introduction_nodes']	= number_of_introduction_nodes
+			@'fire'('settings_number_of_introduction_nodes_changed', number_of_introduction_nodes, old_number_of_introduction_nodes)
 		/**
 		 * @return {boolean} `false` if application works completely offline
 		 */

@@ -88,6 +88,8 @@
             }
           ],
           'max_pending_segments': 10,
+          'number_of_intermediate_nodes': 3,
+          'number_of_introduction_nodes': 3,
           'online': true,
           'packets_per_second': 5
         };
@@ -309,6 +311,36 @@
         old_max_pending_segments = this._state['max_pending_segments'];
         this._state['settings']['max_pending_segments'] = max_pending_segments;
         this['fire']('settings_max_pending_segments_changed', max_pending_segments, old_max_pending_segments);
+      }
+      /**
+       * @return {number}
+       */,
+      'get_settings_number_of_intermediate_nodes': function(){
+        return this._state['settings']['number_of_intermediate_nodes'];
+      }
+      /**
+       * @param {number} number_of_intermediate_nodes
+       */,
+      'set_settings_number_of_intermediate_nodes': function(number_of_intermediate_nodes){
+        var old_number_of_intermediate_nodes;
+        old_number_of_intermediate_nodes = this._state['number_of_intermediate_nodes'];
+        this._state['settings']['number_of_intermediate_nodes'] = number_of_intermediate_nodes;
+        this['fire']('settings_number_of_intermediate_nodes_changed', number_of_intermediate_nodes, old_number_of_intermediate_nodes);
+      }
+      /**
+       * @return {number}
+       */,
+      'get_settings_number_of_introduction_nodes': function(){
+        return this._state['settings']['number_of_introduction_nodes'];
+      }
+      /**
+       * @param {number} number_of_introduction_nodes
+       */,
+      'set_settings_number_of_introduction_nodes': function(number_of_introduction_nodes){
+        var old_number_of_introduction_nodes;
+        old_number_of_introduction_nodes = this._state['number_of_introduction_nodes'];
+        this._state['settings']['number_of_introduction_nodes'] = number_of_introduction_nodes;
+        this['fire']('settings_number_of_introduction_nodes_changed', number_of_introduction_nodes, old_number_of_introduction_nodes);
       }
       /**
        * @return {boolean} `false` if application works completely offline
