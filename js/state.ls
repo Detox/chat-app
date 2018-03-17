@@ -89,6 +89,14 @@ function Wrapper (detox-utils, async-eventer)
 					'number_of_introduction_nodes'	: 3
 					'online'						: true
 					'packets_per_second'			: 5
+					# [reconnection_trial, time_before_next_attempt]
+					'reconnects_intervals'			: [
+						[5, 30]
+						[10, 60]
+						[15, 150]
+						[100, 300]
+						[Number.MAX_SAFE_INTEGER, 600]
+					]
 					# TODO
 				..'contacts'	= [
 					# TODO: This is just for demo purposes
@@ -336,6 +344,18 @@ function Wrapper (detox-utils, async-eventer)
 			old_packets_per_second						= @_state['packets_per_second']
 			@_state['settings']['packets_per_second']	= packets_per_second
 			@'fire'('settings_packets_per_second_changed', packets_per_second, old_packets_per_second)
+		/**
+		 * @return {!Array<!Array<number>>}
+		 */
+		'get_settings_reconnects_intervals' : ->
+			@_state['settings']['reconnects_intervals']
+		/**
+		 * @param {!Array<!Array<number>>} reconnects_intervals
+		 */
+		'set_settings_reconnects_intervals' : (reconnects_intervals) !->
+			old_reconnects_intervals					= @_state['reconnects_intervals']
+			@_state['settings']['reconnects_intervals']	= reconnects_intervals
+			@'fire'('settings_reconnects_intervals_changed', reconnects_intervals, old_reconnects_intervals)
 		/**
 		 * @return {!Contact[]}
 		 */

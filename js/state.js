@@ -91,7 +91,8 @@
           'number_of_intermediate_nodes': 3,
           'number_of_introduction_nodes': 3,
           'online': true,
-          'packets_per_second': 5
+          'packets_per_second': 5,
+          'reconnects_intervals': [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]]
         };
         x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', 0, 0]];
         x$['secrets'] = [];
@@ -377,6 +378,21 @@
         old_packets_per_second = this._state['packets_per_second'];
         this._state['settings']['packets_per_second'] = packets_per_second;
         this['fire']('settings_packets_per_second_changed', packets_per_second, old_packets_per_second);
+      }
+      /**
+       * @return {!Array<!Array<number>>}
+       */,
+      'get_settings_reconnects_intervals': function(){
+        return this._state['settings']['reconnects_intervals'];
+      }
+      /**
+       * @param {!Array<!Array<number>>} reconnects_intervals
+       */,
+      'set_settings_reconnects_intervals': function(reconnects_intervals){
+        var old_reconnects_intervals;
+        old_reconnects_intervals = this._state['reconnects_intervals'];
+        this._state['settings']['reconnects_intervals'] = reconnects_intervals;
+        this['fire']('settings_reconnects_intervals_changed', reconnects_intervals, old_reconnects_intervals);
       }
       /**
        * @return {!Contact[]}

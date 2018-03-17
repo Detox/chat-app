@@ -3,14 +3,6 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-# [reconnection_trial, time_before_next_attempt]
-reconnects_intervals	= [
-	[5, 30]
-	[10, 60]
-	[15, 150]
-	[100, 300]
-	[Number.MAX_SAFE_INTEGER, 600]
-]
 Polymer(
 	is			: 'detox-chat-app'
 	behaviors	: [
@@ -66,7 +58,7 @@ Polymer(
 				reconnects_pending.set(friend_id, {trial: 0, timeout: null})
 			reconnect_pending	= reconnects_pending.get(friend_id)
 			++reconnect_pending.trial
-			for [reconnection_trial, time_before_next_attempt] in reconnects_intervals
+			for [reconnection_trial, time_before_next_attempt] in state.get_settings_reconnects_intervals()
 				if reconnect_pending.trial <= reconnection_trial
 					reconnect_pending.timeout	= timeoutSet(time_before_next_attempt, !->
 						# TODO: Secrets support

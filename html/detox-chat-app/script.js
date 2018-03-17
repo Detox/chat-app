@@ -5,8 +5,6 @@
  * @license 0BSD
  */
 (function(){
-  var reconnects_intervals;
-  reconnects_intervals = [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]];
   Polymer({
     is: 'detox-chat-app',
     behaviors: [detoxChatApp.behaviors.state],
@@ -78,7 +76,7 @@
         }
         reconnect_pending = reconnects_pending.get(friend_id);
         ++reconnect_pending.trial;
-        for (i$ = 0, len$ = (ref$ = reconnects_intervals).length; i$ < len$; ++i$) {
+        for (i$ = 0, len$ = (ref$ = state.get_settings_reconnects_intervals()).length; i$ < len$; ++i$) {
           ref1$ = ref$[i$], reconnection_trial = ref1$[0], time_before_next_attempt = ref1$[1];
           if (reconnect_pending.trial <= reconnection_trial) {
             reconnect_pending.timeout = timeoutSet(time_before_next_attempt, fn$);
