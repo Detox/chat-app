@@ -57,10 +57,13 @@ Polymer(
 			if !reconnects_pending.has(friend_id)
 				reconnects_pending.set(friend_id, {trial: 0, timeout: null})
 			reconnect_pending	= reconnects_pending.get(friend_id)
+			if reconnect_pending.timeout
+				return
 			++reconnect_pending.trial
 			for [reconnection_trial, time_before_next_attempt] in state.get_settings_reconnects_intervals()
 				if reconnect_pending.trial <= reconnection_trial
 					reconnect_pending.timeout	= timeoutSet(time_before_next_attempt, !->
+						reconnect_pending.timeout	= null
 						# TODO: Secrets support
 						chat.connect_to(friend_id, new Uint8Array(0))
 					)
@@ -96,7 +99,8 @@ Polymer(
 			.on('connected', (friend_id) !~>
 				if reconnects_pending.has(friend_id)
 					reconnect_pending	= reconnects_pending.get(friend_id)
-					clearTimeout(reconnect_pending.timeout)
+					if reconnect_pending.timeout
+						clearTimeout(reconnect_pending.timeout)
 					reconnects_pending.delete(friend_id)
 				if !state.has_contact(friend_id)
 					# TODO: This shouldn't happen, contact should be already added at this point

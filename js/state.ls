@@ -489,13 +489,13 @@ function Wrapper (detox-utils, async-eventer)
 			id			= if messages.length then messages[messages.length - 1]['id'] + 1 else 0
 			message		= Message([id, from, date_written, date_sent, text])
 			messages.push(message)
-			@'fire'('contact_message_added', friend_id, message)
-			@'fire'('contact_messages_changed', friend_id)
 			if from
 				@_contact_update_last_active(friend_id)
 			else
 				if !@'has_online_contact'(friend_id)
 					@_local_state.contacts_with_pending_messages.add(friend_id)
+			@'fire'('contact_message_added', friend_id, message)
+			@'fire'('contact_messages_changed', friend_id)
 		/**
 		 * @param {!Uint8Array}	friend_id
 		 * @param {number}		id			Message ID

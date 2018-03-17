@@ -75,6 +75,9 @@
           });
         }
         reconnect_pending = reconnects_pending.get(friend_id);
+        if (reconnect_pending.timeout) {
+          return;
+        }
         ++reconnect_pending.trial;
         for (i$ = 0, len$ = (ref$ = state.get_settings_reconnects_intervals()).length; i$ < len$; ++i$) {
           ref1$ = ref$[i$], reconnection_trial = ref1$[0], time_before_next_attempt = ref1$[1];
@@ -84,6 +87,7 @@
           }
         }
         function fn$(){
+          reconnect_pending.timeout = null;
           chat.connect_to(friend_id, new Uint8Array(0));
         }
       }
@@ -100,7 +104,9 @@
         var reconnect_pending;
         if (reconnects_pending.has(friend_id)) {
           reconnect_pending = reconnects_pending.get(friend_id);
-          clearTimeout(reconnect_pending.timeout);
+          if (reconnect_pending.timeout) {
+            clearTimeout(reconnect_pending.timeout);
+          }
           reconnects_pending['delete'](friend_id);
         }
         if (!state.has_contact(friend_id)) {
