@@ -79,6 +79,13 @@
             'host': '127.0.0.1',
             'port': 16882
           }],
+          'ice_servers': [
+            {
+              urls: 'stun:stun.l.google.com:19302'
+            }, {
+              urls: 'stun:global.stun.twilio.com:3478?transport=udp'
+            }
+          ],
           'online': true
         };
         x$['secrets'] = [];
@@ -269,6 +276,21 @@
         old_bootstrap_nodes = this._state['settings']['bootstrap_nodes'];
         this._state['settings']['bootstrap_nodes'] = bootstrap_nodes;
         this['fire']('settings_bootstrap_nodes_changed');
+      }
+      /**
+       * @return {!Array<!Object>}
+       */,
+      'get_settings_ice_servers': function(){
+        return this._state['settings']['ice_servers'];
+      }
+      /**
+       * @param {!Array<!Object>} ice_servers
+       */,
+      'set_settings_ice_servers': function(ice_servers){
+        var old_ice_servers;
+        old_ice_servers = this._state['settings']['ice_servers'];
+        this._state['settings']['ice_servers'] = ice_servers;
+        this['fire']('settings_ice_servers_changed');
       }
       /**
        * @return {!Contact[]}

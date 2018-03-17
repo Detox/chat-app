@@ -3,10 +3,6 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-const ice_servers			= [
-	{urls: 'stun:stun.l.google.com:19302'}
-	{urls: 'stun:global.stun.twilio.com:3478?transport=udp'}
-]
 const packets_per_second	= 5
 Polymer(
 	is			: 'detox-chat-app'
@@ -49,7 +45,12 @@ Polymer(
 
 		# TODO: For now we are using defaults and hardcoded constants for Chat and Core instances, but in future this will be configurable
 		state	= @_state_instance
-		core	= detox-core.Core(detox-core.generate_seed(), state.get_settings_bootstrap_nodes(), ice_servers, packets_per_second)
+		core	= detox-core.Core(
+			detox-core.generate_seed()
+			state.get_settings_bootstrap_nodes()
+			state.get_settings_ice_servers()
+			packets_per_second
+		)
 			.once('ready', !->
 				state.set_online(true)
 

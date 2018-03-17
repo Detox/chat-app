@@ -5,14 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  var ice_servers, packets_per_second;
-  ice_servers = [
-    {
-      urls: 'stun:stun.l.google.com:19302'
-    }, {
-      urls: 'stun:global.stun.twilio.com:3478?transport=udp'
-    }
-  ];
+  var packets_per_second;
   packets_per_second = 5;
   Polymer({
     is: 'detox-chat-app',
@@ -61,7 +54,7 @@
         sent_messages_map.get(friend_id).set(date_sent, message.id);
       }
       state = this._state_instance;
-      core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), ice_servers, packets_per_second).once('ready', function(){
+      core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), packets_per_second).once('ready', function(){
         state.set_online(true);
         if (state.get_settings_announce()) {
           chat.announce();

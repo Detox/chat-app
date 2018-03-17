@@ -79,6 +79,10 @@ function Wrapper (detox-utils, async-eventer)
 							'port'		: 16882
 						}
 					]
+					'ice_servers'		: [
+						{urls: 'stun:stun.l.google.com:19302'}
+						{urls: 'stun:global.stun.twilio.com:3478?transport=udp'}
+					]
 					'online'			: true
 					# TODO
 				..'secrets'		= []
@@ -251,6 +255,18 @@ function Wrapper (detox-utils, async-eventer)
 			old_bootstrap_nodes						= @_state['settings']['bootstrap_nodes']
 			@_state['settings']['bootstrap_nodes']	= bootstrap_nodes
 			@'fire'('settings_bootstrap_nodes_changed')
+		/**
+		 * @return {!Array<!Object>}
+		 */
+		'get_settings_ice_servers' : ->
+			@_state['settings']['ice_servers']
+		/**
+		 * @param {!Array<!Object>} ice_servers
+		 */
+		'set_settings_ice_servers' : (ice_servers) !->
+			old_ice_servers						= @_state['settings']['ice_servers']
+			@_state['settings']['ice_servers']	= ice_servers
+			@'fire'('settings_ice_servers_changed')
 		/**
 		 * @return {!Contact[]}
 		 */
