@@ -69,6 +69,7 @@
       if (!('version' in this._state)) {
         x$ = this._state;
         x$['version'] = 0;
+        x$['offline'] = false;
         x$['nickname'] = '';
         x$['seed'] = null;
         x$['settings'] = {
@@ -120,6 +121,21 @@
         return Boolean(this._state['seed']);
       }
       /**
+       * @return {boolean} `true` if application works completely offline
+       */,
+      'get_offline': function(){
+        return this._state['offline'];
+      }
+      /**
+       * @param {boolean} offline
+       */,
+      'set_offline': function(offline){
+        var old_offline;
+        old_offline = this._state['offline'];
+        this._state['offline'] = offline;
+        this['fire']('offline_changed', offline, old_offline);
+      }
+      /**
        * @return {Uint8Array} Seed if configured or `null` otherwise
        */,
       'get_seed': function(){
@@ -155,7 +171,7 @@
         this['fire']('nickname_changed', new_nickname, old_nickname);
       }
       /**
-       * @return {boolean}
+       * @return {boolean} `true` if connected to network
        */,
       'get_online': function(){
         return this._local_state.online;

@@ -25,6 +25,9 @@ Polymer(
 			require(['@detox/chat', '@detox/core', '@detox/utils'])
 			@_state_instance_ready
 		]).then ([[detox-chat, detox-core, detox-utils]]) !~>
+			if @_state_instance.get_offline()
+				# We're working offline
+				return
 			<~! detox-chat.ready
 			<~! detox-core.ready
 			@_connect_to_the_network(detox-chat, detox-core, detox-utils)

@@ -66,6 +66,7 @@ function Wrapper (detox-utils, async-eventer)
 		if !('version' of @_state)
 			@_state
 				..'version'		= 0
+				..'offline'		= false
 				..'nickname'	= ''
 				..'seed'		= null
 				..'settings'	=
@@ -126,6 +127,18 @@ function Wrapper (detox-utils, async-eventer)
 				@_ready.then(callback)
 			Boolean(@_state['seed'])
 		/**
+		 * @return {boolean} `true` if application works completely offline
+		 */
+		'get_offline' : ->
+			@_state['offline']
+		/**
+		 * @param {boolean} offline
+		 */
+		'set_offline' : (offline) !->
+			old_offline			= @_state['offline']
+			@_state['offline']	= offline
+			@'fire'('offline_changed', offline, old_offline)
+		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
 		'get_seed' : ->
@@ -154,7 +167,7 @@ function Wrapper (detox-utils, async-eventer)
 			@_state['nickname']	= new_nickname
 			@'fire'('nickname_changed', new_nickname, old_nickname)
 		/**
-		 * @return {boolean}
+		 * @return {boolean} `true` if connected to network
 		 */
 		'get_online' : ->
 			@_local_state.online

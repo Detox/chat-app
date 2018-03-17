@@ -30,6 +30,9 @@
       Promise.all([require(['@detox/chat', '@detox/core', '@detox/utils']), this._state_instance_ready]).then(function(arg$){
         var ref$, detoxChat, detoxCore, detoxUtils;
         ref$ = arg$[0], detoxChat = ref$[0], detoxCore = ref$[1], detoxUtils = ref$[2];
+        if (this$._state_instance.get_offline()) {
+          return;
+        }
         detoxChat.ready(function(){
           detoxCore.ready(function(){
             this$._connect_to_the_network(detoxChat, detoxCore, detoxUtils);
