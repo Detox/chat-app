@@ -101,11 +101,11 @@ Polymer(
 					true
 				else if (
 					# We've added contact, but never connected to it, blindly accept connection this time
-					if !contact.local_secret ||
+					!contact.local_secret ||
 					# Known contact, check if secret is correct
 					are_arrays_equal(secret, contact.local_secret) ||
 					# There is a chance that old secret was used if updated secret didn't reach a friend
-					(contact.old_local_contact && are_arrays_equal(secret, contact.old_local_secret)
+					(contact.old_local_contact && are_arrays_equal(secret, contact.old_local_secret))
 				)
 					true
 				else
@@ -128,11 +128,15 @@ Polymer(
 			.on('connection_failed', (friend_id) !~>
 				do_reconnect_if_needed(friend_id)
 			)
-			.on('secret', (friend_id, remote_secret) !->
-				# TODO: Check secret (if it was not used previously, if it is different from current remote secret, etc)
+			.on('secret', (friend_id, remote_secret) ->
+				contact	= state.get_contact(friend_id)
+				# TODO: Check secret if it was used previously (in which case also reject new secret)
+				if are_arrays_equal(remote_secret, contact.remote_secret)
+					return false
 				state.set_contact_remote_secret(friend_id, remote_secret)
 				secrets_exchange_statuses.get(friend_id).received	= true
 				check_and_add_to_online(friend_id)
+				true
 			)
 			.on('secret_received', (friend_id) !->
 				state.del_contact_old_local_secret(friend_id)

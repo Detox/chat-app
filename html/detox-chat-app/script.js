@@ -106,13 +106,13 @@
         contact = state.get_contact(friend_id);
         if (!contact) {
           return true;
-        } else if (secret.length === 0 && !contact.local_secret) {
+        } else if (!contact.local_secret || are_arrays_equal(secret, contact.local_secret) || (contact.old_local_contact && are_arrays_equal(secret, contact.old_local_secret))) {
           return true;
-        } else if (secret['else']) {
+        } else {
           return false;
         }
       }).on('connected', function(friend_id){
-        var reconnect_pending;
+        var reconnect_pending, local_secret;
         if (reconnects_pending.has(friend_id)) {
           reconnect_pending = reconnects_pending.get(friend_id);
           if (reconnect_pending.timeout) {
@@ -127,13 +127,23 @@
           received: false,
           sent: false
         });
-        chat.secret(friend_id, detoxChat.generate_secret());
+        local_secret = detoxChat.generate_secret();
+        state.set_contact_local_secret(friend_id, local_secret);
+        chat.secret(friend_id, local_secret);
       }).on('connection_failed', function(friend_id){
         do_reconnect_if_needed(friend_id);
-      }).on('secret', function(friend_id, secret){
+      }).on('secret', function(friend_id, remote_secret){
+        var contact;
+        contact = state.get_contact(friend_id);
+        if (are_arrays_equal(remote_secret, contact.remote_secret)) {
+          return false;
+        }
+        state.set_contact_remote_secret(friend_id, remote_secret);
         secrets_exchange_statuses.get(friend_id).received = true;
         check_and_add_to_online(friend_id);
+        return true;
       }).on('secret_received', function(friend_id){
+        state.del_contact_old_local_secret(friend_id);
         secrets_exchange_statuses.get(friend_id).sent = true;
         check_and_add_to_online(friend_id);
       }).on('nickname', function(friend_id, nickname){
