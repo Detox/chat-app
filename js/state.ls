@@ -66,10 +66,10 @@ function Wrapper (detox-utils, async-eventer)
 		# v0 of the state structure
 		if !('version' of @_state)
 			@_state
-				..'version'		= 0
-				..'nickname'	= ''
-				..'seed'		= null
-				..'settings'	=
+				..'version'				= 0
+				..'nickname'			= ''
+				..'seed'				= null
+				..'settings'			=
 					'announce'						: true
 					'bootstrap_nodes'				: [
 						# TODO: This is just for demo purposes, in future must change to real bootstrap node(s)
@@ -98,7 +98,7 @@ function Wrapper (detox-utils, async-eventer)
 						[Number.MAX_SAFE_INTEGER, 600]
 					]
 					# TODO
-				..'contacts'	= [
+				..'contacts'			= [
 					# TODO: This is just for demo purposes
 					[
 						[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125]
@@ -110,7 +110,8 @@ function Wrapper (detox-utils, async-eventer)
 						null
 					]
 				]
-				..'secrets'		= []
+				..'contacts_requests'	= []
+				..'secrets'				= []
 
 		# Denormalize state after deserialization
 		if @_state['seed']
@@ -120,6 +121,13 @@ function Wrapper (detox-utils, async-eventer)
 			for contact in @_state['contacts']
 				contact[0]	= Uint8Array.from(contact[0])
 				contact 	= Contact(contact)
+				[contact['id'], contact]
+		)
+
+		@_state['contacts_requests']	= ArrayMap(
+			for contact in @_state['contacts_requests']
+				contact[0]	= Uint8Array.from(contact[0])
+				contact 	= ContactRequest(contact)
 				[contact['id'], contact]
 		)
 
@@ -360,12 +368,12 @@ function Wrapper (detox-utils, async-eventer)
 			@_state['settings']['reconnects_intervals']	= reconnects_intervals
 			@'fire'('settings_reconnects_intervals_changed', reconnects_intervals, old_reconnects_intervals)
 		/**
-		 * @return {!Contact[]}
+		 * @return {!Array<!Contact>}
 		 */
 		'get_contacts' : ->
 			Array.from(@_state['contacts'].values())
 		/**
-		 * @return {!Uint8Array[]}
+		 * @return {!Array<!Uint8Array>}
 		 */
 		'get_contacts_with_pending_messages' : ->
 			@_local_state.contacts_with_pending_messages
@@ -375,13 +383,12 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {!Uint8Array}	remote_secret
 		 */
 		'add_contact' : (contact_id, nickname, remote_secret) !->
-			# TODO: Secrets support
 			if @_state['contacts'].has(contact_id)
 				return
 			if !nickname
 				nickname = base58_encode(contact_id)
 			new_contact	= Contact([contact_id, nickname, 0, 0, remote_secret, null, null])
-			@_state['contacts'].set(new_contact['id'], new_contact)
+			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_added', new_contact)
 			@'fire'('contacts_changed')
 		/**
@@ -455,7 +462,33 @@ function Wrapper (detox-utils, async-eventer)
 			@'fire'('contact_deleted', old_contact)
 			@'fire'('contacts_changed')
 		/**
-		 * @return {!Uint8Array[]}
+		 * @return {!Array<!ContactRequest>}
+		 */
+		'get_contacts_requests' : ->
+			Array.from(@_state['contacts_requests'].values())
+		/**
+		 * @param {!Uint8Array}	contact_id
+		 * @param {string}		secret_name
+		 */
+		'add_contact_request' : (contact_id, secret_name) !->
+			if @_state['contacts_requests'].has(contact_id)
+				return
+			new_contact_request	= ContactRequest([contact_id, secret_name])
+			@_state['contacts_requests'].set(contact_id, new_contact_request)
+			@'fire'('contact_request_added', new_contact_request)
+			@'fire'('contacts_requests_changed')
+		/**
+		 * @param {!Uint8Array} contact_id
+		 */
+		'del_contact_request' : (contact_id) !->
+			old_contact_request	= @_state['contacts_requests'].get(contact_id)
+			if !old_contact_request
+				return
+			@_state['contacts_requests'].delete(contact_id)
+			@'fire'('contact_request_deleted', old_contact_request)
+			@'fire'('contacts_requests_changed')
+		/**
+		 * @return {!Array<!Uint8Array>}
 		 */
 		'get_online_contacts' : ->
 			Array.from(@_local_state.online_contacts)
@@ -501,14 +534,14 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @param {!Uint8Array} contact_id
 		 *
-		 * @return {!Message[]}
+		 * @return {!Array<!Message>}
 		 */
 		'get_contact_messages' : (contact_id) ->
 			@_local_state.messages.get(contact_id) || []
 		/**
 		 * @param {!Uint8Array} contact_id
 		 *
-		 * @return {!Message[]}
+		 * @return {!Array<!Message>}
 		 */
 		'get_contact_messages_to_be_sent' : (contact_id) ->
 			(@_local_state.messages.get(contact_id) || []).filter (message) ->
@@ -526,7 +559,7 @@ function Wrapper (detox-utils, async-eventer)
 			if !@_local_state.messages.has(contact_id)
 				@_local_state.messages.set(contact_id, [])
 			messages	= @_local_state.messages.get(contact_id)
-			id			= if messages.length then messages[messages.length - 1]['id'] + 1 else 0
+			id			= if messages.length then messages[* - 1]['id'] + 1 else 0
 			message		= Message([id, from, date_written, date_sent, text])
 			messages.push(message)
 			if from
@@ -538,13 +571,13 @@ function Wrapper (detox-utils, async-eventer)
 			@'fire'('contact_messages_changed', contact_id)
 		/**
 		 * @param {!Uint8Array}	contact_id
-		 * @param {number}		id			Message ID
+		 * @param {number}		message_id	Message ID
 		 * @param {number}		date		Date when message was sent
 		 */
-		'set_contact_message_sent' : (contact_id, id, date) !->
+		'set_contact_message_sent' : (contact_id, message_id, date) !->
 			messages	= @_local_state.messages.get(contact_id)
 			for message in messages by -1 # Should be faster to start from the end
-				if message['id'] == id
+				if message['id'] == message_id
 					message['date_sent']	= date
 					@_update_contact_with_pending_messages(contact_id)
 					break
@@ -588,9 +621,10 @@ function Wrapper (detox-utils, async-eventer)
 	 * Local secret is used by remote friend to connect to us.
 	 * Old local secret is kept in addition to local secret until it is proven that remote friend updated its remote secret.
 	 */
-	Contact	= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret'])
-	Message	= create_array_object(['id', 'from', 'date_sent', 'date_received', 'text'])
-	Secret	= create_array_object(['secret', 'name'])
+	Contact			= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret'])
+	ContactRequest	= create_array_object(['id', 'secret_name'])
+	Message			= create_array_object(['id', 'from', 'date_sent', 'date_received', 'text'])
+	Secret			= create_array_object(['secret', 'name'])
 
 	{
 		'Contact'		: Contact

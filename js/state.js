@@ -35,7 +35,7 @@
     }
   }
   function Wrapper(detoxUtils, asyncEventer){
-    var are_arrays_equal, ArrayMap, ArraySet, base58_encode, global_state, Contact, Message, Secret;
+    var are_arrays_equal, ArrayMap, ArraySet, base58_encode, global_state, Contact, ContactRequest, Message, Secret;
     are_arrays_equal = detoxUtils['are_arrays_equal'];
     ArrayMap = detoxUtils['ArrayMap'];
     ArraySet = detoxUtils['ArraySet'];
@@ -95,6 +95,7 @@
           'reconnects_intervals': [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]]
         };
         x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact', 0, 0, null, null, null]];
+        x$['contacts_requests'] = [];
         x$['secrets'] = [];
       }
       if (this._state['seed']) {
@@ -106,6 +107,16 @@
           contact = ref$[i$];
           contact[0] = Uint8Array.from(contact[0]);
           contact = Contact(contact);
+          results$.push([contact['id'], contact]);
+        }
+        return results$;
+      }.call(this)));
+      this._state['contacts_requests'] = ArrayMap((function(){
+        var i$, ref$, len$, results$ = [];
+        for (i$ = 0, len$ = (ref$ = this._state['contacts_requests']).length; i$ < len$; ++i$) {
+          contact = ref$[i$];
+          contact[0] = Uint8Array.from(contact[0]);
+          contact = ContactRequest(contact);
           results$.push([contact['id'], contact]);
         }
         return results$;
@@ -395,13 +406,13 @@
         this['fire']('settings_reconnects_intervals_changed', reconnects_intervals, old_reconnects_intervals);
       }
       /**
-       * @return {!Contact[]}
+       * @return {!Array<!Contact>}
        */,
       'get_contacts': function(){
         return Array.from(this._state['contacts'].values());
       }
       /**
-       * @return {!Uint8Array[]}
+       * @return {!Array<!Uint8Array>}
        */,
       'get_contacts_with_pending_messages': function(){
         return this._local_state.contacts_with_pending_messages;
@@ -420,7 +431,7 @@
           nickname = base58_encode(contact_id);
         }
         new_contact = Contact([contact_id, nickname, 0, 0, remote_secret, null, null]);
-        this._state['contacts'].set(new_contact['id'], new_contact);
+        this._state['contacts'].set(contact_id, new_contact);
         this['fire']('contact_added', new_contact);
         this['fire']('contacts_changed');
       }
@@ -512,7 +523,40 @@
         this['fire']('contacts_changed');
       }
       /**
-       * @return {!Uint8Array[]}
+       * @return {!Array<!ContactRequest>}
+       */,
+      'get_contacts_requests': function(){
+        return Array.from(this._state['contacts_requests'].values());
+      }
+      /**
+       * @param {!Uint8Array}	contact_id
+       * @param {string}		secret_name
+       */,
+      'add_contact_request': function(contact_id, secret_name){
+        var new_contact_request;
+        if (this._state['contacts_requests'].has(contact_id)) {
+          return;
+        }
+        new_contact_request = ContactRequest([contact_id, secret_name]);
+        this._state['contacts_requests'].set(contact_id, new_contact_request);
+        this['fire']('contact_request_added', new_contact_request);
+        this['fire']('contacts_requests_changed');
+      }
+      /**
+       * @param {!Uint8Array} contact_id
+       */,
+      'del_contact_request': function(contact_id){
+        var old_contact_request;
+        old_contact_request = this._state['contacts_requests'].get(contact_id);
+        if (!old_contact_request) {
+          return;
+        }
+        this._state['contacts_requests']['delete'](contact_id);
+        this['fire']('contact_request_deleted', old_contact_request);
+        this['fire']('contacts_requests_changed');
+      }
+      /**
+       * @return {!Array<!Uint8Array>}
        */,
       'get_online_contacts': function(){
         return Array.from(this._local_state.online_contacts);
@@ -569,7 +613,7 @@
       /**
        * @param {!Uint8Array} contact_id
        *
-       * @return {!Message[]}
+       * @return {!Array<!Message>}
        */,
       'get_contact_messages': function(contact_id){
         return this._local_state.messages.get(contact_id) || [];
@@ -577,7 +621,7 @@
       /**
        * @param {!Uint8Array} contact_id
        *
-       * @return {!Message[]}
+       * @return {!Array<!Message>}
        */,
       'get_contact_messages_to_be_sent': function(contact_id){
         return (this._local_state.messages.get(contact_id) || []).filter(function(message){
@@ -614,15 +658,15 @@
       }
       /**
        * @param {!Uint8Array}	contact_id
-       * @param {number}		id			Message ID
+       * @param {number}		message_id	Message ID
        * @param {number}		date		Date when message was sent
        */,
-      'set_contact_message_sent': function(contact_id, id, date){
+      'set_contact_message_sent': function(contact_id, message_id, date){
         var messages, i$, message;
         messages = this._local_state.messages.get(contact_id);
         for (i$ = messages.length - 1; i$ >= 0; --i$) {
           message = messages[i$];
-          if (message['id'] === id) {
+          if (message['id'] === message_id) {
             message['date_sent'] = date;
             this._update_contact_with_pending_messages(contact_id);
             break;
@@ -677,6 +721,7 @@
      * Old local secret is kept in addition to local secret until it is proven that remote friend updated its remote secret.
      */
     Contact = create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret']);
+    ContactRequest = create_array_object(['id', 'secret_name']);
     Message = create_array_object(['id', 'from', 'date_sent', 'date_received', 'text']);
     Secret = create_array_object(['secret', 'name']);
     return {
