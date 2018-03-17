@@ -24,7 +24,8 @@
       });
     },
     _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){
-      var timeoutSet, ArrayMap, secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat, this$ = this;
+      var are_arrays_equal, timeoutSet, ArrayMap, secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat, this$ = this;
+      are_arrays_equal = detoxUtils.are_arrays_equal;
       timeoutSet = detoxUtils.timeoutSet;
       ArrayMap = detoxUtils.ArrayMap;
       secrets_exchange_statuses = ArrayMap();
@@ -100,7 +101,17 @@
       });
       chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes()).once('announced', function(){
         state.set_announced(true);
-      }).on('introduction', function(friend_id, secret){}).on('connected', function(friend_id){
+      }).on('introduction', function(friend_id, secret){
+        var contact;
+        contact = state.get_contact(friend_id);
+        if (!contact) {
+          return true;
+        } else if (secret.length === 0 && !contact.local_secret) {
+          return true;
+        } else if (secret['else']) {
+          return false;
+        }
+      }).on('connected', function(friend_id){
         var reconnect_pending;
         if (reconnects_pending.has(friend_id)) {
           reconnect_pending = reconnects_pending.get(friend_id);
@@ -110,7 +121,7 @@
           reconnects_pending['delete'](friend_id);
         }
         if (!state.has_contact(friend_id)) {
-          state.add_contact(friend_id, detoxUtils.base58_encode(friend_id), null);
+          return;
         }
         secrets_exchange_statuses.set(friend_id, {
           received: false,

@@ -20,6 +20,7 @@ Polymer(
 			<~! detox-core.ready
 			@_connect_to_the_network(detox-chat, detox-core, detox-utils)
 	_connect_to_the_network : (detox-chat, detox-core, detox-utils) !->
+		are_arrays_equal			= detox-utils.are_arrays_equal
 		timeoutSet					= detox-utils.timeoutSet
 		ArrayMap					= detox-utils.ArrayMap
 
@@ -93,8 +94,23 @@ Polymer(
 			.once('announced', !->
 				state.set_announced(true)
 			)
-			.on('introduction', (friend_id, secret) !->
-				# TODO: Check secret
+			.on('introduction', (friend_id, secret) ->
+				contact	= state.get_contact(friend_id)
+				if !contact
+					# TODO: Check global secrets and show friendship request if it is the same as some of them, also don't connect immediately (return `false` instead of `true`)
+					true
+				else if (
+					# We've added contact, but never connected to it, blindly accept connection this time
+					if !contact.local_secret ||
+					# Known contact, check if secret is correct
+					are_arrays_equal(secret, contact.local_secret) ||
+					# There is a chance that old secret was used if updated secret didn't reach a friend
+					(contact.old_local_contact && are_arrays_equal(secret, contact.old_local_secret)
+				)
+					true
+				else
+					# TODO: Notify user that friend might have been compromised, since wrong secret was used!
+					false
 			)
 			.on('connected', (friend_id) !~>
 				if reconnects_pending.has(friend_id)
@@ -103,21 +119,23 @@ Polymer(
 						clearTimeout(reconnect_pending.timeout)
 					reconnects_pending.delete(friend_id)
 				if !state.has_contact(friend_id)
-					# TODO: This shouldn't happen, contact should be already added at this point
-					state.add_contact(friend_id, detox-utils.base58_encode(friend_id), null)
+					return
 				secrets_exchange_statuses.set(friend_id, {received: false, sent: false})
-				# TODO: Secret should be stored and expected next time
-				chat.secret(friend_id, detox-chat.generate_secret())
+				local_secret	= detox-chat.generate_secret()
+				state.set_contact_local_secret(friend_id, local_secret)
+				chat.secret(friend_id, local_secret)
 			)
 			.on('connection_failed', (friend_id) !~>
 				do_reconnect_if_needed(friend_id)
 			)
-			.on('secret', (friend_id, secret) !->
-				# TODO: Check secret
+			.on('secret', (friend_id, remote_secret) !->
+				# TODO: Check secret (if it was not used previously, if it is different from current remote secret, etc)
+				state.set_contact_remote_secret(friend_id, remote_secret)
 				secrets_exchange_statuses.get(friend_id).received	= true
 				check_and_add_to_online(friend_id)
 			)
 			.on('secret_received', (friend_id) !->
+				state.del_contact_old_local_secret(friend_id)
 				secrets_exchange_statuses.get(friend_id).sent		= true
 				check_and_add_to_online(friend_id)
 			)

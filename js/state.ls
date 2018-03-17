@@ -418,6 +418,33 @@ function Wrapper (detox-utils, async-eventer)
 			@'fire'('contact_updated', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
+		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	local_secret
+		 */
+		'set_contact_local_secret' : (friend_id, local_secret) !->
+			old_contact	= @_state['contacts'].get(friend_id)
+			if !old_contact
+				return
+			old_local_secret				= old_contact['old_local_secret'] || old_contact['local_secret']
+			new_contact						= old_contact['clone']()
+			new_contact['local_secret']		= local_secret
+			new_contact['old_local_secret']	= old_local_secret
+			@_state['contacts'].set(friend_id, new_contact)
+			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contacts_changed')
+		/**
+		 * @param {!Uint8Array}	friend_id
+		 */
+		'del_contact_old_local_secret' : (friend_id) !->
+			old_contact	= @_state['contacts'].get(friend_id)
+			if !old_contact
+				return
+			new_contact						= old_contact['clone']()
+			new_contact['old_local_secret']	= null
+			@_state['contacts'].set(friend_id, new_contact)
+			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contacts_changed')
+		/**
 		 * @param {!Uint8Array} friend_id
 		 */
 		'del_contact' : (friend_id) !->

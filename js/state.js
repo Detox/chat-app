@@ -466,6 +466,39 @@
         this['fire']('contacts_changed');
       }
       /**
+       * @param {!Uint8Array}	friend_id
+       * @param {!Uint8Array}	local_secret
+       */,
+      'set_contact_local_secret': function(friend_id, local_secret){
+        var old_contact, old_local_secret, new_contact;
+        old_contact = this._state['contacts'].get(friend_id);
+        if (!old_contact) {
+          return;
+        }
+        old_local_secret = old_contact['old_local_secret'] || old_contact['local_secret'];
+        new_contact = old_contact['clone']();
+        new_contact['local_secret'] = local_secret;
+        new_contact['old_local_secret'] = old_local_secret;
+        this._state['contacts'].set(friend_id, new_contact);
+        this['fire']('contact_updated', new_contact, old_contact);
+        this['fire']('contacts_changed');
+      }
+      /**
+       * @param {!Uint8Array}	friend_id
+       */,
+      'del_contact_old_local_secret': function(friend_id){
+        var old_contact, new_contact;
+        old_contact = this._state['contacts'].get(friend_id);
+        if (!old_contact) {
+          return;
+        }
+        new_contact = old_contact['clone']();
+        new_contact['old_local_secret'] = null;
+        this._state['contacts'].set(friend_id, new_contact);
+        this['fire']('contact_updated', new_contact, old_contact);
+        this['fire']('contacts_changed');
+      }
+      /**
        * @param {!Uint8Array} friend_id
        */,
       'del_contact': function(friend_id){
