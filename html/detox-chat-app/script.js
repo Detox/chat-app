@@ -52,13 +52,13 @@
         sent_messages_map.get(friend_id).set(date_sent, message.id);
       }
       state = this._state_instance;
-      core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_packets_per_second(), state.get_bucket_size()).once('ready', function(){
+      core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_settings_packets_per_second(), state.get_settings_bucket_size()).once('ready', function(){
         state.set_online(true);
         if (state.get_settings_announce()) {
           chat.announce();
         }
       });
-      chat = detoxChat.Chat(core, state.get_seed(), state.get_number_of_introduction_nodes(), state.get_number_of_intermediate_nodes()).once('announced', function(){
+      chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes()).once('announced', function(){
         state.set_announced(true);
       }).on('introduction', function(friend_id, secret){}).on('connected', function(friend_id){
         if (!state.has_contact(friend_id)) {

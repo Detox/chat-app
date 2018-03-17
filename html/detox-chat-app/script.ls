@@ -48,8 +48,8 @@ Polymer(
 			detox-core.generate_seed()
 			state.get_settings_bootstrap_nodes()
 			state.get_settings_ice_servers()
-			state.get_packets_per_second()
-			state.get_bucket_size()
+			state.get_settings_packets_per_second()
+			state.get_settings_bucket_size()
 		)
 			.once('ready', !->
 				state.set_online(true)
@@ -60,8 +60,8 @@ Polymer(
 		chat	= detox-chat.Chat(
 			core
 			state.get_seed()
-			state.get_number_of_introduction_nodes()
-			state.get_number_of_intermediate_nodes()
+			state.get_settings_number_of_introduction_nodes()
+			state.get_settings_number_of_intermediate_nodes()
 		)
 			.once('announced', !->
 				state.set_announced(true)
