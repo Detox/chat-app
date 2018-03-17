@@ -9,11 +9,6 @@
     is: 'detox-chat-app-sidebar',
     behaviors: [detoxChatApp.behaviors.state],
     properties: {
-      id_base58: String,
-      name: {
-        observer: '_nickname_changed',
-        type: String
-      },
       settings_announce: {
         observer: '_settings_announce_changed',
         type: Number
@@ -21,26 +16,14 @@
     },
     ready: function(){
       var this$ = this;
-      Promise.all([require(['@detox/chat', '@detox/crypto']), this._state_instance_ready]).then(function(arg$){
-        var ref$, detoxChat, detoxCrypto;
-        ref$ = arg$[0], detoxChat = ref$[0], detoxCrypto = ref$[1];
-        detoxCrypto.ready(function(){
-          detoxChat.ready(function(){
-            var state;
-            state = this$._state_instance;
-            this$.id_base58 = detoxChat.id_encode(detoxCrypto.create_keypair(state.get_seed()).ed25519['public'], new Uint8Array(0));
-            this$.name = state.get_nickname();
-            this$.settings_announce = this$._bool_to_int(state.get_settings_announce());
-            state.on('nickname_changed', function(new_name){
-              if (this$.name !== new_name) {
-                this$.name = new_name;
-              }
-            }).on('settings_announce_changed', function(new_settings_announce){
-              if (this$.settings_announce != new_settings_announce) {
-                this$.settings_announce = this$._bool_to_int(new_settings_announce);
-              }
-            });
-          });
+      this._state_instance_ready.then(function(){
+        var state;
+        state = this$._state_instance;
+        this$.settings_announce = this$._bool_to_int(state.get_settings_announce());
+        state.on('settings_announce_changed', function(new_settings_announce){
+          if (this$.settings_announce != new_settings_announce) {
+            this$.settings_announce = this$._bool_to_int(new_settings_announce);
+          }
         });
       });
     },
@@ -51,18 +34,10 @@
         return 0;
       }
     },
-    _nickname_changed: function(){
-      if (this.name !== this._state_instance.get_nickname()) {
-        this._state_instance.set_nickname(this.name);
-      }
-    },
     _settings_announce_changed: function(){
       if (this.settings_announce != this._state_instance.get_settings_announce()) {
         this._state_instance.set_settings_announce(this.settings_announce == 1);
       }
-    },
-    _id_click: function(e){
-      e.target.select();
     }
   });
 }).call(this);
