@@ -405,6 +405,19 @@ function Wrapper (detox-utils, async-eventer)
 			@'fire'('contact_updated', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
+		 * @param {!Uint8Array}	friend_id
+		 * @param {!Uint8Array}	remote_secret
+		 */
+		'set_contact_remote_secret' : (friend_id, remote_secret) !->
+			old_contact	= @_state['contacts'].get(friend_id)
+			if !old_contact
+				return
+			new_contact						= old_contact['clone']()
+			new_contact['remote_secret']	= remote_secret
+			@_state['contacts'].set(friend_id, new_contact)
+			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contacts_changed')
+		/**
 		 * @param {!Uint8Array} friend_id
 		 */
 		'del_contact' : (friend_id) !->

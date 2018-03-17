@@ -42,7 +42,7 @@ Polymer(
 			name			= modal.querySelector('#name').value
 			([detox-chat])	<~! require(['@detox/chat']).then
 			try
-				[public_key, secret]	= detox-chat.id_decode(id_base58)
-				@_state_instance.add_contact(public_key, name, secret)
+				[public_key, remote_secret]	= detox-chat.id_decode(id_base58)
+				@_state_instance.add_contact(public_key, name, remote_secret)
 		)
 )
