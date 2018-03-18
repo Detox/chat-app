@@ -378,6 +378,11 @@ function Wrapper (detox-utils, async-eventer)
 		'get_contacts_with_pending_messages' : ->
 			@_local_state.contacts_with_pending_messages
 		/**
+		 * @param {!Uint8Array} contact_id
+		 */
+		'get_contact' : (contact_id) ->
+			@_state['contacts'].get(contact_id)
+		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {string}		nickname
 		 * @param {Uint8Array}	remote_secret

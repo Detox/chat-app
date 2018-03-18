@@ -418,6 +418,12 @@
         return this._local_state.contacts_with_pending_messages;
       }
       /**
+       * @param {!Uint8Array} contact_id
+       */,
+      'get_contact': function(contact_id){
+        return this._state['contacts'].get(contact_id);
+      }
+      /**
        * @param {!Uint8Array}	contact_id
        * @param {string}		nickname
        * @param {Uint8Array}	remote_secret
