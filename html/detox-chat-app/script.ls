@@ -160,7 +160,9 @@ Polymer(
 				check_and_add_to_online(contact_id)
 			)
 			.on('nickname', (contact_id, nickname) !->
-				state.set_contact_nickname(contact_id, nickname)
+				nickname	= nickname.trimLeft()
+				if nickname
+					state.set_contact_nickname(contact_id, nickname)
 			)
 			.on('text_message', (contact_id, date_written, date_sent, text_message) !->
 				# TODO: Check date_written and date_sent

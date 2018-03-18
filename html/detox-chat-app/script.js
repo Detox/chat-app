@@ -168,7 +168,10 @@
         secrets_exchange_statuses.get(contact_id).sent = true;
         check_and_add_to_online(contact_id);
       }).on('nickname', function(contact_id, nickname){
-        state.set_contact_nickname(contact_id, nickname);
+        nickname = nickname.trimLeft();
+        if (nickname) {
+          state.set_contact_nickname(contact_id, nickname);
+        }
       }).on('text_message', function(contact_id, date_written, date_sent, text_message){
         state.add_contact_message(contact_id, true, date_written, date_sent, text_message);
       }).on('text_message_received', function(contact_id, date_sent){
