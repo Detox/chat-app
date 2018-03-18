@@ -19,10 +19,11 @@
       this['_state_instance_ready'] = require(['@detox/chat', 'state']).then(function(arg$){
         var detoxChat, state;
         detoxChat = arg$[0], state = arg$[1];
-        this$._state_instance = state['get_instance'](this$.chatId);
-        if (!this$._state_instance['ready']()) {
-          csw['functions']['notify']("Previous state was not found, new identity generated", 'warning');
-          this$._state_instance['set_seed'](detoxChat['generate_seed']());
+        this$._state_instance = state.get_instance(this$.chatId);
+        if (!this$._state_instance.ready()) {
+          csw.functions.notify("Previous state was not found, new identity generated", 'warning');
+          this$._state_instance.set_seed(detoxChat.generate_seed());
+          this$._state_instance.add_secret(detoxChat.generate_secret().slice(0, 4), 'Default secret');
         }
       });
     }

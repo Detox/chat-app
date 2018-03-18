@@ -98,11 +98,11 @@ Polymer(
 				contact	= state.get_contact(contact_id)
 				if !contact
 					secret_length	= secret.length
-					for {secret, name} in state.get_secrets()
+					for local_secret in state.get_secrets()
 						padded_secret	= new Uint8Array(secret_length)
-							..set(secret)
+							..set(local_secret.secret)
 						if are_arrays_equal(secret, padded_secret)
-							state.add_contact_request(contact_id, name)
+							state.add_contact_request(contact_id, local_secret.name)
 							break
 					false
 				else if (
@@ -171,9 +171,7 @@ Polymer(
 			)
 		state
 			.on('contact_added', (new_contact) !~>
-				# TODO: Secrets support
-				# TODO: Handle failed connections
-				chat.connect_to(new_contact.id, new Uint8Array(0))
+				chat.connect_to(new_contact.id, new_contact.remote_secret)
 			)
 			.on('contact_message_added', (contact_id, message) !->
 				if (

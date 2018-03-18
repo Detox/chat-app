@@ -414,7 +414,7 @@ function Wrapper (detox-utils, async-eventer)
 			new_contact				= old_contact['clone']()
 			new_contact['nickname']	= nickname
 			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contact_changed', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
 		 * @param {!Uint8Array}	contact_id
@@ -427,7 +427,7 @@ function Wrapper (detox-utils, async-eventer)
 			new_contact						= old_contact['clone']()
 			new_contact['remote_secret']	= remote_secret
 			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contact_changed', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
 		 * @param {!Uint8Array}	contact_id
@@ -442,7 +442,7 @@ function Wrapper (detox-utils, async-eventer)
 			new_contact['local_secret']		= local_secret
 			new_contact['old_local_secret']	= old_local_secret
 			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contact_changed', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
 		 * @param {!Uint8Array}	contact_id
@@ -454,7 +454,7 @@ function Wrapper (detox-utils, async-eventer)
 			new_contact						= old_contact['clone']()
 			new_contact['old_local_secret']	= null
 			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contact_changed', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
 		 * @param {!Uint8Array} contact_id
@@ -534,7 +534,7 @@ function Wrapper (detox-utils, async-eventer)
 			new_contact						= old_contact['clone']()
 			new_contact['last_time_active']	= +(new Date)
 			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_updated', new_contact, old_contact)
+			@'fire'('contact_changed', new_contact, old_contact)
 			@'fire'('contacts_changed')
 		/**
 		 * @param {!Uint8Array} contact_id
@@ -599,23 +599,23 @@ function Wrapper (detox-utils, async-eventer)
 			new_secret	= Secret([secret, name])
 			@_state['secrets'].set(new_secret['secret'], new_secret)
 			@'fire'('secret_added', new_secret)
-			@'fire'('secrets_updated')
+			@'fire'('secrets_changed')
 		/**
 		 * @param {!Array<!Secret>} secrets
 		 */
 		'set_secrets' : (secrets) !->
 			@_state['secrets']	= secrets
-			@'fire'('secrets_updated')
+			@'fire'('secrets_changed')
 		/**
 		 * @param {!Uint8Array}	secret
 		 */
-		'adel_secret' : (secret) !->
+		'del_secret' : (secret) !->
 			old_secret	= @_state['secrets'].get(secret)
 			if !old_secret
 				return
 			@_state['secrets'].delete(secret)
 			@'fire'('secret_deleted', old_secret)
-			@'fire'('secrets_updated')
+			@'fire'('secrets_changed')
 		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)

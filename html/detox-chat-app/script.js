@@ -102,16 +102,16 @@
       chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes()).once('announced', function(){
         state.set_announced(true);
       }).on('introduction', function(contact_id, secret){
-        var contact, secret_length, i$, ref$, len$, ref1$, name, x$, padded_secret;
+        var contact, secret_length, i$, ref$, len$, local_secret, x$, padded_secret;
         contact = state.get_contact(contact_id);
         if (!contact) {
           secret_length = secret.length;
           for (i$ = 0, len$ = (ref$ = state.get_secrets()).length; i$ < len$; ++i$) {
-            ref1$ = ref$[i$], secret = ref1$.secret, name = ref1$.name;
+            local_secret = ref$[i$];
             x$ = padded_secret = new Uint8Array(secret_length);
-            x$.set(secret);
+            x$.set(local_secret.secret);
             if (are_arrays_equal(secret, padded_secret)) {
-              state.add_contact_request(contact_id, name);
+              state.add_contact_request(contact_id, local_secret.name);
               break;
             }
           }
@@ -174,7 +174,7 @@
         do_reconnect_if_needed(contact_id);
       });
       state.on('contact_added', function(new_contact){
-        chat.connect_to(new_contact.id, new Uint8Array(0));
+        chat.connect_to(new_contact.id, new_contact.remote_secret);
       }).on('contact_message_added', function(contact_id, message){
         if (message.from || message.date_received || !state.has_online_contact(contact_id)) {
           do_reconnect_if_needed(contact_id);

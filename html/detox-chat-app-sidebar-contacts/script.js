@@ -51,7 +51,8 @@
       this._state_instance.set_ui_active_contact(e.model.item.id);
     },
     _accept_contact_request: function(e){
-      var item, modal;
+      var state, item, modal;
+      state = this._state_instance;
       item = e.model.item;
       modal = csw.functions.simple_modal("<h3>What do you want to do with contact request from <i>" + item.name + "</i> that used secret <i>" + item.secret_name + "</i>?</h3>\n<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n<csw-button><button id=\"reject\">Reject</button></csw-button>\n<csw-button><button id=\"cancel\">Cancel</button></csw-button>");
       modal.querySelector('#accept').addEventListener('click', function(){

@@ -463,7 +463,7 @@
         new_contact = old_contact['clone']();
         new_contact['nickname'] = nickname;
         this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_updated', new_contact, old_contact);
+        this['fire']('contact_changed', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
@@ -479,7 +479,7 @@
         new_contact = old_contact['clone']();
         new_contact['remote_secret'] = remote_secret;
         this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_updated', new_contact, old_contact);
+        this['fire']('contact_changed', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
@@ -497,7 +497,7 @@
         new_contact['local_secret'] = local_secret;
         new_contact['old_local_secret'] = old_local_secret;
         this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_updated', new_contact, old_contact);
+        this['fire']('contact_changed', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
@@ -512,7 +512,7 @@
         new_contact = old_contact['clone']();
         new_contact['old_local_secret'] = null;
         this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_updated', new_contact, old_contact);
+        this['fire']('contact_changed', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
@@ -613,7 +613,7 @@
         new_contact = old_contact['clone']();
         new_contact['last_time_active'] = +new Date;
         this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_updated', new_contact, old_contact);
+        this['fire']('contact_changed', new_contact, old_contact);
         this['fire']('contacts_changed');
       }
       /**
@@ -694,19 +694,19 @@
         new_secret = Secret([secret, name]);
         this._state['secrets'].set(new_secret['secret'], new_secret);
         this['fire']('secret_added', new_secret);
-        this['fire']('secrets_updated');
+        this['fire']('secrets_changed');
       }
       /**
        * @param {!Array<!Secret>} secrets
        */,
       'set_secrets': function(secrets){
         this._state['secrets'] = secrets;
-        this['fire']('secrets_updated');
+        this['fire']('secrets_changed');
       }
       /**
        * @param {!Uint8Array}	secret
        */,
-      'adel_secret': function(secret){
+      'del_secret': function(secret){
         var old_secret;
         old_secret = this._state['secrets'].get(secret);
         if (!old_secret) {
@@ -714,7 +714,7 @@
         }
         this._state['secrets']['delete'](secret);
         this['fire']('secret_deleted', old_secret);
-        this['fire']('secrets_updated');
+        this['fire']('secrets_changed');
       }
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);

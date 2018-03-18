@@ -12,7 +12,8 @@ window.{}detox-chat-app.{}behaviors
 		created : !->
 			@'_state_instance_ready'	= require(['@detox/chat', 'state'])
 				.then ([detox-chat, state]) !~>
-					@_state_instance	= state['get_instance'](@chat-id)
-					if !@_state_instance['ready']()
-						csw['functions']['notify']("Previous state was not found, new identity generated", 'warning')
-						@_state_instance['set_seed'](detox-chat['generate_seed']())
+					@_state_instance	= state.get_instance(@chat-id)
+					if !@_state_instance.ready()
+						csw.functions.notify("Previous state was not found, new identity generated", 'warning')
+						@_state_instance.set_seed(detox-chat.generate_seed())
+						@_state_instance.add_secret(detox-chat.generate_secret().slice(0, 4), 'Default secret')
