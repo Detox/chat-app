@@ -9,7 +9,11 @@
     is: 'detox-chat-app-sidebar-contacts',
     behaviors: [detoxChatApp.behaviors.state],
     properties: {
-      contacts: Array
+      contacts: Array,
+      contacts_requests: {
+        type: Array,
+        value: []
+      }
     },
     ready: function(){
       var this$ = this;
@@ -17,13 +21,15 @@
         var state;
         state = this$._state_instance;
         this$.contacts = state.get_contacts();
+        this$.contacts_requests = state.get_contacts_requests();
         state.on('contacts_changed', function(){
           this$.contacts = state.get_contacts();
+        }).on('contacts_requests_changed', function(){
+          var contacts_requests;
+          contacts_requests = state.get_contacts_requests();
+          this$.contacts_requests = contacts_requests;
         });
       });
-    },
-    _set_active_contact: function(e){
-      this._state_instance.set_ui_active_contact(e.model.item.id);
     },
     _add_contact: function(){
       var modal, this$ = this;
@@ -39,6 +45,26 @@
             this$._state_instance.add_contact(public_key, name, remote_secret);
           } catch (e$) {}
         });
+      });
+    },
+    _set_active_contact: function(e){
+      this._state_instance.set_ui_active_contact(e.model.item.id);
+    },
+    _accept_contact_request: function(e){
+      var item, modal;
+      item = e.model.item;
+      modal = csw.functions.simple_modal("<h3>What do you want to do with contact request from <i>" + item.name + "</i> that used secret <i>" + item.secret_name + "</i>?</h3>\n<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n<csw-button><button id=\"reject\">Reject</button></csw-button>\n<csw-button><button id=\"cancel\">Cancel</button></csw-button>");
+      modal.querySelector('#accept').addEventListener('click', function(){
+        state.add_contact(item.id, '', new Uint8Array(0));
+        state.del_contact_request(item.id);
+        modal.close();
+      });
+      modal.querySelector('#reject').addEventListener('click', function(){
+        state.del_contact_request(item.id);
+        modal.close();
+      });
+      modal.querySelector('#cancel').addEventListener('click', function(){
+        modal.close();
       });
     }
   });

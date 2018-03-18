@@ -97,8 +97,14 @@ Polymer(
 			.on('introduction', (contact_id, secret) ->
 				contact	= state.get_contact(contact_id)
 				if !contact
-					# TODO: Check global secrets and show friendship request if it is the same as some of them, also don't connect immediately (return `false` instead of `true`)
-					true
+					secret_length	= secret.length
+					for {secret, name} in state.get_secrets()
+						padded_secret	= new Uint8Array(secret_length)
+							..set(secret)
+						if are_arrays_equal(secret, padded_secret)
+							state.add_contact_request(contact_id, name)
+							break
+					false
 				else if (
 					# We've added contact, but never connected to it, blindly accept connection this time
 					!contact.local_secret ||

@@ -102,10 +102,20 @@
       chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes()).once('announced', function(){
         state.set_announced(true);
       }).on('introduction', function(contact_id, secret){
-        var contact;
+        var contact, secret_length, i$, ref$, len$, ref1$, name, x$, padded_secret;
         contact = state.get_contact(contact_id);
         if (!contact) {
-          return true;
+          secret_length = secret.length;
+          for (i$ = 0, len$ = (ref$ = state.get_secrets()).length; i$ < len$; ++i$) {
+            ref1$ = ref$[i$], secret = ref1$.secret, name = ref1$.name;
+            x$ = padded_secret = new Uint8Array(secret_length);
+            x$.set(secret);
+            if (are_arrays_equal(secret, padded_secret)) {
+              state.add_contact_request(contact_id, name);
+              break;
+            }
+          }
+          return false;
         } else if (!contact.local_secret || are_arrays_equal(secret, contact.local_secret) || (contact.old_local_contact && are_arrays_equal(secret, contact.old_local_secret))) {
           return true;
         } else {

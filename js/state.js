@@ -420,7 +420,7 @@
       /**
        * @param {!Uint8Array}	contact_id
        * @param {string}		nickname
-       * @param {!Uint8Array}	remote_secret
+       * @param {Uint8Array}	remote_secret
        */,
       'add_contact': function(contact_id, nickname, remote_secret){
         var new_contact;
@@ -537,7 +537,7 @@
         if (this._state['contacts_requests'].has(contact_id)) {
           return;
         }
-        new_contact_request = ContactRequest([contact_id, secret_name]);
+        new_contact_request = ContactRequest([contact_id, base58_encode(contact_id), secret_name]);
         this._state['contacts_requests'].set(contact_id, new_contact_request);
         this['fire']('contact_request_added', new_contact_request);
         this['fire']('contacts_requests_changed');
@@ -721,11 +721,12 @@
      * Old local secret is kept in addition to local secret until it is proven that remote friend updated its remote secret.
      */
     Contact = create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret']);
-    ContactRequest = create_array_object(['id', 'secret_name']);
+    ContactRequest = create_array_object(['id', 'name', 'secret_name']);
     Message = create_array_object(['id', 'from', 'date_sent', 'date_received', 'text']);
     Secret = create_array_object(['secret', 'name']);
     return {
       'Contact': Contact,
+      'ContactRequest': ContactRequest,
       'Message': Message,
       'Secret': Secret,
       'State': State

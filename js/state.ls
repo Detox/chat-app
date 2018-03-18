@@ -380,7 +380,7 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {string}		nickname
-		 * @param {!Uint8Array}	remote_secret
+		 * @param {Uint8Array}	remote_secret
 		 */
 		'add_contact' : (contact_id, nickname, remote_secret) !->
 			if @_state['contacts'].has(contact_id)
@@ -473,7 +473,7 @@ function Wrapper (detox-utils, async-eventer)
 		'add_contact_request' : (contact_id, secret_name) !->
 			if @_state['contacts_requests'].has(contact_id)
 				return
-			new_contact_request	= ContactRequest([contact_id, secret_name])
+			new_contact_request	= ContactRequest([contact_id, base58_encode(contact_id), secret_name])
 			@_state['contacts_requests'].set(contact_id, new_contact_request)
 			@'fire'('contact_request_added', new_contact_request)
 			@'fire'('contacts_requests_changed')
@@ -622,22 +622,23 @@ function Wrapper (detox-utils, async-eventer)
 	 * Old local secret is kept in addition to local secret until it is proven that remote friend updated its remote secret.
 	 */
 	Contact			= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret'])
-	ContactRequest	= create_array_object(['id', 'secret_name'])
+	ContactRequest	= create_array_object(['id', 'name', 'secret_name'])
 	Message			= create_array_object(['id', 'from', 'date_sent', 'date_received', 'text'])
 	Secret			= create_array_object(['secret', 'name'])
 
 	{
-		'Contact'		: Contact
-		'Message'		: Message
-		'Secret'		: Secret
-		'State'			: State
+		'Contact'			: Contact
+		'ContactRequest'	: ContactRequest
+		'Message'			: Message
+		'Secret'			: Secret
+		'State'				: State
 		/**
 		 * @param {string}	name
 		 * @param {!Object}	initial_state
 		 *
 		 * @return {!detoxState}
 		 */
-		'get_instance'	: (name, initial_state) ->
+		'get_instance'		: (name, initial_state) ->
 			if !(name of global_state)
 				global_state[name]	= State(initial_state)
 			global_state[name]

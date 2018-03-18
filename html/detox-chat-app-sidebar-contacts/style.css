@@ -1,1 +1,1 @@
-:host{display:block}csw-group{display:block;margin-top:1em}csw-group csw-button{width:100%}csw-group csw-button button{justify-content:flex-start}csw-group csw-button button div{text-overflow:ellipsis;overflow:hidden}
+:host{display:block}csw-group{display:block;margin-top:1em}csw-group csw-button{width:100%}csw-group csw-button button{justify-content:flex-start}csw-group csw-button button div{text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
