@@ -65,12 +65,11 @@ Polymer(
 				if reconnect_pending.trial <= reconnection_trial
 					reconnect_pending.timeout	= timeoutSet(time_before_next_attempt, !->
 						reconnect_pending.timeout	= null
-						# TODO: Secrets support
-						chat.connect_to(contact_id, new Uint8Array(0))
+						contact						= state.get_contact(contact_id)
+						chat.connect_to(contact_id, contact.remote_secret)
 					)
 					break
 
-		# TODO: For now we are using defaults and hardcoded constants for Chat and Core instances, but in future this will be configurable
 		state	= @_state_instance
 		core	= detox-core.Core(
 			detox-core.generate_seed()

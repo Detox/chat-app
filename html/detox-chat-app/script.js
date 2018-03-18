@@ -88,8 +88,10 @@
           }
         }
         function fn$(){
+          var contact;
           reconnect_pending.timeout = null;
-          chat.connect_to(contact_id, new Uint8Array(0));
+          contact = state.get_contact(contact_id);
+          chat.connect_to(contact_id, contact.remote_secret);
         }
       }
       state = this._state_instance;
