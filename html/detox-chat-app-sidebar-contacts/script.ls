@@ -29,7 +29,7 @@ Polymer(
 				@contacts_requests	= contacts_requests
 			)
 	_add_contact : !->
-		modal	= csw.functions.confirm("""
+		content	= """
 			<csw-form>
 				<form>
 					<label>
@@ -44,7 +44,8 @@ Polymer(
 					</label>
 				</form>
 			</csw-form>
-		""", !~>
+		"""
+		modal	= csw.functions.confirm(content, !~>
 			id_base58		= modal.querySelector('#id').value
 			name			= modal.querySelector('#name').value
 			([detox-chat])	<~! require(['@detox/chat']).then
@@ -58,12 +59,13 @@ Polymer(
 		state	= @_state_instance
 
 		item	= e.model.item
-		modal	= csw.functions.simple_modal("""
+		content	= """
 			<h3>What do you want to do with contact request from <i>#{item.name}</i> that used secret <i>#{item.secret_name}</i>?</h3>
 			<csw-button primary><button id="accept">Accept</button></csw-button>
 			<csw-button><button id="reject">Reject</button></csw-button>
 			<csw-button><button id="cancel">Cancel</button></csw-button>
-		""")
+		"""
+		modal	= csw.functions.simple_modal(content)
 		modal.querySelector('#accept').addEventListener('click', !->
 			state.add_contact(item.id, '', new Uint8Array(0))
 			state.del_contact_request(item.id)

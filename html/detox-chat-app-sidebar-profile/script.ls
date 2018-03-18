@@ -48,7 +48,7 @@ Polymer(
 	_id_click : (e) !->
 		e.target.select()
 	_add_secret : !->
-		modal	= csw.functions.confirm("""
+		content	= """
 			<csw-form>
 				<form>
 					<label>Secret name:</label>
@@ -65,7 +65,8 @@ Polymer(
 					</label>
 				</form>
 			</csw-form>
-		""", !~>
+		"""
+		modal	= csw.functions.confirm(form, !~>
 			name	= modal.querySelector('#name').value
 			if !name
 				return

@@ -32,8 +32,9 @@
       });
     },
     _add_contact: function(){
-      var modal, this$ = this;
-      modal = csw.functions.confirm("<csw-form>\n	<form>\n		<label>\n			<csw-textarea>\n				<textarea id=\"id\" placeholder=\"ID\"></textarea>\n			</csw-textarea>\n		</label>\n		<label>\n			<csw-textarea>\n				<textarea id=\"name\" placeholder=\"Name (optional)\"></textarea>\n			</csw-textarea>\n		</label>\n	</form>\n</csw-form>", function(){
+      var content, modal, this$ = this;
+      content = "<csw-form>\n	<form>\n		<label>\n			<csw-textarea>\n				<textarea id=\"id\" placeholder=\"ID\"></textarea>\n			</csw-textarea>\n		</label>\n		<label>\n			<csw-textarea>\n				<textarea id=\"name\" placeholder=\"Name (optional)\"></textarea>\n			</csw-textarea>\n		</label>\n	</form>\n</csw-form>";
+      modal = csw.functions.confirm(content, function(){
         var id_base58, name;
         id_base58 = modal.querySelector('#id').value;
         name = modal.querySelector('#name').value;
@@ -51,10 +52,11 @@
       this._state_instance.set_ui_active_contact(e.model.item.id);
     },
     _accept_contact_request: function(e){
-      var state, item, modal;
+      var state, item, content, modal;
       state = this._state_instance;
       item = e.model.item;
-      modal = csw.functions.simple_modal("<h3>What do you want to do with contact request from <i>" + item.name + "</i> that used secret <i>" + item.secret_name + "</i>?</h3>\n<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n<csw-button><button id=\"reject\">Reject</button></csw-button>\n<csw-button><button id=\"cancel\">Cancel</button></csw-button>");
+      content = "<h3>What do you want to do with contact request from <i>" + item.name + "</i> that used secret <i>" + item.secret_name + "</i>?</h3>\n<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n<csw-button><button id=\"reject\">Reject</button></csw-button>\n<csw-button><button id=\"cancel\">Cancel</button></csw-button>";
+      modal = csw.functions.simple_modal(content);
       modal.querySelector('#accept').addEventListener('click', function(){
         state.add_contact(item.id, '', new Uint8Array(0));
         state.del_contact_request(item.id);
