@@ -53,7 +53,6 @@ Polymer(
 				nickname	= state.get_nickname()
 				if nickname
 					chat.nickname(contact_id, nickname)
-				# TODO: In addition to this we need to scan for contacts with such messages and actively try to connect to them
 				for message in state.get_contact_messages_to_be_sent(contact_id)
 					send_message(contact_id, message)
 		/**
