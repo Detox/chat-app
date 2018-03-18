@@ -20,7 +20,7 @@
 		"demo-http-server" : "http-server"
 	},
 	"dependencies"    : {
-		"@detox/chat"                    : "^0.6.0",
+		"@detox/chat"                    : "^0.6.1",
 		"@detox/core"                    : "^0.5.1",
 		"@detox/utils"                   : "^1.6.0",
 		"@polymer/polymer"               : "^2.5.0",
