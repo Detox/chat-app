@@ -27,6 +27,22 @@ Polymer(
 		secrets_exchange_statuses	= ArrayMap()
 		sent_messages_map			= ArrayMap()
 		reconnects_pending			= ArrayMap()
+
+
+		state	= @_state_instance
+		core	= detox-core.Core(
+			detox-core.generate_seed()
+			state.get_settings_bootstrap_nodes()
+			state.get_settings_ice_servers()
+			state.get_settings_packets_per_second()
+			state.get_settings_bucket_size()
+		)
+		chat	= detox-chat.Chat(
+			core
+			state.get_seed()
+			state.get_settings_number_of_introduction_nodes()
+			state.get_settings_number_of_intermediate_nodes()
+		)
 		/**
 		 * @param {!Uint8Array} contact_id
 		 */
@@ -53,7 +69,14 @@ Polymer(
 		 * @param {!Uint8Array} contact_id
 		 */
 		!function do_reconnect_if_needed (contact_id)
-			if !state.get_contact_messages_to_be_sent(contact_id).length # TODO: Or secrets were not exchanged (never connected)
+			contact	= state.get_contact(contact_id)
+			if !contact
+				return
+			# Reconnect when there are messages to be sent or contact was never connected
+			if !(
+				state.get_contact_messages_to_be_sent(contact_id).length &&
+				contact.local_secret
+			)
 				return
 			if !reconnects_pending.has(contact_id)
 				reconnects_pending.set(contact_id, {trial: 0, timeout: null})
@@ -65,31 +88,20 @@ Polymer(
 				if reconnect_pending.trial <= reconnection_trial
 					reconnect_pending.timeout	= timeoutSet(time_before_next_attempt, !->
 						reconnect_pending.timeout	= null
-						contact						= state.get_contact(contact_id)
 						chat.connect_to(contact_id, contact.remote_secret)
 					)
 					break
 
-		state	= @_state_instance
-		core	= detox-core.Core(
-			detox-core.generate_seed()
-			state.get_settings_bootstrap_nodes()
-			state.get_settings_ice_servers()
-			state.get_settings_packets_per_second()
-			state.get_settings_bucket_size()
-		)
+		core
 			.once('ready', !->
 				state.set_online(true)
 
 				if state.get_settings_announce()
 					chat.announce()
+				for contact in state.get_contacts()
+					do_reconnect_if_needed(contact.id)
 			)
-		chat	= detox-chat.Chat(
-			core
-			state.get_seed()
-			state.get_settings_number_of_introduction_nodes()
-			state.get_settings_number_of_intermediate_nodes()
-		)
+		chat
 			.once('announced', !->
 				state.set_announced(true)
 			)

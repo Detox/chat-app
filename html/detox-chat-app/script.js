@@ -31,6 +31,9 @@
       secrets_exchange_statuses = ArrayMap();
       sent_messages_map = ArrayMap();
       reconnects_pending = ArrayMap();
+      state = this._state_instance;
+      core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_settings_packets_per_second(), state.get_settings_bucket_size());
+      chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes());
       /**
        * @param {!Uint8Array} contact_id
        */
@@ -65,8 +68,12 @@
        * @param {!Uint8Array} contact_id
        */
       function do_reconnect_if_needed(contact_id){
-        var reconnect_pending, i$, ref$, len$, ref1$, reconnection_trial, time_before_next_attempt;
-        if (!state.get_contact_messages_to_be_sent(contact_id).length) {
+        var contact, reconnect_pending, i$, ref$, len$, ref1$, reconnection_trial, time_before_next_attempt;
+        contact = state.get_contact(contact_id);
+        if (!contact) {
+          return;
+        }
+        if (!(state.get_contact_messages_to_be_sent(contact_id).length && contact.local_secret)) {
           return;
         }
         if (!reconnects_pending.has(contact_id)) {
@@ -88,20 +95,22 @@
           }
         }
         function fn$(){
-          var contact;
           reconnect_pending.timeout = null;
-          contact = state.get_contact(contact_id);
           chat.connect_to(contact_id, contact.remote_secret);
         }
       }
-      state = this._state_instance;
-      core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_settings_packets_per_second(), state.get_settings_bucket_size()).once('ready', function(){
+      core.once('ready', function(){
+        var i$, ref$, len$, contact;
         state.set_online(true);
         if (state.get_settings_announce()) {
           chat.announce();
         }
+        for (i$ = 0, len$ = (ref$ = state.get_contacts()).length; i$ < len$; ++i$) {
+          contact = ref$[i$];
+          do_reconnect_if_needed(contact.id);
+        }
       });
-      chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes()).once('announced', function(){
+      chat.once('announced', function(){
         state.set_announced(true);
       }).on('introduction', function(contact_id, secret){
         var contact, secret_length, i$, ref$, len$, local_secret, x$, padded_secret;
