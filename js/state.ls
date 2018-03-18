@@ -59,7 +59,6 @@ function Wrapper (detox-utils, async-eventer)
 			messages						: ArrayMap()
 			ui								:
 				active_contact	: null
-				# TODO
 			online_contacts					: ArraySet()
 			contacts_with_pending_messages	: ArraySet()
 
@@ -97,7 +96,6 @@ function Wrapper (detox-utils, async-eventer)
 						[100, 300]
 						[Number.MAX_SAFE_INTEGER, 600]
 					]
-					# TODO
 				..'contacts'			= [
 					# TODO: This is just for demo purposes
 					[
@@ -616,7 +614,6 @@ function Wrapper (detox-utils, async-eventer)
 			@_state['secrets'].delete(secret)
 			@'fire'('secret_deleted', old_secret)
 			@'fire'('secrets_changed')
-		# TODO: Many more methods here
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)
 	Object.defineProperty(State::, 'constructor', {value: State})
