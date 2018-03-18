@@ -32,7 +32,6 @@ Polymer(
 					}
 
 			public_key	= detox-crypto.create_keypair(state.get_seed()).ed25519.public
-			# TODO: Secrets and multiple textarea elements with different IDs
 			@id_base58	= id_encode(public_key, new Uint8Array(0))
 			@name		= state.get_nickname()
 			update_secrets()
