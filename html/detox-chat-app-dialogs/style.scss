@@ -25,6 +25,10 @@
 	overflow       : auto;
 	padding        : 1em;
 
+	&[hidden] {
+		display : none;
+	}
+
 	.message {
 		display       : flex;
 		margin-bottom : 1em;
