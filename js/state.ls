@@ -241,9 +241,9 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'set_settings_announce' : (announce) !->
 			old_announce					= @_state['settings']['announce']
-			new_announce					= !!announce
+			new_announce					= announce
 			@_state['settings']['announce']	= new_announce
-			@'fire'('settings_announce_changed')
+			@'fire'('settings_announce_changed', new_announce, old_announce)
 		/**
 		 * @return {!Array<!Object>}
 		 */

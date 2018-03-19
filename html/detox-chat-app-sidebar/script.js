@@ -11,7 +11,7 @@
     properties: {
       settings_announce: {
         observer: '_settings_announce_changed',
-        type: Number
+        type: String
       }
     },
     ready: function(){
@@ -19,24 +19,25 @@
       this._state_instance_ready.then(function(){
         var state;
         state = this$._state_instance;
-        this$.settings_announce = this$._bool_to_int(state.get_settings_announce());
+        this$.settings_announce = this$._bool_to_string(state.get_settings_announce());
         state.on('settings_announce_changed', function(new_settings_announce){
-          if (this$.settings_announce != new_settings_announce) {
-            this$.settings_announce = this$._bool_to_int(new_settings_announce);
+          new_settings_announce = this$._bool_to_string(new_settings_announce);
+          if (this$.settings_announce !== new_settings_announce) {
+            this$.settings_announce = new_settings_announce;
           }
         });
       });
     },
-    _bool_to_int: function(value){
+    _bool_to_string: function(value){
       if (value) {
-        return 1;
+        return '1';
       } else {
-        return 0;
+        return '0';
       }
     },
     _settings_announce_changed: function(){
-      if (this.settings_announce != this._state_instance.get_settings_announce()) {
-        this._state_instance.set_settings_announce(this.settings_announce == 1);
+      if (this.settings_announce !== this._bool_to_string(this._state_instance.get_settings_announce())) {
+        this._state_instance.set_settings_announce(this.settings_announce === '1');
       }
     }
   });

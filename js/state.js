@@ -250,9 +250,9 @@
       'set_settings_announce': function(announce){
         var old_announce, new_announce;
         old_announce = this._state['settings']['announce'];
-        new_announce = !!announce;
+        new_announce = announce;
         this._state['settings']['announce'] = new_announce;
-        this['fire']('settings_announce_changed');
+        this['fire']('settings_announce_changed', new_announce, old_announce);
       }
       /**
        * @return {!Array<!Object>}
