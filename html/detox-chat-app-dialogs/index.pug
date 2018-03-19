@@ -3,7 +3,7 @@ dom-module(id="detox-chat-app-dialogs")
 	template
 		#messages-list(hidden="[[!active_contact]]")
 			template(is="dom-repeat" items="{{messages}}" mutable-data)
-				p(right$="[[!item.from]]") [[item.text]]
+				div(right$="[[!item.from]]") [[item.text]]
 		csw-form: form#send-form(hidden="[[!active_contact]]")
 			//- TODO: autosize instead of fixed rows number
 			csw-textarea: textarea(rows="7")

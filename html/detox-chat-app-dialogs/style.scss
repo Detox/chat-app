@@ -11,11 +11,23 @@
 }
 
 #messages-list {
-	flex-grow : 1;
-	overflow  : auto;
+	display        : flex;
+	flex-direction : column;
+	flex-grow      : 1;
+	overflow       : auto;
+	padding        : 1em;
 
-	p[right] {
-		text-align : right;
+	div {
+		background    : var(--base-highlight-background);
+		border-radius : 1em 1em 1em 0;
+		margin-bottom : 1em;
+		max-width     : 70%;
+		padding       : 1em;
+
+		&[right] {
+			border-radius : 1em 1em 0 1em;
+			align-self    : flex-end;
+		}
 	}
 }
 
