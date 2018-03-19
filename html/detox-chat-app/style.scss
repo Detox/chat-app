@@ -4,13 +4,18 @@
  * @license 0BSD
  */
 :host {
-	display               : grid;
-	grid-template-columns : 1fr 4fr;
-	height                : 100vh;
-	width                 : 100vw;
+	display  : flex;
+	height   : 100vh;
+	overflow : hidden;
+	width    : 100vw;
 }
 
 detox-chat-app-sidebar {
 	max-width : 420px;
 	min-width : 240px;
+	width     : 20%;
+}
+
+detox-chat-app-dialogs {
+	flex-grow : 1;
 }

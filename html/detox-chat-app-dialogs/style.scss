@@ -12,6 +12,7 @@
 
 #messages-list {
 	flex-grow : 1;
+	overflow  : auto;
 
 	p[right] {
 		text-align : right;
