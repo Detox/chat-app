@@ -73,7 +73,16 @@ Polymer(
 					csw.functions.alert('Adding yourself to contacts is not supported')
 					return
 				@_state_instance.add_contact(public_key, name, remote_secret)
+			catch
+				csw.functions.notify('Incorrect ID, correct it and try again', 'error', 'right')
+				@_last_add_contact	= [name, id_base58]
+				@_add_contact()
 		)
+		if @_last_add_contact
+			[name, id_base58]	= @_last_add_contact
+			delete @_last_add_contact
+			modal.querySelector('#id').value	= id_base58
+			modal.querySelector('#name').value	= name
 	_set_active_contact : (e) !->
 		@_state_instance.set_ui_active_contact(e.model.item.id)
 	_del_contact : (e) !->

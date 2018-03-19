@@ -46,14 +46,14 @@
       });
     },
     _add_contact: function(){
-      var content, modal, this$ = this;
+      var content, modal, ref$, name, id_base58, this$ = this;
       content = "<csw-form>\n	<form>\n		<label>\n			<csw-textarea>\n				<textarea id=\"id\" placeholder=\"ID\"></textarea>\n			</csw-textarea>\n		</label>\n		<label>\n			<csw-textarea>\n				<textarea id=\"name\" placeholder=\"Name (optional)\"></textarea>\n			</csw-textarea>\n		</label>\n	</form>\n</csw-form>";
       modal = csw.functions.confirm(content, function(){
         var id_base58, name;
         id_base58 = modal.querySelector('#id').value;
         name = modal.querySelector('#name').value;
         require(['@detox/chat', '@detox/crypto', '@detox/utils']).then(function(arg$){
-          var detoxChat, detoxCrypto, detoxUtils, ref$, public_key, remote_secret, own_public_key;
+          var detoxChat, detoxCrypto, detoxUtils, ref$, public_key, remote_secret, own_public_key, e;
           detoxChat = arg$[0], detoxCrypto = arg$[1], detoxUtils = arg$[2];
           try {
             ref$ = detoxChat.id_decode(id_base58), public_key = ref$[0], remote_secret = ref$[1];
@@ -63,9 +63,20 @@
               return;
             }
             this$._state_instance.add_contact(public_key, name, remote_secret);
-          } catch (e$) {}
+          } catch (e$) {
+            e = e$;
+            csw.functions.notify('Incorrect ID, correct it and try again', 'error', 'right');
+            this$._last_add_contact = [name, id_base58];
+            this$._add_contact();
+          }
         });
       });
+      if (this._last_add_contact) {
+        ref$ = this._last_add_contact, name = ref$[0], id_base58 = ref$[1];
+        delete this._last_add_contact;
+        modal.querySelector('#id').value = id_base58;
+        modal.querySelector('#name').value = name;
+      }
     },
     _set_active_contact: function(e){
       this._state_instance.set_ui_active_contact(e.model.item.id);
