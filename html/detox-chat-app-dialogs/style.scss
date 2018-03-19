@@ -17,16 +17,37 @@
 	overflow       : auto;
 	padding        : 1em;
 
-	div {
-		background    : var(--base-highlight-background);
-		border-radius : 1em 1em 1em 0;
+	.message {
+		display       : flex;
 		margin-bottom : 1em;
-		max-width     : 70%;
-		padding       : 1em;
 
 		&[right] {
-			border-radius : 1em 1em 0 1em;
-			align-self    : flex-end;
+			flex-direction : row-reverse;
+
+			.message-content {
+				border-radius : 1em 1em 0 1em;
+			}
+
+			.message-details {
+				text-align : right;
+			}
+		}
+
+		&:hover .message-details {
+			opacity : 1;
+		}
+
+		.message-content {
+			background    : var(--base-highlight-background);
+			border-radius : 1em 1em 1em 0;
+			max-width     : 70%;
+			padding       : 1em;
+		}
+
+		.message-details {
+			align-self : center;
+			padding    : 1em;
+			opacity    : 0;
 		}
 	}
 }

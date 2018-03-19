@@ -42,4 +42,12 @@ Polymer(
 		contact_id		= state.get_ui_active_contact()
 		# TODO: Sent date should be updated
 		state.add_contact_message(contact_id, false, +(new Date), 0, text_message)
+	_format_date : (date) ->
+		if !date
+			return 'Unknown'
+		# If message older than 24 hours, we'll use full date and time, otherwise time only
+		if date - (new Date) < 24 * 60 * 60 * 1000
+			(new Date(date)).toLocaleTimeString()
+		else
+			(new Date(date)).toLocaleString()
 )

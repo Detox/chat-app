@@ -140,8 +140,8 @@ function Wrapper (detox-utils, async-eventer)
 		@_local_state.messages.set(
 			Array.from(@_state['contacts'].keys())[0],
 			[
-				Message([0, true, +(new Date), +(new Date), 'Received message'])
-				Message([1, false, +(new Date), +(new Date), 'Sent message'])
+				Message([0, true, +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])
+				Message([1, false, +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])
 			]
 		)
 
@@ -627,7 +627,7 @@ function Wrapper (detox-utils, async-eventer)
 	 */
 	Contact			= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret'])
 	ContactRequest	= create_array_object(['id', 'name', 'secret_name'])
-	Message			= create_array_object(['id', 'from', 'date_sent', 'date_received', 'text'])
+	Message			= create_array_object(['id', 'from', 'date_written', 'date_sent', 'text'])
 	Secret			= create_array_object(['secret', 'name'])
 
 	{
