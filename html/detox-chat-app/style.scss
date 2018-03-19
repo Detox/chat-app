@@ -11,11 +11,11 @@
 }
 
 detox-chat-app-sidebar {
-	max-width : 420px;
-	min-width : 240px;
-	width     : 20%;
+	flex-basis : 20%;
+	max-width  : 420px;
+	min-width  : 300px;
 }
 
 detox-chat-app-dialogs {
-	flex-grow : 1;
+	flex-basis : 80%;
 }
