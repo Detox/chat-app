@@ -65,9 +65,13 @@ Polymer(
 		modal	= csw.functions.confirm(content, !~>
 			id_base58		= modal.querySelector('#id').value
 			name			= modal.querySelector('#name').value
-			([detox-chat])	<~! require(['@detox/chat']).then
+			([detox-chat, detox-crypto, detox-utils])	<~! require(['@detox/chat', '@detox/crypto', '@detox/utils']).then
 			try
 				[public_key, remote_secret]	= detox-chat.id_decode(id_base58)
+				own_public_key				= detox-crypto.create_keypair(@_state_instance.get_seed()).ed25519.public
+				if detox-utils.are_arrays_equal(public_key, own_public_key)
+					csw.functions.alert('Adding yourself to contacts is not supported')
+					return
 				@_state_instance.add_contact(public_key, name, remote_secret)
 		)
 	_set_active_contact : (e) !->

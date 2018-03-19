@@ -52,11 +52,16 @@
         var id_base58, name;
         id_base58 = modal.querySelector('#id').value;
         name = modal.querySelector('#name').value;
-        require(['@detox/chat']).then(function(arg$){
-          var detoxChat, ref$, public_key, remote_secret;
-          detoxChat = arg$[0];
+        require(['@detox/chat', '@detox/crypto', '@detox/utils']).then(function(arg$){
+          var detoxChat, detoxCrypto, detoxUtils, ref$, public_key, remote_secret, own_public_key;
+          detoxChat = arg$[0], detoxCrypto = arg$[1], detoxUtils = arg$[2];
           try {
             ref$ = detoxChat.id_decode(id_base58), public_key = ref$[0], remote_secret = ref$[1];
+            own_public_key = detoxCrypto.create_keypair(this$._state_instance.get_seed()).ed25519['public'];
+            if (detoxUtils.are_arrays_equal(public_key, own_public_key)) {
+              csw.functions.alert('Adding yourself to contacts is not supported');
+              return;
+            }
             this$._state_instance.add_contact(public_key, name, remote_secret);
           } catch (e$) {}
         });
