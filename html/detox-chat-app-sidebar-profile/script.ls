@@ -56,10 +56,10 @@ Polymer(
 							<input id="name">
 						</csw-input-text>
 					</label>
-					<label>Secret length:</label>
+					<label>Secret length (1..32):</label>
 					<label>
 						<csw-input-text>
-							<input id="length" min="1" max="32" value="4">
+							<input type="number" id="length" min="1" max="32" value="4">
 						</csw-input-text>
 					</label>
 				</form>

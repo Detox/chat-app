@@ -60,7 +60,7 @@
     },
     _add_secret: function(){
       var content, modal, this$ = this;
-      content = "<csw-form>\n	<form>\n		<label>Secret name:</label>\n		<label>\n			<csw-input-text>\n				<input id=\"name\">\n			</csw-input-text>\n		</label>\n		<label>Secret length:</label>\n		<label>\n			<csw-input-text>\n				<input id=\"length\" min=\"1\" max=\"32\" value=\"4\">\n			</csw-input-text>\n		</label>\n	</form>\n</csw-form>";
+      content = "<csw-form>\n	<form>\n		<label>Secret name:</label>\n		<label>\n			<csw-input-text>\n				<input id=\"name\">\n			</csw-input-text>\n		</label>\n		<label>Secret length (1..32):</label>\n		<label>\n			<csw-input-text>\n				<input type=\"number\" id=\"length\" min=\"1\" max=\"32\" value=\"4\">\n			</csw-input-text>\n		</label>\n	</form>\n</csw-form>";
       modal = csw.functions.confirm(content, function(){
         var name, length;
         name = modal.querySelector('#name').value;
