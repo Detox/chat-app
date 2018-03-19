@@ -65,7 +65,7 @@
 		/* Select */
 
 		--csw-select-option: {
-			margin  : 0 -var(--form-element-padding-horizontal);
+			margin  : 0 calc(-1 * var(--form-element-padding-horizontal));
 			padding : var(--form-element-padding);
 		};
 
@@ -84,7 +84,6 @@
 			box-sizing       : border-box;
 			color            : var(--text-color-base);
 			height           : var(--form-element-height);
-			justify-content  : center;
 			padding          : 0 var(--form-element-padding-horizontal);
 		};
 
@@ -262,7 +261,7 @@
 		--csw-tooltip: {
 			background  : var(--tooltip-background);
 			color       : var(--tooltip-color);
-			margin-top  : -var(--tooltip-arrow-height);
+			margin-top  : calc(-1 * var(--tooltip-arrow-height));
 			opacity     : 0;
 			transform   : scale(0);
 			transition  : opacity var(--transition-duration-short) var(--transition-duration-short), transform 0s var(--transition-duration);
@@ -311,7 +310,6 @@
 		/* Notify */
 
 		--csw-notify: {
-			display     : inline-block;
 			padding     : var(--block-padding);
 			transition  : all var(--notify-transition-duration) cubic-bezier(0.47, 0, 0.75, 0.72); /* In - Sine */
 			will-change : transform;
@@ -366,7 +364,7 @@
 		};
 
 		--csw-notify-top: {
-			transform : translateY(-var(--notify-translate));
+			transform : translateY(calc(-1 * var(--notify-translate)));
 		};
 
 		--csw-notify-show: {
