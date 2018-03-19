@@ -13,21 +13,35 @@
       contacts_requests: {
         type: Array,
         value: []
+      },
+      online_contacts: {
+        type: Object
+      },
+      ui_active_contact: {
+        type: Object
       }
     },
     ready: function(){
       var this$ = this;
-      this._state_instance_ready.then(function(){
-        var state;
+      Promise.all([require(['@detox/utils']), this._state_instance_ready]).then(function(arg$){
+        var detoxUtils, ArraySet, state;
+        detoxUtils = arg$[0][0];
+        ArraySet = detoxUtils.ArraySet;
         state = this$._state_instance;
         this$.contacts = state.get_contacts();
+        this$.online_contacts = ArraySet(state.get_online_contacts());
         this$.contacts_requests = state.get_contacts_requests();
+        this$.ui_active_contact = ArraySet([state.get_ui_active_contact() || new Uint8Array(0)]);
         state.on('contacts_changed', function(){
           this$.contacts = state.get_contacts();
+        }).on('online_contacts_changed', function(){
+          this$.online_contacts = ArraySet(state.get_online_contacts());
         }).on('contacts_requests_changed', function(){
           var contacts_requests;
           contacts_requests = state.get_contacts_requests();
           this$.contacts_requests = contacts_requests;
+        }).on('ui_active_contact_changed', function(){
+          this$.ui_active_contact = ArraySet([state.get_ui_active_contact()]);
         });
       });
     },
@@ -69,6 +83,12 @@
       modal.querySelector('#cancel').addEventListener('click', function(){
         modal.close();
       });
+    },
+    _online: function(contact_id, online_contacts){
+      return online_contacts.has(contact_id);
+    },
+    _selected: function(contact_id, ui_active_contact){
+      return ui_active_contact.has(contact_id);
     }
   });
 }).call(this);

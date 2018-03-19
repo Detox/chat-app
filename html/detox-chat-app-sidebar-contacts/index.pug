@@ -1,17 +1,24 @@
 dom-module(id="detox-chat-app-sidebar-contacts")
 	link(rel="import" href="style.css" type="css")
 	template
-		csw-button(icon="plus"): button(type="button" on-click="_add_contact") Add new contact
 		div(hidden="[[!contacts_requests.length]]")
 			h4 Contacts requests
 			csw-group(vertical)
 				template(is="dom-repeat" items="{{contacts_requests}}")
-					csw-button: button(type="button" on-click="_accept_contact_request")
-						div [[item.secret_name]]: [[item.name]]
+					.contact-item(on-click="_accept_contact_request" unconfirmed) [[item.secret_name]]: [[item.name]]
+		div(hidden="[[contacts.length]]")
+			csw-button(icon="plus"): button(type="button" on-click="_add_contact") Add new contact
 		div(hidden="[[!contacts.length]]")
-			h4 Contacts
+			h4
+				div Contacts
+				csw-button(icon="plus" tooltip="Add new contact"): button(type="button" on-click="_add_contact")
 			csw-group(vertical)
 				template(is="dom-repeat" items="{{contacts}}")
-					csw-button: button(type="button" on-click="_set_active_contact")
-						div [[item.nickname]]
+					//- TODO: Add [unread] property
+					.contact-item(
+						on-click="_set_active_contact"
+						online$="[[_online(item.id, online_contacts)]]"
+						selected$="[[_selected(item.id, ui_active_contact)]]"
+						unconfirmed$="[[!item.local_secret]]"
+					) [[item.nickname]]
 	script(src="script.js")

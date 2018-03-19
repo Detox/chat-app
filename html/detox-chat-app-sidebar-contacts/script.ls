@@ -13,21 +13,38 @@ Polymer(
 		contacts_requests	:
 			type	: Array
 			value	: []
+		online_contacts		:
+			type	: Object
+		ui_active_contact	:
+			type	: Object
 	ready : !->
-		<~! @_state_instance_ready.then
-		state				= @_state_instance
-		@contacts			= state.get_contacts()
-		@contacts_requests	= state.get_contacts_requests()
-		state
-			.on('contacts_changed', !~>
-				# TODO: Sort contacts
-				@contacts	= state.get_contacts()
-			)
-			.on('contacts_requests_changed', !~>
-				# TODO: Sort contacts
-				contacts_requests	= state.get_contacts_requests()
-				@contacts_requests	= contacts_requests
-			)
+		Promise.all([
+			require(['@detox/utils'])
+			@_state_instance_ready
+		]).then ([[detox-utils]]) !~>
+			ArraySet			= detox-utils.ArraySet
+
+			state				= @_state_instance
+			@contacts			= state.get_contacts()
+			@online_contacts	= ArraySet(state.get_online_contacts())
+			@contacts_requests	= state.get_contacts_requests()
+			@ui_active_contact	= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
+			state
+				.on('contacts_changed', !~>
+					# TODO: Sort contacts
+					@contacts	= state.get_contacts()
+				)
+				.on('online_contacts_changed', !~>
+					@online_contacts	= ArraySet(state.get_online_contacts())
+				)
+				.on('contacts_requests_changed', !~>
+					# TODO: Sort contacts
+					contacts_requests	= state.get_contacts_requests()
+					@contacts_requests	= contacts_requests
+				)
+				.on('ui_active_contact_changed', !~>
+					@ui_active_contact	= ArraySet([state.get_ui_active_contact()])
+				)
 	_add_contact : !->
 		content	= """
 			<csw-form>
@@ -78,4 +95,8 @@ Polymer(
 		modal.querySelector('#cancel').addEventListener('click', !->
 			modal.close()
 		)
+	_online : (contact_id, online_contacts) ->
+		online_contacts.has(contact_id)
+	_selected : (contact_id, ui_active_contact) ->
+		ui_active_contact.has(contact_id)
 )
