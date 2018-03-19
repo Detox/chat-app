@@ -13,4 +13,10 @@
 
 csw-switcher {
 	flex-grow : 1;
+	overflow  : hidden;
+
+	> * {
+		height     : 100%;
+		overflow-y : auto;
+	}
 }
