@@ -24,6 +24,11 @@ Polymer(
 			state				= @_state_instance
 			state
 				.on('ui_active_contact_changed', (new_active_contact) !~>
+					if !new_active_contact
+						@active_contact	= false
+						@contact		= {}
+						@messages		= []
+						return
 					@active_contact	= true
 					@contact		= state.get_contact(new_active_contact)
 					@messages		= state.get_contact_messages(new_active_contact).slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed

@@ -20,5 +20,7 @@ dom-module(id="detox-chat-app-sidebar-contacts")
 						online$="[[_online(item.id, online_contacts)]]"
 						selected$="[[_selected(item.id, ui_active_contact)]]"
 						unconfirmed$="[[!item.local_secret]]"
-					) [[item.nickname]]
+					)
+						.nickname [[item.nickname]]
+						csw-icon(icon="times" on-click="_del_contact" tooltip="Delete contact")
 	script(src="script.js")

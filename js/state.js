@@ -224,13 +224,13 @@
         this['fire']('announced_changed', new_announced, old_announced);
       }
       /**
-       * @return {boolean}
+       * @return {Uint8Array}
        */,
       'get_ui_active_contact': function(){
         return this._local_state.ui.active_contact;
       }
       /**
-       * @param {!Uint8Array} contact_id
+       * @param {Uint8Array} contact_id
        */,
       'set_ui_active_contact': function(new_active_contact){
         var old_active_contact;
@@ -524,6 +524,11 @@
         if (!old_contact) {
           return;
         }
+        if (are_arrays_equal(this['get_ui_active_contact'](), contact_id)) {
+          this['set_ui_active_contact'](null);
+        }
+        this._local_state.messages['delete'](contact_id);
+        this['fire']('contact_messages_changed', contact_id);
         this._state['contacts']['delete'](contact_id);
         this['fire']('contact_deleted', old_contact);
         this['fire']('contacts_changed');
@@ -601,9 +606,10 @@
           message = ref$[i$];
           if (!message['from'] && !message['date_sent']) {
             this._local_state.contacts_with_pending_messages.add(contact_id);
-            break;
+            return;
           }
         }
+        this._local_state.contacts_with_pending_messages['delete'](contact_id);
       }
       /**
        * @param {!Uint8Array} contact_id
@@ -657,7 +663,7 @@
           this._contact_update_last_active(contact_id);
         } else {
           if (!this['has_online_contact'](contact_id)) {
-            this._local_state.contacts_with_pending_messages.add(contact_id);
+            this._update_contact_with_pending_messages(contact_id);
           }
         }
         this['fire']('contact_message_added', contact_id, message);

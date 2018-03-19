@@ -41,7 +41,7 @@
           contacts_requests = state.get_contacts_requests();
           this$.contacts_requests = contacts_requests;
         }).on('ui_active_contact_changed', function(){
-          this$.ui_active_contact = ArraySet([state.get_ui_active_contact()]);
+          this$.ui_active_contact = ArraySet([state.get_ui_active_contact() || new Uint8Array(0)]);
         });
       });
     },
@@ -69,6 +69,13 @@
     },
     _set_active_contact: function(e){
       this._state_instance.set_ui_active_contact(e.model.item.id);
+    },
+    _del_contact: function(e){
+      var this$ = this;
+      csw.functions.confirm("<h3>Are you sure you want to delete contact <i>" + e.model.item.nickname + "</i>?</h3>", function(){
+        this$._state_instance.del_contact(e.model.item.id);
+      });
+      e.stopPropagation();
     },
     _accept_contact_request: function(e){
       var state, item, content, modal;

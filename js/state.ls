@@ -220,12 +220,12 @@ function Wrapper (detox-utils, async-eventer)
 			@_local_state.announced	= new_announced
 			@'fire'('announced_changed', new_announced, old_announced)
 		/**
-		 * @return {boolean}
+		 * @return {Uint8Array}
 		 */
 		'get_ui_active_contact' : ->
 			@_local_state.ui.active_contact
 		/**
-		 * @param {!Uint8Array} contact_id
+		 * @param {Uint8Array} contact_id
 		 */
 		'set_ui_active_contact' : (new_active_contact) !->
 			old_active_contact				= @_local_state.ui.active_contact
@@ -461,6 +461,10 @@ function Wrapper (detox-utils, async-eventer)
 			old_contact	= @_state['contacts'].get(contact_id)
 			if !old_contact
 				return
+			if are_arrays_equal(@'get_ui_active_contact'(), contact_id)
+				@'set_ui_active_contact'(null)
+			@_local_state.messages.delete(contact_id)
+			@'fire'('contact_messages_changed', contact_id)
 			@_state['contacts'].delete(contact_id)
 			@'fire'('contact_deleted', old_contact)
 			@'fire'('contacts_changed')
@@ -524,7 +528,8 @@ function Wrapper (detox-utils, async-eventer)
 			for message in @'get_contact_messages'(contact_id)
 				if !message['from'] && !message['date_sent']
 					@_local_state.contacts_with_pending_messages.add(contact_id)
-					break
+					return
+			@_local_state.contacts_with_pending_messages.delete(contact_id)
 		/**
 		 * @param {!Uint8Array} contact_id
 		 */
@@ -570,7 +575,7 @@ function Wrapper (detox-utils, async-eventer)
 				@_contact_update_last_active(contact_id)
 			else
 				if !@'has_online_contact'(contact_id)
-					@_local_state.contacts_with_pending_messages.add(contact_id)
+					@_update_contact_with_pending_messages(contact_id)
 			@'fire'('contact_message_added', contact_id, message)
 			@'fire'('contact_messages_changed', contact_id)
 		/**

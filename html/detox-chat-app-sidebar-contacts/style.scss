@@ -26,12 +26,12 @@ csw-group {
 	display : block;
 
 	.contact-item {
+		align-items          : center;
 		box-sizing           : border-box;
 		cursor               : pointer;
-		overflow             : hidden;
+		display              : flex;
+		justify-content      : space-between;
 		padding              : .7em;
-		text-overflow        : ellipsis;
-		white-space          : nowrap;
 
 		--corner-bottom-left : 45deg;
 		--corner-end         : 6%;
@@ -47,6 +47,10 @@ csw-group {
 
 		&:hover {
 			background-color : var(--base-highlight-background);
+
+			csw-icon {
+				display : inline-block;
+			}
 		}
 
 		&[online] {
@@ -69,6 +73,16 @@ csw-group {
 
 		&[unread] {
 			background-image : var(--unread-corner);
+		}
+
+		.nickname {
+			overflow      : hidden;
+			text-overflow : ellipsis;
+			white-space   : nowrap;
+		}
+
+		csw-icon {
+			display : none;
 		}
 	}
 }

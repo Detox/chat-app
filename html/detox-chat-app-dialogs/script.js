@@ -24,6 +24,12 @@
         are_arrays_equal = detoxUtils.are_arrays_equal;
         state = this$._state_instance;
         state.on('ui_active_contact_changed', function(new_active_contact){
+          if (!new_active_contact) {
+            this$.active_contact = false;
+            this$.contact = {};
+            this$.messages = [];
+            return;
+          }
           this$.active_contact = true;
           this$.contact = state.get_contact(new_active_contact);
           this$.messages = state.get_contact_messages(new_active_contact).slice();
