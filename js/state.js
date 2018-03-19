@@ -601,6 +601,7 @@
           message = ref$[i$];
           if (!message.from && !message.date_sent) {
             this._local_state.contacts_with_pending_messages.add(contact_id);
+            break;
           }
         }
       }
@@ -630,8 +631,8 @@
        * @return {!Array<!Message>}
        */,
       'get_contact_messages_to_be_sent': function(contact_id){
-        return (this._local_state.messages.get(contact_id) || []).filter(function(message){
-          return !message.sent;
+        return this['get_contact_messages'](contact_id).filter(function(message){
+          return !message.date_sent;
         });
       }
       /**
