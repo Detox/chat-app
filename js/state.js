@@ -599,7 +599,7 @@
         var i$, ref$, len$, message;
         for (i$ = 0, len$ = (ref$ = this['get_contact_messages'](contact_id)).length; i$ < len$; ++i$) {
           message = ref$[i$];
-          if (!message.from && !message.date_sent) {
+          if (!message['from'] && !message['date_sent']) {
             this._local_state.contacts_with_pending_messages.add(contact_id);
             break;
           }
@@ -632,7 +632,7 @@
        */,
       'get_contact_messages_to_be_sent': function(contact_id){
         return this['get_contact_messages'](contact_id).filter(function(message){
-          return !message.date_sent;
+          return !message['date_sent'];
         });
       }
       /**

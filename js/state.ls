@@ -522,7 +522,7 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		_update_contact_with_pending_messages : (contact_id) !->
 			for message in @'get_contact_messages'(contact_id)
-				if !message.from && !message.date_sent
+				if !message['from'] && !message['date_sent']
 					@_local_state.contacts_with_pending_messages.add(contact_id)
 					break
 		/**
@@ -549,7 +549,7 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'get_contact_messages_to_be_sent' : (contact_id) ->
 			@'get_contact_messages'(contact_id).filter (message) ->
-				!message.date_sent
+				!message['date_sent']
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {boolean}		from			`true` if message was received and `false` if sent to a friend
