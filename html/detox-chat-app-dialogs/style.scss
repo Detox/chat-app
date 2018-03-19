@@ -5,7 +5,7 @@
  */
 :host {
 	background     : var(--base-background-color);
-	color          : var(--base-text-color);
+	color          : var(--text-color-base);
 	display        : flex;
 	flex-direction : column;
 }
