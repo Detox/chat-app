@@ -1,1 +1,1 @@
-:host{display:flex;height:100vh;overflow:hidden;width:100vw}detox-chat-app-sidebar{flex-basis:20%;max-width:420px;min-width:300px}detox-chat-app-dialogs{flex-basis:80%}
+:host{display:flex;height:100vh;overflow:hidden;width:100vw}detox-chat-app-sidebar{flex-basis:20%;max-width:420px;min-width:300px}detox-chat-app-dialogs{flex-basis:80%;flex-grow:1}
