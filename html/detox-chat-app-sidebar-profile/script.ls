@@ -65,7 +65,7 @@ Polymer(
 				</form>
 			</csw-form>
 		"""
-		modal	= csw.functions.confirm(form, !~>
+		modal	= csw.functions.confirm(content, !~>
 			name	= modal.querySelector('#name').value
 			if !name
 				return
