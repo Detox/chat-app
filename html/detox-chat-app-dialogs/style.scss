@@ -10,6 +10,14 @@
 	flex-direction : column;
 }
 
+#contact-details {
+	height        : 2.5em;
+	background    : var(--secondary-background-color);
+	border-bottom : .1em solid var(--base-border-color);
+	line-height   : 2.5em;
+	padding       : 0 1em;
+}
+
 #messages-list {
 	display        : flex;
 	flex-direction : column;

@@ -1,6 +1,7 @@
 dom-module(id="detox-chat-app-dialogs")
 	link(rel="import" href="style.css" type="css")
 	template
+		#contact-details(hidden="[[!active_contact]]") [[contact.nickname]]
 		#messages-list(hidden="[[!active_contact]]")
 			template(is="dom-repeat" items="{{messages}}" mutable-data)
 				.message(right$="[[!item.from]]")
