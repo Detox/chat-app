@@ -26,6 +26,7 @@ csw-group {
 	display : block;
 
 	.contact-item {
+		box-sizing           : border-box;
 		cursor               : pointer;
 		overflow             : hidden;
 		padding              : .7em;
@@ -45,7 +46,7 @@ csw-group {
 		--unconfirmed-corner : linear-gradient(var(--corner-bottom-left), var(--unconfirmed-color) var(--corner-start), transparent var(--corner-end));
 
 		&:hover {
-			background-color : rgba(255, 255, 255, 0.1);
+			background-color : var(--base-highlight-background);
 		}
 
 		&[online] {
@@ -58,11 +59,8 @@ csw-group {
 
 		&[selected] {
 			background-color : var(--base-background-color);
-			width            : calc(100% + 1.1em);
-			padding-right    : 1em;
-			box-sizing       : border-box;
 			border           : 0.1em solid var(--base-border-color);
-			border-right     : none;
+			padding          : .6em;
 		}
 
 		&[unconfirmed] {
