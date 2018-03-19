@@ -461,7 +461,7 @@ function Wrapper (detox-utils, async-eventer)
 			old_contact	= @_state['contacts'].get(contact_id)
 			if !old_contact
 				return
-			if are_arrays_equal(@'get_ui_active_contact'(), contact_id)
+			if are_arrays_equal(@'get_ui_active_contact'() || new Uint8Array(0), contact_id)
 				@'set_ui_active_contact'(null)
 			@_local_state.messages.delete(contact_id)
 			@'fire'('contact_messages_changed', contact_id)

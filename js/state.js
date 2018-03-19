@@ -524,7 +524,7 @@
         if (!old_contact) {
           return;
         }
-        if (are_arrays_equal(this['get_ui_active_contact'](), contact_id)) {
+        if (are_arrays_equal(this['get_ui_active_contact']() || new Uint8Array(0), contact_id)) {
           this['set_ui_active_contact'](null);
         }
         this._local_state.messages['delete'](contact_id);
