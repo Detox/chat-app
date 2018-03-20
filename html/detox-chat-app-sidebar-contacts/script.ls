@@ -62,7 +62,7 @@ Polymer(
 			[public_key, remote_secret]	= detox-chat.id_decode(@new_contact_id)
 			own_public_key				= detox-crypto.create_keypair(@_state_instance.get_seed()).ed25519.public
 			if detox-utils.are_arrays_equal(public_key, own_public_key)
-				csw.functions.notify('Adding yourself to contacts is not supported', 'error', 'right')
+				csw.functions.notify('Adding yourself to contacts is not supported', 'error', 'right', 3)
 				return
 			existing_contact	= @_state_instance.get_contact(public_key)
 			if existing_contact
@@ -74,7 +74,7 @@ Polymer(
 			@new_contact_id		= ''
 			@new_contact_name	= ''
 		catch
-			csw.functions.notify('Incorrect ID, correct it and try again', 'error', 'right')
+			csw.functions.notify('Incorrect ID, check for typos and try again', 'error', 'right', 3)
 	_add_contact_cancel : !->
 		@add_contact	= false
 	_set_active_contact : (e) !->
