@@ -22,7 +22,8 @@
 	display        : flex;
 	flex-direction : column;
 	flex-grow      : 1;
-	overflow       : auto;
+	overflow-x     : hidden;
+	overflow-y     : auto;
 	padding        : 1em;
 
 	&[hidden] {
@@ -31,6 +32,7 @@
 
 	.message {
 		display       : flex;
+		flex-shrink   : 0;
 		margin-bottom : 1em;
 
 		&[right] {
@@ -54,6 +56,7 @@
 			border-radius : 1em 1em 1em 0;
 			max-width     : 70%;
 			padding       : 1em;
+			word-break    : break-word;
 		}
 
 		.message-details {
