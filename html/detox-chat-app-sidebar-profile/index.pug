@@ -6,7 +6,7 @@ dom-module(id="detox-chat-app-sidebar-profile")
 			csw-textarea: textarea(readonly on-click="_id_click" rows="3" value="[[id_base58]]")
 			label Name:
 			csw-textarea: textarea(rows="3" value="{{name}}")
-			label: csw-button(icon="plus"): button(type="button" on-click="_add_secret") Add new secret
+			csw-button(icon="plus"): button(type="button" on-click="_add_secret") Add new secret
 			template(is="dom-repeat" items="{{secrets}}")
 				label
 					| ID for secret

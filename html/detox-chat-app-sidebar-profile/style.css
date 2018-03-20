@@ -1,1 +1,1 @@
-:host{display:block}textarea{height:auto;resize:none}
+:host{display:block}csw-textarea{display:block}csw-textarea textarea{height:auto;resize:none}csw-button{margin-bottom:var(--block-padding)}
