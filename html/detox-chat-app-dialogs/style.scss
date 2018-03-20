@@ -18,6 +18,10 @@
 	padding       : 0 1em;
 }
 
+#welcome {
+	padding : var(--block-padding);
+}
+
 #messages-list {
 	display        : flex;
 	flex-direction : column;
