@@ -7,7 +7,7 @@
 (function(){
   Polymer({
     is: 'detox-chat-app-dialogs',
-    behaviors: [detoxChatApp.behaviors.state],
+    behaviors: [detoxChatApp.behaviors.state, Polymer.MutableDataBehavior],
     properties: {
       active_contact: {
         type: Boolean,
@@ -32,14 +32,14 @@
           }
           this$.active_contact = true;
           this$.contact = state.get_contact(new_active_contact);
-          this$.messages = state.get_contact_messages(new_active_contact).slice();
+          this$.messages = state.get_contact_messages(new_active_contact);
           this$.notifyPath('messages');
           this$.$['send-form'].querySelector('textarea').value = '';
         }).on('contact_messages_changed', function(contact_id){
           var active_contact;
           active_contact = state.get_ui_active_contact();
           if (active_contact && are_arrays_equal(contact_id, active_contact)) {
-            this$.messages = state.get_contact_messages(contact_id).slice();
+            this$.messages = state.get_contact_messages(contact_id);
             this$.notifyPath('messages');
           }
         }).on('contact_changed', function(new_contact){

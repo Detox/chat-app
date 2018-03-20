@@ -7,6 +7,7 @@ Polymer(
 	is			: 'detox-chat-app-dialogs'
 	behaviors	: [
 		detox-chat-app.behaviors.state
+		Polymer.MutableDataBehavior
 	]
 	properties	:
 		active_contact	:
@@ -31,14 +32,14 @@ Polymer(
 						return
 					@active_contact	= true
 					@contact		= state.get_contact(new_active_contact)
-					@messages		= state.get_contact_messages(new_active_contact).slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed
+					@messages		= state.get_contact_messages(new_active_contact)
 					@notifyPath('messages')
 					@$['send-form']querySelector('textarea').value	= '' # TODO: Same on per-contact basis instead of erasing
 				)
 				.on('contact_messages_changed', (contact_id) !~>
 					active_contact	= state.get_ui_active_contact()
 					if active_contact && are_arrays_equal(contact_id, active_contact)
-						@messages	= state.get_contact_messages(contact_id).slice() # TODO: slice is a hack until https://github.com/Polymer/polymer/issues/5151 is fixed
+						@messages	= state.get_contact_messages(contact_id)
 						@notifyPath('messages')
 				)
 				.on('contact_changed', (new_contact) !~>
