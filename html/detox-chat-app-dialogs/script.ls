@@ -49,13 +49,16 @@ Polymer(
 		state			= @_state_instance
 		textarea		= @$['send-form']querySelector('textarea')
 		text_message	= textarea.value
+		text_message	= text_message.trim()
+		if !text_message
+			return
 		textarea.value	= ''
 		contact_id		= state.get_ui_active_contact()
 		# TODO: Sent date should be updated
 		state.add_contact_message(contact_id, false, +(new Date), 0, text_message)
 	_format_date : (date) ->
 		if !date
-			return 'Unknown'
+			return 'Not yet'
 		# If message older than 24 hours, we'll use full date and time, otherwise time only
 		if date - (new Date) < 24 * 60 * 60 * 1000
 			(new Date(date)).toLocaleTimeString()

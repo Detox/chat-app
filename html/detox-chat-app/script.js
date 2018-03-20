@@ -173,6 +173,10 @@
           state.set_contact_nickname(contact_id, nickname);
         }
       }).on('text_message', function(contact_id, date_written, date_sent, text_message){
+        text_message = text_message.trim();
+        if (!text_message) {
+          return;
+        }
         state.add_contact_message(contact_id, true, date_written, date_sent, text_message);
       }).on('text_message_received', function(contact_id, date_sent){
         var id, ref$;

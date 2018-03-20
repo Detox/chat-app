@@ -54,13 +54,17 @@
       state = this._state_instance;
       textarea = this.$['send-form'].querySelector('textarea');
       text_message = textarea.value;
+      text_message = text_message.trim();
+      if (!text_message) {
+        return;
+      }
       textarea.value = '';
       contact_id = state.get_ui_active_contact();
       state.add_contact_message(contact_id, false, +new Date, 0, text_message);
     },
     _format_date: function(date){
       if (!date) {
-        return 'Unknown';
+        return 'Not yet';
       }
       if (date - new Date < 24 * 60 * 60 * 1000) {
         return new Date(date).toLocaleTimeString();

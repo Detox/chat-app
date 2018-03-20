@@ -668,6 +668,7 @@
         }
         this['fire']('contact_message_added', contact_id, message);
         this['fire']('contact_messages_changed', contact_id);
+        id;
       }
       /**
        * @param {!Uint8Array}	contact_id

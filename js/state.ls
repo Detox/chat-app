@@ -587,6 +587,7 @@ function Wrapper (detox-utils, async-eventer)
 					@_update_contact_with_pending_messages(contact_id)
 			@'fire'('contact_message_added', contact_id, message)
 			@'fire'('contact_messages_changed', contact_id)
+			id
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {number}		message_id	Message ID

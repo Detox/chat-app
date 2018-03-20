@@ -166,6 +166,9 @@ Polymer(
 			)
 			.on('text_message', (contact_id, date_written, date_sent, text_message) !->
 				# TODO: Check date_written and date_sent
+				text_message	= text_message.trim()
+				if !text_message
+					return
 				state.add_contact_message(contact_id, true, date_written, date_sent, text_message)
 			)
 			.on('text_message_received', (contact_id, date_sent) !->
