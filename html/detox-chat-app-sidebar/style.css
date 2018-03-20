@@ -1,1 +1,1 @@
-:host{background:var(--background-color-sidebar);border-right:var(--border-base);color:var(--text-color-base);display:flex;flex-direction:column}csw-switcher{flex-grow:1;overflow:hidden}csw-switcher>*{height:100%;overflow-y:auto}
+:host{background:var(--background-color-sidebar);border-right:var(--border-base);color:var(--text-color-base);display:flex;flex-direction:column}csw-tabs,detox-chat-sidebar-status{flex-shrink:0}csw-switcher{flex-grow:1;height:100%;overflow-y:auto}detox-chat-sidebar-status{border-top:var(--border-base)}

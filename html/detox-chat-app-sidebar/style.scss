@@ -11,12 +11,17 @@
 	flex-direction : column;
 }
 
-csw-switcher {
-	flex-grow : 1;
-	overflow  : hidden;
+csw-tabs,
+detox-chat-sidebar-status {
+	flex-shrink : 0;
+}
 
-	> * {
-		height     : 100%;
-		overflow-y : auto;
-	}
+csw-switcher {
+	flex-grow  : 1;
+	height     : 100%;
+	overflow-y : auto;
+}
+
+detox-chat-sidebar-status {
+	border-top : var(--border-base);
 }

@@ -75,6 +75,11 @@
           this$._state_instance.add_secret(secret, name);
         });
       });
+    },
+    _help: function(){
+      var content;
+      content = "<p>Secrets are used as anti-spam system. You can create different secrets for different purposes.<br>\nEach time you have incoming contact request, you'll see which secret was used.<br>\nFor instance, you can create a secret for conference and know who is connecting to you before you accept contact request.</p>\n\n<p>For contact requests you need to share ID with secret.<br>\nPlain ID without secret will not result in visible contact request, but if you and your interlocutor add each other to contacts list explicitly, you'll be connected and able to communicate.</p>";
+      csw.functions.simple_modal(content);
     }
   });
 }).call(this);
