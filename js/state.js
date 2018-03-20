@@ -433,6 +433,7 @@
         if (this._state['contacts'].has(contact_id)) {
           return;
         }
+        nickname = nickname.trim();
         if (!nickname) {
           nickname = base58_encode(contact_id);
         }

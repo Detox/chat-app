@@ -9,11 +9,20 @@
     is: 'detox-chat-app-sidebar-contacts',
     behaviors: [detoxChatApp.behaviors.state],
     properties: {
-      contacts: Array,
+      add_contact: {
+        type: Boolean,
+        value: false
+      },
+      contacts: {
+        type: Array,
+        value: []
+      },
       contacts_requests: {
         type: Array,
         value: []
       },
+      new_contact_id: String,
+      new_contact_name: String,
       online_contacts: {
         type: Object
       },
@@ -45,38 +54,42 @@
         });
       });
     },
+    _hide_header: function(list, add_contact){
+      return !list.length || add_contact;
+    },
     _add_contact: function(){
-      var content, modal, ref$, name, id_base58, this$ = this;
-      content = "<csw-form>\n	<form>\n		<label>\n			<csw-textarea>\n				<textarea id=\"id\" placeholder=\"ID\"></textarea>\n			</csw-textarea>\n		</label>\n		<label>\n			<csw-textarea>\n				<textarea id=\"name\" placeholder=\"Name (optional)\"></textarea>\n			</csw-textarea>\n		</label>\n	</form>\n</csw-form>";
-      modal = csw.functions.confirm(content, function(){
-        var id_base58, name;
-        id_base58 = modal.querySelector('#id').value;
-        name = modal.querySelector('#name').value;
-        require(['@detox/chat', '@detox/crypto', '@detox/utils']).then(function(arg$){
-          var detoxChat, detoxCrypto, detoxUtils, ref$, public_key, remote_secret, own_public_key, e;
-          detoxChat = arg$[0], detoxCrypto = arg$[1], detoxUtils = arg$[2];
-          try {
-            ref$ = detoxChat.id_decode(id_base58), public_key = ref$[0], remote_secret = ref$[1];
-            own_public_key = detoxCrypto.create_keypair(this$._state_instance.get_seed()).ed25519['public'];
-            if (detoxUtils.are_arrays_equal(public_key, own_public_key)) {
-              csw.functions.alert('Adding yourself to contacts is not supported');
-              return;
-            }
-            this$._state_instance.add_contact(public_key, name, remote_secret);
-          } catch (e$) {
-            e = e$;
-            csw.functions.notify('Incorrect ID, correct it and try again', 'error', 'right');
-            this$._last_add_contact = [name, id_base58];
-            this$._add_contact();
+      this.add_contact = true;
+    },
+    _add_contact_confirm: function(){
+      var this$ = this;
+      require(['@detox/chat', '@detox/crypto', '@detox/utils']).then(function(arg$){
+        var detoxChat, detoxCrypto, detoxUtils, ref$, public_key, remote_secret, own_public_key, existing_contact, e;
+        detoxChat = arg$[0], detoxCrypto = arg$[1], detoxUtils = arg$[2];
+        try {
+          ref$ = detoxChat.id_decode(this$.new_contact_id), public_key = ref$[0], remote_secret = ref$[1];
+          own_public_key = detoxCrypto.create_keypair(this$._state_instance.get_seed()).ed25519['public'];
+          if (detoxUtils.are_arrays_equal(public_key, own_public_key)) {
+            csw.functions.notify('Adding yourself to contacts is not supported', 'error', 'right');
+            return;
           }
-        });
+          existing_contact = this$._state_instance.get_contact(public_key);
+          if (existing_contact) {
+            csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>" + existing_contact.nickname + "</i>", 'warning', 'right', 3);
+            return;
+          }
+          this$._state_instance.add_contact(public_key, this$.new_contact_name, remote_secret);
+          csw.functions.notify('Contact added', 'success', 'right', 3);
+          this$.add_contact = false;
+          this$.new_contact_id = '';
+          this$.new_contact_name = '';
+        } catch (e$) {
+          e = e$;
+          csw.functions.notify('Incorrect ID, correct it and try again', 'error', 'right');
+        }
       });
-      if (this._last_add_contact) {
-        ref$ = this._last_add_contact, name = ref$[0], id_base58 = ref$[1];
-        delete this._last_add_contact;
-        modal.querySelector('#id').value = id_base58;
-        modal.querySelector('#name').value = name;
-      }
+    },
+    _add_contact_cancel: function(){
+      this.add_contact = false;
     },
     _set_active_contact: function(e){
       this._state_instance.set_ui_active_contact(e.model.item.id);

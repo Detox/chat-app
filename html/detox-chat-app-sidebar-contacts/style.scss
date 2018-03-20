@@ -22,6 +22,19 @@ h4 {
 	}
 }
 
+.add-contact {
+	margin-bottom : var(--block-padding);
+
+	csw-textarea {
+		display : block;
+
+		textarea {
+			height : auto;
+			resize : none;
+		}
+	}
+}
+
 csw-group {
 	display : block;
 

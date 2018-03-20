@@ -397,6 +397,7 @@ function Wrapper (detox-utils, async-eventer)
 		'add_contact' : (contact_id, nickname, remote_secret) !->
 			if @_state['contacts'].has(contact_id)
 				return
+			nickname	= nickname.trim()
 			if !nickname
 				nickname = base58_encode(contact_id)
 			new_contact	= Contact([contact_id, nickname, 0, 0, remote_secret, null, null])

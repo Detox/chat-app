@@ -9,10 +9,17 @@ Polymer(
 		detox-chat-app.behaviors.state
 	]
 	properties	:
-		contacts			: Array
+		add_contact			:
+			type	: Boolean
+			value	: false
+		contacts			:
+			type	: Array
+			value	: []
 		contacts_requests	:
 			type	: Array
 			value	: []
+		new_contact_id		: String
+		new_contact_name	: String
 		online_contacts		:
 			type	: Object
 		ui_active_contact	:
@@ -45,44 +52,31 @@ Polymer(
 				.on('ui_active_contact_changed', !~>
 					@ui_active_contact	= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
 				)
+	_hide_header : (list, add_contact) ->
+		!list.length || add_contact
 	_add_contact : !->
-		content	= """
-			<csw-form>
-				<form>
-					<label>
-						<csw-textarea>
-							<textarea id="id" placeholder="ID"></textarea>
-						</csw-textarea>
-					</label>
-					<label>
-						<csw-textarea>
-							<textarea id="name" placeholder="Name (optional)"></textarea>
-						</csw-textarea>
-					</label>
-				</form>
-			</csw-form>
-		"""
-		modal	= csw.functions.confirm(content, !~>
-			id_base58		= modal.querySelector('#id').value
-			name			= modal.querySelector('#name').value
-			([detox-chat, detox-crypto, detox-utils])	<~! require(['@detox/chat', '@detox/crypto', '@detox/utils']).then
-			try
-				[public_key, remote_secret]	= detox-chat.id_decode(id_base58)
-				own_public_key				= detox-crypto.create_keypair(@_state_instance.get_seed()).ed25519.public
-				if detox-utils.are_arrays_equal(public_key, own_public_key)
-					csw.functions.alert('Adding yourself to contacts is not supported')
-					return
-				@_state_instance.add_contact(public_key, name, remote_secret)
-			catch
-				csw.functions.notify('Incorrect ID, correct it and try again', 'error', 'right')
-				@_last_add_contact	= [name, id_base58]
-				@_add_contact()
-		)
-		if @_last_add_contact
-			[name, id_base58]	= @_last_add_contact
-			delete @_last_add_contact
-			modal.querySelector('#id').value	= id_base58
-			modal.querySelector('#name').value	= name
+		@add_contact	= true
+	_add_contact_confirm : !->
+		([detox-chat, detox-crypto, detox-utils])	<~! require(['@detox/chat', '@detox/crypto', '@detox/utils']).then
+		try
+			[public_key, remote_secret]	= detox-chat.id_decode(@new_contact_id)
+			own_public_key				= detox-crypto.create_keypair(@_state_instance.get_seed()).ed25519.public
+			if detox-utils.are_arrays_equal(public_key, own_public_key)
+				csw.functions.notify('Adding yourself to contacts is not supported', 'error', 'right')
+				return
+			existing_contact	= @_state_instance.get_contact(public_key)
+			if existing_contact
+				csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>#{existing_contact.nickname}</i>", 'warning', 'right', 3)
+				return
+			@_state_instance.add_contact(public_key, @new_contact_name, remote_secret)
+			csw.functions.notify('Contact added', 'success', 'right', 3)
+			@add_contact		= false
+			@new_contact_id		= ''
+			@new_contact_name	= ''
+		catch
+			csw.functions.notify('Incorrect ID, correct it and try again', 'error', 'right')
+	_add_contact_cancel : !->
+		@add_contact	= false
 	_set_active_contact : (e) !->
 		@_state_instance.set_ui_active_contact(e.model.item.id)
 	_del_contact : (e) !->
