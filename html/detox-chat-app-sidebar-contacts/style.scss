@@ -28,12 +28,11 @@ csw-group {
 	.contact-item {
 		align-items          : center;
 		background-color     : var(--background-color-interactive);
-		box-sizing           : border-box;
 		cursor               : pointer;
 		display              : flex;
 		justify-content      : space-between;
-		padding              : .7em;
-		width                : calc(100% + var(--block-padding));
+		padding              : var(--block-padding);
+		width                : calc(100% - var(--block-padding));
 
 		--corner-bottom-left : 45deg;
 		--corner-end         : 6%;
@@ -46,6 +45,10 @@ csw-group {
 		--unread-corner      : linear-gradient(var(--corner-top-right), var(--unread-color) var(--corner-start), transparent var(--corner-end));
 		--unconfirmed-color  : rgb(128, 128, 128, 0.5);
 		--unconfirmed-corner : linear-gradient(var(--corner-bottom-left), var(--unconfirmed-color) var(--corner-start), transparent var(--corner-end));
+
+		&:nth-of-type(n+2) {
+			border-top : var(--border-base);
+		}
 
 		&:hover {
 			color            : var(--text-color-base-active);
