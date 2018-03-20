@@ -30,5 +30,6 @@ dom-module(id="detox-chat-app-sidebar-contacts")
 						unconfirmed$="[[!item.local_secret]]"
 					)
 						.nickname [[item.nickname]]
-						csw-icon(icon="times" on-click="_del_contact" tooltip="Delete contact")
+						csw-icon(icon="edit" on-click="_rename_contact" tooltip="Rename contact")
+						csw-icon(icon="trash" on-click="_del_contact" tooltip="Delete contact")
 	script(src="script.js")

@@ -94,6 +94,14 @@
     _set_active_contact: function(e){
       this._state_instance.set_ui_active_contact(e.model.item.id);
     },
+    _rename_contact: function(e){
+      var modal, this$ = this;
+      modal = csw.functions.prompt("New nickname:", function(new_nickname){
+        this$._state_instance.set_contact_nickname(e.model.item.id, new_nickname);
+      });
+      modal.input.value = e.model.item.nickname;
+      e.stopPropagation();
+    },
     _del_contact: function(e){
       var this$ = this;
       csw.functions.confirm("<h3>Are you sure you want to delete contact <i>" + e.model.item.nickname + "</i>?</h3>", function(){

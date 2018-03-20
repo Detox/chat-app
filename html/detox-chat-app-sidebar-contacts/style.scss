@@ -43,7 +43,6 @@ csw-group {
 		background-color     : var(--background-color-interactive);
 		cursor               : pointer;
 		display              : flex;
-		justify-content      : space-between;
 		padding              : var(--block-padding);
 		width                : calc(100% - var(--block-padding));
 
@@ -93,13 +92,20 @@ csw-group {
 		}
 
 		.nickname {
+			flex-grow     : 1;
 			overflow      : hidden;
 			text-overflow : ellipsis;
 			white-space   : nowrap;
 		}
 
 		csw-icon {
-			display : none;
+			color       : var(--text-color-base-disabled);
+			display     : none;
+			margin-left : calc(var(--block-padding) / 2);
+
+			&:hover {
+				color : var(--text-color-active);
+			}
 		}
 	}
 }

@@ -43,7 +43,7 @@
             this$.notifyPath('messages');
           }
         }).on('contact_changed', function(new_contact){
-          if (are_arrays_equal(this$.contact.id, new_contact.id)) {
+          if (this$.contact && are_arrays_equal(this$.contact.id, new_contact.id)) {
             this$.contact = new_contact;
           }
         });

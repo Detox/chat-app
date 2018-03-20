@@ -42,7 +42,7 @@ Polymer(
 						@notifyPath('messages')
 				)
 				.on('contact_changed', (new_contact) !~>
-					if are_arrays_equal(@contact.id, new_contact.id)
+					if @contact && are_arrays_equal(@contact.id, new_contact.id)
 						@contact	= new_contact
 				)
 	_send : !->

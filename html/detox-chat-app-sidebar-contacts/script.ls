@@ -79,6 +79,12 @@ Polymer(
 		@add_contact	= false
 	_set_active_contact : (e) !->
 		@_state_instance.set_ui_active_contact(e.model.item.id)
+	_rename_contact : (e) !->
+		modal	= csw.functions.prompt("New nickname:", (new_nickname) !~>
+			@_state_instance.set_contact_nickname(e.model.item.id, new_nickname)
+		)
+		modal.input.value	= e.model.item.nickname
+		e.stopPropagation()
 	_del_contact : (e) !->
 		csw.functions.confirm("<h3>Are you sure you want to delete contact <i>#{e.model.item.nickname}</i>?</h3>", !~>
 			@_state_instance.del_contact(e.model.item.id)
