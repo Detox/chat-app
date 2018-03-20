@@ -23,6 +23,10 @@
 			margin-bottom : var(--block-padding);
 		};
 
+		--csw-form-within-label: {
+			width : 100%;
+		};
+
 		--csw-form-after-label: {
 			margin-bottom : var(--block-padding);
 		};
@@ -46,7 +50,7 @@
 		};
 
 		--csw-input-text-disabled: {
-			background-color : var(--background-color-base-disabled);
+			background-color : var(--background-color-element-disabled);
 			color            : var(--text-color-base-disabled);
 		};
 
@@ -60,6 +64,7 @@
 			height     : var(--form-textarea-height);
 			min-height : var(--form-textarea-height);
 			padding    : var(--form-element-padding);
+			width      : var(--form-element-width);
 		};
 
 		/* Select */
@@ -80,25 +85,29 @@
 		/* Button */
 
 		--csw-button: {
-			background-color : var(--background-color-base);
+			background-color : var(--button-background);
 			box-sizing       : border-box;
-			color            : var(--text-color-base);
+			color            : var(--button-color);
 			height           : var(--form-element-height);
 			padding          : 0 var(--form-element-padding-horizontal);
 		};
 
 		--csw-button-hover: {
-			color      : var(--button-hover-color);
+			color      : var(--button-hover-color) !important;
 			background : var(--button-hover-background);
 		};
 
+		--csw-button-focus: {
+			color : var(--button-hover-color) !important;
+		};
+
 		--csw-button-active: {
-			color      : var(--button-active-color) !important;
+			color      : var(--button-active-color);
 			background : var(--button-active-background) !important;
 		};
 
 		--csw-button-disabled: {
-			background-color : var(--background-color-base-disabled);
+			background-color : var(--background-color-element-disabled);
 			background-image : none;
 			box-shadow       : none;
 			color            : var(--text-color-base-disabled);
@@ -138,7 +147,7 @@
 		/* Label button */
 
 		--csw-label-button: {
-			background-color : var(--background-color-base-disabled);
+			background-color : var(--background-color-element-disabled);
 			color            : var(--text-color-base-disabled);
 		};
 
@@ -316,7 +325,8 @@
 		};
 
 		--csw-notify-content: {
-			background : var(--background-color-base);
+			background : var(--background-color-element);
+			border     : var(--form-element-border);
 			max-height : var(--notify-translate);
 			overflow   : hidden;
 			padding    : var(--block-padding);
@@ -416,7 +426,7 @@
 		};
 
 		--csw-dropdown-content: {
-			background : var(--background-color-base);
+			background : var(--background-color-element);
 			padding    : var(--tooltip-padding);
 		};
 

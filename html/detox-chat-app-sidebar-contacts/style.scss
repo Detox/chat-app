@@ -46,7 +46,7 @@ csw-group {
 		--unconfirmed-corner : linear-gradient(var(--corner-bottom-left), var(--unconfirmed-color) var(--corner-start), transparent var(--corner-end));
 
 		&:hover {
-			background-color : var(--base-highlight-background);
+			background-color : var(--background-color-highlight);
 
 			csw-icon {
 				display : inline-block;
@@ -62,8 +62,8 @@ csw-group {
 		}
 
 		&[selected] {
-			background-color : var(--base-background-color);
-			border           : 0.1em solid var(--base-border-color);
+			background-color : var(--background-color-dialogs);
+			border           : var(--border-base);
 			padding          : .6em;
 		}
 
