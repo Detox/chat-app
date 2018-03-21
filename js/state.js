@@ -462,96 +462,85 @@
         return this._state['contacts'].has(contact_id);
       }
       /**
-       * @param {!Uint8Array}	contact_id
-       * @param {string}		nickname
+       * @param {!Uint8Array}			contact_id
+       * @param {!Object<string, *>}	properties
        */,
-      'set_contact_nickname': function(contact_id, nickname){
-        var old_contact, new_contact;
+      _set_contact: function(contact_id, properties){
+        var old_contact, new_contact, i$, len$, value, property;
         old_contact = this['get_contact'](contact_id);
         if (!old_contact) {
           return;
         }
-        if (!nickname) {
-          nickname = base58_encode(contact_id);
-        }
         new_contact = old_contact['clone']();
-        new_contact['nickname'] = nickname;
+        for (i$ = 0, len$ = properties.length; i$ < len$; ++i$) {
+          value = i$;
+          property = properties[i$];
+          new_contact[property] = value;
+        }
         this._state['contacts'].set(contact_id, new_contact);
         this['fire']('contact_changed', new_contact, old_contact);
         this['fire']('contacts_changed');
+      }
+      /**
+       * @param {!Uint8Array}	contact_id
+       * @param {string}		nickname
+       */,
+      'set_contact_nickname': function(contact_id, nickname){
+        if (!nickname) {
+          nickname = base58_encode(contact_id);
+        }
+        this._set_contact(contact_id, {
+          'nickname': nickname
+        });
       }
       /**
        * @param {!Uint8Array}	contact_id
        * @param {!Uint8Array}	remote_secret
        */,
       'set_contact_remote_secret': function(contact_id, remote_secret){
-        var old_contact, new_contact;
-        old_contact = this['get_contact'](contact_id);
-        if (!old_contact) {
-          return;
-        }
-        new_contact = old_contact['clone']();
-        new_contact['remote_secret'] = remote_secret;
-        this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_changed', new_contact, old_contact);
-        this['fire']('contacts_changed');
+        this._set_contact(contact_id, {
+          'remote_secret': remote_secret
+        });
       }
       /**
        * @param {!Uint8Array}	contact_id
        * @param {!Uint8Array}	local_secret
        */,
       'set_contact_local_secret': function(contact_id, local_secret){
-        var old_contact, old_local_secret, new_contact;
+        var old_contact, old_local_secret;
         old_contact = this['get_contact'](contact_id);
         if (!old_contact) {
           return;
         }
         old_local_secret = old_contact['old_local_secret'] || old_contact['local_secret'];
-        new_contact = old_contact['clone']();
-        new_contact['local_secret'] = local_secret;
-        new_contact['old_local_secret'] = old_local_secret;
-        this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_changed', new_contact, old_contact);
-        this['fire']('contacts_changed');
+        this._set_contact(contact_id, {
+          'old_local_secret': old_local_secret,
+          'local_secret': local_secret
+        });
       }
       /**
        * @param {!Uint8Array} contact_id
        */,
       _update_contact_last_active: function(contact_id){
-        var old_contact, new_contact;
-        old_contact = this['get_contact'](contact_id);
-        new_contact = old_contact['clone']();
-        new_contact['last_time_active'] = +new Date;
-        this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_changed', new_contact, old_contact);
-        this['fire']('contacts_changed');
+        this._set_contact(contact_id, {
+          'last_time_active': +new Date
+        });
       }
       /**
        * @param {!Uint8Array}	contact_id
        */,
       _update_contact_last_read_message: function(contact_id){
-        var old_contact, new_contact;
-        old_contact = this['get_contact'](contact_id);
-        new_contact = old_contact['clone']();
-        new_contact['last_read_message'] = +new Date;
-        this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_changed', new_contact, old_contact);
-        this['fire']('contacts_changed');
+        this._set_contact(contact_id, {
+          'last_read_message': +new Date
+        });
       }
       /**
        * @param {!Uint8Array}	contact_id
        */,
       'del_contact_old_local_secret': function(contact_id){
-        var old_contact, new_contact;
-        old_contact = this['get_contact'](contact_id);
-        if (!old_contact) {
-          return;
-        }
-        new_contact = old_contact['clone']();
-        new_contact['old_local_secret'] = null;
-        this._state['contacts'].set(contact_id, new_contact);
-        this['fire']('contact_changed', new_contact, old_contact);
-        this['fire']('contacts_changed');
+        this._set_contact(contact_id, {
+          'old_local_secret': null
+        });
       }
       /**
        * @param {!Uint8Array} contact_id

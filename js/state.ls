@@ -420,35 +420,38 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'has_contact' : (contact_id) ->
 			@_state['contacts'].has(contact_id)
-		# TODO: _set_contact(properties : Object) for convenience
+		/**
+		 * @param {!Uint8Array}			contact_id
+		 * @param {!Object<string, *>}	properties
+		 */
+		_set_contact : (contact_id, properties) !->
+			old_contact	= @'get_contact'(contact_id)
+			if !old_contact
+				return
+			new_contact	= old_contact['clone']()
+			for property, value in properties
+				new_contact[property]	= value
+			@_state['contacts'].set(contact_id, new_contact)
+			@'fire'('contact_changed', new_contact, old_contact)
+			@'fire'('contacts_changed')
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {string}		nickname
 		 */
 		'set_contact_nickname' : (contact_id, nickname) !->
-			old_contact	= @'get_contact'(contact_id)
-			if !old_contact
-				return
 			if !nickname
 				nickname = base58_encode(contact_id)
-			new_contact				= old_contact['clone']()
-			new_contact['nickname']	= nickname
-			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_changed', new_contact, old_contact)
-			@'fire'('contacts_changed')
+			@_set_contact(contact_id, {
+				'nickname'	: nickname
+			})
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {!Uint8Array}	remote_secret
 		 */
 		'set_contact_remote_secret' : (contact_id, remote_secret) !->
-			old_contact	= @'get_contact'(contact_id)
-			if !old_contact
-				return
-			new_contact						= old_contact['clone']()
-			new_contact['remote_secret']	= remote_secret
-			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_changed', new_contact, old_contact)
-			@'fire'('contacts_changed')
+			@_set_contact(contact_id, {
+				'remote_secret'	: remote_secret
+			})
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {!Uint8Array}	local_secret
@@ -457,45 +460,32 @@ function Wrapper (detox-utils, async-eventer)
 			old_contact	= @'get_contact'(contact_id)
 			if !old_contact
 				return
-			old_local_secret				= old_contact['old_local_secret'] || old_contact['local_secret']
-			new_contact						= old_contact['clone']()
-			new_contact['local_secret']		= local_secret
-			new_contact['old_local_secret']	= old_local_secret
-			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_changed', new_contact, old_contact)
-			@'fire'('contacts_changed')
+			old_local_secret	= old_contact['old_local_secret'] || old_contact['local_secret']
+			@_set_contact(contact_id, {
+				'old_local_secret'	: old_local_secret
+				'local_secret'		: local_secret
+			})
 		/**
 		 * @param {!Uint8Array} contact_id
 		 */
 		_update_contact_last_active : (contact_id) !->
-			old_contact						= @'get_contact'(contact_id)
-			new_contact						= old_contact['clone']()
-			new_contact['last_time_active']	= +(new Date)
-			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_changed', new_contact, old_contact)
-			@'fire'('contacts_changed')
+			@_set_contact(contact_id, {
+				'last_time_active'	: +(new Date)
+			})
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 */
 		_update_contact_last_read_message : (contact_id) !->
-			old_contact							= @'get_contact'(contact_id)
-			new_contact							= old_contact['clone']()
-			new_contact['last_read_message']	= +(new Date)
-			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_changed', new_contact, old_contact)
-			@'fire'('contacts_changed')
+			@_set_contact(contact_id, {
+				'last_read_message'	: +(new Date)
+			})
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 */
 		'del_contact_old_local_secret' : (contact_id) !->
-			old_contact	= @'get_contact'(contact_id)
-			if !old_contact
-				return
-			new_contact						= old_contact['clone']()
-			new_contact['old_local_secret']	= null
-			@_state['contacts'].set(contact_id, new_contact)
-			@'fire'('contact_changed', new_contact, old_contact)
-			@'fire'('contacts_changed')
+			@_set_contact(contact_id, {
+				'old_local_secret'	: null
+			})
 		/**
 		 * @param {!Uint8Array} contact_id
 		 */
