@@ -173,8 +173,19 @@
           state.set_contact_nickname(contact_id, nickname);
         }
       }).on('text_message', function(contact_id, date_written, date_sent, text_message){
+        var i$, ref$, old_message, last_message_received;
         text_message = text_message.trim();
         if (!text_message) {
+          return;
+        }
+        for (i$ = (ref$ = state.get_contact_messages(contact_id)).length - 1; i$ >= 0; --i$) {
+          old_message = ref$[i$];
+          if (old_message.from) {
+            last_message_received = old_message;
+            break;
+          }
+        }
+        if (last_message_received && (last_message_received.date_sent <= date_sent || last_message_received.date_written < date_written)) {
           return;
         }
         state.add_contact_message(contact_id, true, date_written, date_sent, text_message);

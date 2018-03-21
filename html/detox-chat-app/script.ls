@@ -165,9 +165,15 @@ Polymer(
 					state.set_contact_nickname(contact_id, nickname)
 			)
 			.on('text_message', (contact_id, date_written, date_sent, text_message) !->
-				# TODO: Check date_written and date_sent
 				text_message	= text_message.trim()
 				if !text_message
+					return
+				for old_message in state.get_contact_messages(contact_id) by -1
+					if old_message.from
+						last_message_received = old_message
+						break
+				# `date_sent` always increases, `date_written` never decreases
+				if last_message_received && (last_message_received.date_sent <= date_sent || last_message_received.date_written < date_written)
 					return
 				state.add_contact_message(contact_id, true, date_written, date_sent, text_message)
 			)
