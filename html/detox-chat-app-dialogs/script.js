@@ -24,6 +24,7 @@
         are_arrays_equal = detoxUtils.are_arrays_equal;
         state = this$._state_instance;
         state.on('ui_active_contact_changed', function(new_active_contact){
+          var messages_list;
           if (!new_active_contact) {
             this$.active_contact = false;
             this$.contact = {};
@@ -34,13 +35,22 @@
           this$.contact = state.get_contact(new_active_contact);
           this$.messages = state.get_contact_messages(new_active_contact);
           this$.notifyPath('messages');
+          this$.$['messages-list-template'].render();
+          messages_list = this$.$['messages-list'];
+          messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
           this$.$['send-form'].querySelector('textarea').value = '';
         }).on('contact_messages_changed', function(contact_id){
-          var active_contact;
+          var active_contact, messages_list, need_to_update_scroll;
           active_contact = state.get_ui_active_contact();
           if (active_contact && are_arrays_equal(contact_id, active_contact)) {
+            messages_list = this$.$['messages-list'];
+            need_to_update_scroll = messages_list.scrollHeight - messages_list.offsetHeight === messages_list.scrollTop;
             this$.messages = state.get_contact_messages(contact_id);
             this$.notifyPath('messages');
+            if (need_to_update_scroll) {
+              this$.$['messages-list-template'].render();
+              messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
+            }
           }
         }).on('contact_changed', function(new_contact){
           if (this$.contact && are_arrays_equal(this$.contact.id, new_contact.id)) {

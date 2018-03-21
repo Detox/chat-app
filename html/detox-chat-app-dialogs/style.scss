@@ -15,7 +15,7 @@
 	background    : var(--background-color-sidebar);
 	border-bottom : var(--border-base);
 	line-height   : 2.5em;
-	padding       : 0 1em;
+	padding       : 0 var(--block-padding);
 }
 
 #welcome {
@@ -28,22 +28,22 @@
 	flex-grow      : 1;
 	overflow-x     : hidden;
 	overflow-y     : auto;
-	padding        : 1em;
+	padding        : var(--block-padding);
 
 	&[hidden] {
 		display : none;
 	}
 
 	.message {
-		display       : flex;
-		flex-shrink   : 0;
-		margin-bottom : 1em;
+		display        : flex;
+		flex-shrink    : 0;
+		padding-bottom : var(--block-padding);
 
 		&[right] {
 			flex-direction : row-reverse;
 
 			.message-content {
-				border-radius : 1em 1em 0 1em;
+				border-radius : var(--block-padding) var(--block-padding) 0 var(--block-padding);
 			}
 
 			.message-details {
@@ -57,15 +57,15 @@
 
 		.message-content {
 			background    : var(--background-color-highlight);
-			border-radius : 1em 1em 1em 0;
+			border-radius : var(--block-padding) var(--block-padding) var(--block-padding) 0;
 			max-width     : 70%;
-			padding       : 1em;
+			padding       : var(--block-padding);
 			word-break    : break-word;
 		}
 
 		.message-details {
 			align-self : center;
-			padding    : 1em;
+			padding    : var(--block-padding);
 			opacity    : 0;
 		}
 	}

@@ -34,13 +34,23 @@ Polymer(
 					@contact		= state.get_contact(new_active_contact)
 					@messages		= state.get_contact_messages(new_active_contact)
 					@notifyPath('messages')
+					# Force synchronous messages render in order to be sure scrolling works properly
+					@$['messages-list-template'].render()
+					messages_list									= @$['messages-list']
+					messages_list.scrollTop							= messages_list.scrollHeight - messages_list.offsetHeight
 					@$['send-form']querySelector('textarea').value	= '' # TODO: Same on per-contact basis instead of erasing
 				)
 				.on('contact_messages_changed', (contact_id) !~>
 					active_contact	= state.get_ui_active_contact()
 					if active_contact && are_arrays_equal(contact_id, active_contact)
-						@messages	= state.get_contact_messages(contact_id)
+						messages_list			= @$['messages-list']
+						need_to_update_scroll	= messages_list.scrollHeight - messages_list.offsetHeight == messages_list.scrollTop
+						@messages				= state.get_contact_messages(contact_id)
 						@notifyPath('messages')
+						if need_to_update_scroll
+							# Force synchronous messages render in order to be sure scrolling works properly
+							@$['messages-list-template'].render()
+							messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
 				)
 				.on('contact_changed', (new_contact) !~>
 					if @contact && are_arrays_equal(@contact.id, new_contact.id)
