@@ -10,7 +10,7 @@ Polymer(
 	]
 	properties	:
 		id_base58			: String
-		name				:
+		nickname			:
 			observer	: '_nickname_changed'
 			type		: String
 	ready : !->
@@ -33,17 +33,17 @@ Polymer(
 
 			public_key	= detox-crypto.create_keypair(state.get_seed()).ed25519.public
 			@id_base58	= id_encode(public_key, new Uint8Array(0))
-			@name		= state.get_nickname()
+			@nickname	= state.get_nickname()
 			update_secrets()
 			state
-				.on('nickname_changed', (new_name) !~>
-					if @name != new_name
-						@name	= new_name
+				.on('nickname_changed', (new_nickname) !~>
+					if @nickname != new_nickname
+						@nickname	= new_nickname
 				)
 				.on('secrets_changed', update_secrets)
 	_nickname_changed : !->
-		if @name != @_state_instance.get_nickname()
-			@_state_instance.set_nickname(@name)
+		if @nickname != @_state_instance.get_nickname()
+			@_state_instance.set_nickname(@nickname)
 	_id_click : (e) !->
 		e.target.select()
 	_add_secret : !->

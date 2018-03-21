@@ -10,7 +10,7 @@
     behaviors: [detoxChatApp.behaviors.state],
     properties: {
       id_base58: String,
-      name: {
+      nickname: {
         observer: '_nickname_changed',
         type: String
       }
@@ -39,11 +39,11 @@
             }
             public_key = detoxCrypto.create_keypair(state.get_seed()).ed25519['public'];
             this$.id_base58 = id_encode(public_key, new Uint8Array(0));
-            this$.name = state.get_nickname();
+            this$.nickname = state.get_nickname();
             update_secrets();
-            state.on('nickname_changed', function(new_name){
-              if (this$.name !== new_name) {
-                this$.name = new_name;
+            state.on('nickname_changed', function(new_nickname){
+              if (this$.nickname !== new_nickname) {
+                this$.nickname = new_nickname;
               }
             }).on('secrets_changed', update_secrets);
           });
@@ -51,8 +51,8 @@
       });
     },
     _nickname_changed: function(){
-      if (this.name !== this._state_instance.get_nickname()) {
-        this._state_instance.set_nickname(this.name);
+      if (this.nickname !== this._state_instance.get_nickname()) {
+        this._state_instance.set_nickname(this.nickname);
       }
     },
     _id_click: function(e){
