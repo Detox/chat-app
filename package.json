@@ -27,7 +27,7 @@
 		"@webcomponents/shadycss"        : "^1.1.1",
 		"@webcomponents/webcomponentsjs" : "^1.1.0",
 		"alameda"                        : "^1.2.1",
-		"cleverstyle-widgets"            : "^0.6.0"
+		"cleverstyle-widgets"            : "^0.6.1"
 	},
 	"devDependencies" : {
 		"http-server" : "^0.11.1"
