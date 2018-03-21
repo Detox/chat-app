@@ -48,8 +48,8 @@ Polymer(
 					@notifyPath('messages')
 					# Force synchronous messages render in order to be sure scrolling works properly
 					@$['messages-list-template'].render()
-					messages_list									= @$['messages-list']
-					messages_list.scrollTop							= messages_list.scrollHeight - messages_list.offsetHeight
+					messages_list			= @$['messages-list']
+					messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
 				)
 				.on('contact_messages_changed', (contact_id) !~>
 					active_contact	= state.get_ui_active_contact()
