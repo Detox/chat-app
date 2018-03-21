@@ -1,1 +1,1 @@
-:host{display:block;padding:var(--block-padding)}
+:host{border-top:var(--border-base);display:block;padding:var(--block-padding)}

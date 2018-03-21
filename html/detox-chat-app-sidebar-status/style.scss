@@ -4,6 +4,7 @@
  * @license 0BSD
  */
 :host {
-	display : block;
-	padding : var(--block-padding);
+	border-top : var(--border-base);
+	display    : block;
+	padding    : var(--block-padding);
 }
