@@ -20,8 +20,12 @@ csw-button {
 	margin-bottom : var(--block-padding);
 }
 
-.secret-text-label {
-	position : relative;
+.secret-name {
+	display : flex !important;
+
+	div {
+		flex-grow : 1;
+	}
 
 	&:hover {
 		csw-icon {
@@ -30,13 +34,11 @@ csw-button {
 	}
 
 	csw-icon {
-		color    : var(--text-color-base-disabled);
-		cursor   : pointer;
-		display  : none;
-		position : absolute;
-		right    : .5em;
-		top      : .5em;
-		width    : 1em;
+		color       : var(--text-color-base-disabled);
+		cursor      : pointer;
+		display     : none;
+		margin-left : calc(var(--block-padding) / 2);
+		width       : auto;
 
 		&:hover {
 			color : var(--text-color-active);

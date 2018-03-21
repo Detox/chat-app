@@ -744,6 +744,18 @@
         this['fire']('secrets_changed');
       }
       /**
+       * @param {!Uint8Array}	secret
+       * @param {string}		name
+       */,
+      'set_secret_name': function(secret, name){
+        var old_secret, new_secret;
+        old_secret = this._state['secrets'].get(secret);
+        new_secret = old_secret['clone']();
+        new_secret['name'] = name;
+        this._state['secrets'].set(secret, new_secret);
+        this['fire']('secrets_changed');
+      }
+      /**
        * @param {!Array<!Secret>} secrets
        */,
       'set_secrets': function(secrets){

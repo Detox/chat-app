@@ -72,8 +72,9 @@
       this.add_secret = true;
     },
     _add_secret_confirm: function(){
-      var this$ = this;
-      if (!this.new_secret_name) {
+      var new_secret_name, this$ = this;
+      new_secret_name = this.new_secret_name.trim();
+      if (!new_secret_name) {
         csw.functions.notify('Secret name is required', 'error', 'right', 3);
         return;
       }
@@ -81,7 +82,7 @@
         var detoxChat, secret;
         detoxChat = arg$[0];
         secret = detoxChat.generate_secret().slice(0, this$.new_secret_length);
-        this$._state_instance.add_secret(secret, this$.new_secret_name);
+        this$._state_instance.add_secret(secret, new_secret_name);
         csw.functions.notify('Secret added', 'success', 'right', 3);
         this$.add_secret = false;
         this$.new_secret_name = '';
@@ -95,6 +96,20 @@
       var content;
       content = "<p>Secrets are used as anti-spam system. You can create different secrets for different purposes.<br>\nEach time you have incoming contact request, you'll see which secret was used.<br>\nFor instance, you can create a secret for conference and know who is connecting to you before you accept contact request.</p>\n\n<p>For contact requests you need to share ID with secret.<br>\nPlain ID without secret will not result in visible contact request, but if you and your interlocutor add each other to contacts list explicitly, you'll be connected and able to communicate.</p>";
       csw.functions.simple_modal(content);
+    },
+    _rename_secret: function(e){
+      var modal, this$ = this;
+      modal = csw.functions.prompt("New secret name:", function(new_secret_name){
+        new_secret_name = new_secret_name.trim();
+        if (!new_secret_name) {
+          csw.functions.notify('Secret name is required', 'error', 'right', 3);
+          return;
+        }
+        this$._state_instance.set_secret_name(e.model.item.secret, new_secret_name);
+        csw.functions.notify('Secret name updated', 'success', 'right', 3);
+      });
+      modal.input.value = e.model.item.name;
+      e.preventDefault();
     },
     _del_secret: function(e){
       var this$ = this;

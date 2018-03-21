@@ -57,12 +57,13 @@ Polymer(
 	_add_secret : !->
 		@add_secret	= true
 	_add_secret_confirm : !->
-		if !@new_secret_name
+		new_secret_name	= @new_secret_name.trim()
+		if !new_secret_name
 			csw.functions.notify('Secret name is required', 'error', 'right', 3)
 			return
 		([detox-chat])	<~! require(['@detox/chat']).then
 		secret	= detox-chat.generate_secret().slice(0, @new_secret_length)
-		@_state_instance.add_secret(secret, @new_secret_name)
+		@_state_instance.add_secret(secret, new_secret_name)
 		csw.functions.notify('Secret added', 'success', 'right', 3)
 		@add_secret			= false
 		@new_secret_name	= ''
@@ -79,6 +80,17 @@ Polymer(
 			Plain ID without secret will not result in visible contact request, but if you and your interlocutor add each other to contacts list explicitly, you'll be connected and able to communicate.</p>
 		"""
 		csw.functions.simple_modal(content)
+	_rename_secret : (e) !->
+		modal	= csw.functions.prompt("New secret name:", (new_secret_name) !~>
+			new_secret_name	= new_secret_name.trim()
+			if !new_secret_name
+				csw.functions.notify('Secret name is required', 'error', 'right', 3)
+				return
+			@_state_instance.set_secret_name(e.model.item.secret, new_secret_name)
+			csw.functions.notify('Secret name updated', 'success', 'right', 3)
+		)
+		modal.input.value	= e.model.item.name
+		e.preventDefault()
 	_del_secret : (e) !->
 		csw.functions.confirm("<h3>Are you sure you want to delete secret <i>#{e.model.item.name}</i>?</h3>", !~>
 			@_state_instance.del_secret(e.model.item.secret)

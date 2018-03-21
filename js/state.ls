@@ -646,6 +646,16 @@ function Wrapper (detox-utils, async-eventer)
 			@'fire'('secret_added', new_secret)
 			@'fire'('secrets_changed')
 		/**
+		 * @param {!Uint8Array}	secret
+		 * @param {string}		name
+		 */
+		'set_secret_name' : (secret, name) !->
+			old_secret			= @_state['secrets'].get(secret)
+			new_secret			= old_secret['clone']()
+			new_secret['name']	= name
+			@_state['secrets'].set(secret, new_secret)
+			@'fire'('secrets_changed')
+		/**
 		 * @param {!Array<!Secret>} secrets
 		 */
 		'set_secrets' : (secrets) !->

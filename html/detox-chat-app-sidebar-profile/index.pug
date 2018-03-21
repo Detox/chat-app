@@ -19,8 +19,9 @@ dom-module(id="detox-chat-app-sidebar-profile")
 			csw-button: button(type="button" on-click="_add_secret_cancel") Cancel
 		csw-form: form
 			template(is="dom-repeat" items="{{secrets}}")
-				label ID for secret <i>[[item.name]]</i>:
-				label.secret-text-label
-					csw-textarea: textarea(readonly on-click="_id_click" rows="4" value="[[item.id]]")
+				label.secret-name
+					div ID for secret <i>[[item.name]]</i>:
+					csw-icon(icon="edit" on-click="_rename_secret" tooltip="Rename secret")
 					csw-icon(icon="trash" on-click="_del_secret" tooltip="Delete secret")
+				csw-textarea: textarea(readonly on-click="_id_click" rows="4" value="[[item.id]]")
 	script(src="script.js")

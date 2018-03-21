@@ -92,6 +92,7 @@ Polymer(
 	_rename_contact : (e) !->
 		modal	= csw.functions.prompt("New nickname:", (new_nickname) !~>
 			@_state_instance.set_contact_nickname(e.model.item.id, new_nickname)
+			csw.functions.notify('Nickname updated', 'success', 'right', 3)
 		)
 		modal.input.value	= e.model.item.nickname
 		e.stopPropagation()
