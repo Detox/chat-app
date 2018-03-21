@@ -27,6 +27,7 @@ Polymer(
 			!~function update_secrets
 				@secrets	= for secret in state.get_secrets()
 					{
+						secret	: secret.secret
 						id		: id_encode(public_key, secret.secret)
 						name	: secret.name
 					}
@@ -84,4 +85,9 @@ Polymer(
 			Plain ID without secret will not result in visible contact request, but if you and your interlocutor add each other to contacts list explicitly, you'll be connected and able to communicate.</p>
 		"""
 		csw.functions.simple_modal(content)
+	_del_secret : (e) !->
+		csw.functions.confirm("<h3>Are you sure you want to delete secret <i>#{e.model.item.name}</i>?</h3>", !~>
+			@_state_instance.del_secret(e.model.item.secret)
+		)
+		e.preventDefault()
 )

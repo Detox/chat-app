@@ -19,3 +19,27 @@ csw-textarea {
 csw-button {
 	margin-bottom : var(--block-padding);
 }
+
+.secret-text-label {
+	position : relative;
+
+	&:hover {
+		csw-icon {
+			display : inline-block;
+		}
+	}
+
+	csw-icon {
+		color    : var(--text-color-base-disabled);
+		cursor   : pointer;
+		display  : none;
+		position : absolute;
+		right    : .5em;
+		top      : .5em;
+		width    : 1em;
+
+		&:hover {
+			color : var(--text-color-active);
+		}
+	}
+}

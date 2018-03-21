@@ -11,5 +11,7 @@ dom-module(id="detox-chat-app-sidebar-profile")
 				csw-button(icon="question"): button(type="button" on-click="_help")
 			template(is="dom-repeat" items="{{secrets}}")
 				label ID for secret <i>[[item.name]]</i>:
-				csw-textarea: textarea(readonly on-click="_id_click" rows="4" value="[[item.id]]")
+				label.secret-text-label
+					csw-textarea: textarea(readonly on-click="_id_click" rows="4" value="[[item.id]]")
+					csw-icon(icon="trash" on-click="_del_secret" tooltip="Delete secret")
 	script(src="script.js")

@@ -31,6 +31,7 @@
               for (i$ = 0, len$ = (ref$ = state.get_secrets()).length; i$ < len$; ++i$) {
                 secret = ref$[i$];
                 res$.push({
+                  secret: secret.secret,
                   id: id_encode(public_key, secret.secret),
                   name: secret.name
                 });
@@ -80,6 +81,13 @@
       var content;
       content = "<p>Secrets are used as anti-spam system. You can create different secrets for different purposes.<br>\nEach time you have incoming contact request, you'll see which secret was used.<br>\nFor instance, you can create a secret for conference and know who is connecting to you before you accept contact request.</p>\n\n<p>For contact requests you need to share ID with secret.<br>\nPlain ID without secret will not result in visible contact request, but if you and your interlocutor add each other to contacts list explicitly, you'll be connected and able to communicate.</p>";
       csw.functions.simple_modal(content);
+    },
+    _del_secret: function(e){
+      var this$ = this;
+      csw.functions.confirm("<h3>Are you sure you want to delete secret <i>" + e.model.item.name + "</i>?</h3>", function(){
+        this$._state_instance.del_secret(e.model.item.secret);
+      });
+      e.preventDefault();
     }
   });
 }).call(this);
