@@ -429,7 +429,7 @@ function Wrapper (detox-utils, async-eventer)
 			if !old_contact
 				return
 			new_contact	= old_contact['clone']()
-			for property, value in properties
+			for property, value of properties
 				new_contact[property]	= value
 			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_changed', new_contact, old_contact)

@@ -466,15 +466,14 @@
        * @param {!Object<string, *>}	properties
        */,
       _set_contact: function(contact_id, properties){
-        var old_contact, new_contact, i$, len$, value, property;
+        var old_contact, new_contact, property, value;
         old_contact = this['get_contact'](contact_id);
         if (!old_contact) {
           return;
         }
         new_contact = old_contact['clone']();
-        for (i$ = 0, len$ = properties.length; i$ < len$; ++i$) {
-          value = i$;
-          property = properties[i$];
+        for (property in properties) {
+          value = properties[property];
           new_contact[property] = value;
         }
         this._state['contacts'].set(contact_id, new_contact);

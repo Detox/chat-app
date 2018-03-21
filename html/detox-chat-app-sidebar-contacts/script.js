@@ -121,7 +121,7 @@
       var state, item, content, modal;
       state = this._state_instance;
       item = e.model.item;
-      content = "<h3>What do you want to do with contact request from <i>" + item.name + "</i> that used secret <i>" + item.secret_name + "</i>?</h3>\n<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n<csw-button><button id=\"reject\">Reject</button></csw-button>\n<csw-button><button id=\"cancel\">Cancel</button></csw-button>";
+      content = "<h3>What do you want to do with contact request?</h3>\n<p>ID: <i>" + item.name + "</i></p>\n<p>Secret used: <i>" + item.secret_name + "</i></p>\n<csw-group>\n	<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n	<csw-button><button id=\"reject\">Reject</button></csw-button>\n	<csw-button><button id=\"cancel\">Cancel</button></csw-button>\n</csw-group>";
       modal = csw.functions.simple_modal(content);
       modal.querySelector('#accept').addEventListener('click', function(){
         state.add_contact(item.id, '', new Uint8Array(0));

@@ -3,9 +3,10 @@ dom-module(id="detox-chat-app-sidebar-contacts")
 	template
 		div(hidden="[[_hide_header(contacts_requests, add_contact)]]")
 			h4 Contacts requests
-			csw-group(vertical)
+			csw-group#contacts-requests(vertical)
 				template(is="dom-repeat" items="{{contacts_requests}}")
-					.contact-item(on-click="_accept_contact_request" unconfirmed) [[item.secret_name]]: [[item.name]]
+					.contact-item(on-click="_accept_contact_request" unconfirmed)
+						.nickname [[item.secret_name]]: [[item.name]]
 		div(hidden="[[contacts.length]]")
 			csw-button(icon="plus"): button(type="button" on-click="_add_contact") Add new contact
 		div(hidden="[[_hide_header(contacts, add_contact)]]")

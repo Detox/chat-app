@@ -105,10 +105,14 @@ Polymer(
 
 		item	= e.model.item
 		content	= """
-			<h3>What do you want to do with contact request from <i>#{item.name}</i> that used secret <i>#{item.secret_name}</i>?</h3>
-			<csw-button primary><button id="accept">Accept</button></csw-button>
-			<csw-button><button id="reject">Reject</button></csw-button>
-			<csw-button><button id="cancel">Cancel</button></csw-button>
+			<h3>What do you want to do with contact request?</h3>
+			<p>ID: <i>#{item.name}</i></p>
+			<p>Secret used: <i>#{item.secret_name}</i></p>
+			<csw-group>
+				<csw-button primary><button id="accept">Accept</button></csw-button>
+				<csw-button><button id="reject">Reject</button></csw-button>
+				<csw-button><button id="cancel">Cancel</button></csw-button>
+			</csw-group>
 		"""
 		modal	= csw.functions.simple_modal(content)
 		modal.querySelector('#accept').addEventListener('click', !->
