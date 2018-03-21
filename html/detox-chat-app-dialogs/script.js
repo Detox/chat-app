@@ -14,17 +14,32 @@
         value: false
       },
       contact: Object,
-      messages: Array
+      messages: Array,
+      text_message: {
+        type: String,
+        value: ''
+      }
     },
     ready: function(){
       var this$ = this;
       Promise.all([require(['@detox/utils']), this._state_instance_ready]).then(function(arg$){
-        var detoxUtils, are_arrays_equal, state;
+        var detoxUtils, are_arrays_equal, ArrayMap, text_messages, state;
         detoxUtils = arg$[0][0];
         are_arrays_equal = detoxUtils.are_arrays_equal;
+        ArrayMap = detoxUtils.ArrayMap;
+        text_messages = ArrayMap();
         state = this$._state_instance;
-        state.on('ui_active_contact_changed', function(new_active_contact){
-          var messages_list;
+        state.on('ui_active_contact_changed', function(new_active_contact, old_active_contact){
+          var text_message, messages_list;
+          text_message = this$.text_message.trim();
+          if (text_message && old_active_contact) {
+            text_messages.set(old_active_contact, text_message);
+            this$.text_message = '';
+          }
+          if (new_active_contact && text_messages.has(new_active_contact)) {
+            this$.text_message = text_messages.get(new_active_contact);
+            text_messages['delete'](new_active_contact);
+          }
           if (!new_active_contact) {
             this$.active_contact = false;
             this$.contact = {};
@@ -38,7 +53,6 @@
           this$.$['messages-list-template'].render();
           messages_list = this$.$['messages-list'];
           messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
-          this$.$['send-form'].querySelector('textarea').value = '';
         }).on('contact_messages_changed', function(contact_id){
           var active_contact, messages_list, need_to_update_scroll;
           active_contact = state.get_ui_active_contact();
@@ -56,19 +70,19 @@
           if (this$.contact && are_arrays_equal(this$.contact.id, new_contact.id)) {
             this$.contact = new_contact;
           }
+        }).on('contact_deleted', function(old_contact){
+          text_messages['delete'](old_contact);
         });
       });
     },
     _send: function(){
-      var state, textarea, text_message, contact_id;
-      state = this._state_instance;
-      textarea = this.$['send-form'].querySelector('textarea');
-      text_message = textarea.value;
-      text_message = text_message.trim();
+      var text_message, state, contact_id;
+      text_message = this.text_message.trim();
       if (!text_message) {
         return;
       }
-      textarea.value = '';
+      this.text_message = '';
+      state = this._state_instance;
       contact_id = state.get_ui_active_contact();
       state.add_contact_message(contact_id, false, +new Date, 0, text_message);
     },

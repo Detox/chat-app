@@ -15,16 +15,28 @@ Polymer(
 			value	: false
 		contact			: Object
 		messages		: Array
+		text_message	:
+			type	: String
+			value	: ''
 	ready : !->
 		Promise.all([
 			require(['@detox/utils'])
 			@_state_instance_ready
 		]).then ([[detox-utils]]) !~>
 			are_arrays_equal	= detox-utils.are_arrays_equal
+			ArrayMap			= detox-utils.ArrayMap
 
+			text_messages		= ArrayMap()
 			state				= @_state_instance
 			state
-				.on('ui_active_contact_changed', (new_active_contact) !~>
+				.on('ui_active_contact_changed', (new_active_contact, old_active_contact) !~>
+					text_message	= @text_message.trim()
+					if text_message && old_active_contact
+						text_messages.set(old_active_contact, text_message)
+						@text_message	= ''
+					if new_active_contact && text_messages.has(new_active_contact)
+						@text_message	= text_messages.get(new_active_contact)
+						text_messages.delete(new_active_contact)
 					if !new_active_contact
 						@active_contact	= false
 						@contact		= {}
@@ -38,7 +50,6 @@ Polymer(
 					@$['messages-list-template'].render()
 					messages_list									= @$['messages-list']
 					messages_list.scrollTop							= messages_list.scrollHeight - messages_list.offsetHeight
-					@$['send-form']querySelector('textarea').value	= '' # TODO: Same on per-contact basis instead of erasing
 				)
 				.on('contact_messages_changed', (contact_id) !~>
 					active_contact	= state.get_ui_active_contact()
@@ -56,14 +67,15 @@ Polymer(
 					if @contact && are_arrays_equal(@contact.id, new_contact.id)
 						@contact	= new_contact
 				)
+				.on('contact_deleted', (old_contact) !~>
+					text_messages.delete(old_contact)
+				)
 	_send : !->
-		state			= @_state_instance
-		textarea		= @$['send-form']querySelector('textarea')
-		text_message	= textarea.value
-		text_message	= text_message.trim()
+		text_message	= @text_message.trim()
 		if !text_message
 			return
-		textarea.value	= ''
+		@text_message	= ''
+		state			= @_state_instance
 		contact_id		= state.get_ui_active_contact()
 		# TODO: Sent date should be updated
 		state.add_contact_message(contact_id, false, +(new Date), 0, text_message)
