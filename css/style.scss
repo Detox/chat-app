@@ -29,7 +29,8 @@ html {
 
 	/* Borders */
 	--border-color-base                        : #484848;
-	--border-base                              : 1px solid var(--border-color-base);
+	--border-width-base                        : 1px;
+	--border-base                              : var(--border-width-base) solid var(--border-color-base);
 	--border-color-element                     : var(--border-color-base);
 
 	/* Fonts */
@@ -98,9 +99,10 @@ html {
 
 	--tooltip-background                       : var(--background-color-element);
 	--tooltip-color                            : var(--text-color-base);
-	--tooltip-padding                          : .5em;
+	--tooltip-padding                          : calc(var(--block-padding) / 2);
 	--tooltip-max-height                       : 40vh;
 	--tooltip-max-width                        : 40vw;
+	--tooltip-arrow-background                 : var(--border-color-base);
 	--tooltip-arrow-height                     : .4em;
 	--tooltip-arrow-width                      : .7em;
 	--tooltip-offset                           : 1.5em;

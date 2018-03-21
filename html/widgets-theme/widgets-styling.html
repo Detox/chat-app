@@ -269,6 +269,7 @@
 
 		--csw-tooltip: {
 			background  : var(--tooltip-background);
+			border      : var(--border-base);
 			color       : var(--tooltip-color);
 			margin-top  : calc(-1 * var(--tooltip-arrow-height));
 			opacity     : 0;
@@ -308,12 +309,29 @@
 		--csw-tooltip-arrow: {
 			border-style : solid;
 			border-width : var(--tooltip-arrow-height) var(--tooltip-arrow-width) 0 var(--tooltip-arrow-width);
+			border-color : var(--tooltip-arrow-background) transparent transparent transparent;
+		};
+
+		--csw-tooltip-arrow-after: {
+			content      : '';
+			display      : block;
+			border-style : solid;
+			border-width : var(--tooltip-arrow-height) var(--tooltip-arrow-width) 0 var(--tooltip-arrow-width);
 			border-color : var(--tooltip-background) transparent transparent transparent;
+			left         : calc(-1 * var(--tooltip-arrow-width));
+			position     : relative;
+			top          : calc(-1 * var(--tooltip-arrow-height) - var(--border-width-base));
 		};
 
 		--csw-tooltip-arrow-top: {
 			border-width : 0 var(--tooltip-arrow-width) var(--tooltip-arrow-height) var(--tooltip-arrow-width);
+			border-color : transparent transparent var(--tooltip-arrow-background) transparent;
+		};
+
+		--csw-tooltip-arrow-top-after: {
+			border-width : 0 var(--tooltip-arrow-width) var(--tooltip-arrow-height) var(--tooltip-arrow-width);
 			border-color : transparent transparent var(--tooltip-background) transparent;
+			top          : var(--border-width-base);
 		};
 
 		/* Notify */
