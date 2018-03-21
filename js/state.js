@@ -240,7 +240,10 @@
         this._local_state.ui.active_contact = new_active_contact;
         this._update_contact_with_unread_messages(new_active_contact);
         this['fire']('ui_active_contact_changed', new_active_contact, old_active_contact);
-        this._update_contact_last_read_message(old_active_contact);
+        if (old_active_contact) {
+          this._update_contact_last_read_message(old_active_contact);
+          this._update_contact_with_unread_messages(old_active_contact);
+        }
       }
       /**
        * @return {boolean}
@@ -419,13 +422,13 @@
        * @return {!Array<!Uint8Array>}
        */,
       'get_contacts_with_pending_messages': function(){
-        return this._local_state.contacts_with_pending_messages;
+        return Array.from(this._local_state.contacts_with_pending_messages.values());
       }
       /**
        * @return {!Array<!Uint8Array>}
        */,
       'get_contacts_with_unread_messages': function(){
-        return this._local_state.contacts_with_unread_messages;
+        return Array.from(this._local_state.contacts_with_unread_messages.values());
       }
       /**
        * @param {!Uint8Array} contact_id

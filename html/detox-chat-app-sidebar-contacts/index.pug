@@ -25,9 +25,11 @@ dom-module(id="detox-chat-app-sidebar-contacts")
 					//- TODO: Add [unread] property
 					.contact-item(
 						on-click="_set_active_contact"
-						online$="[[_online(item.id, online_contacts)]]"
-						selected$="[[_selected(item.id, ui_active_contact)]]"
-						unconfirmed$="[[!item.local_secret]]"
+						selected$="[[_selected(item, ui_active_contact)]]"
+						unconfirmed$="[[_unconfirmed(item)]]"
+						online$="[[_online(item, online_contacts)]]"
+						unread$="[[_unread(item, ui_active_contact, contacts_with_unread_messages)]]"
+						pending$="[[_pending(item, contacts_with_pending_messages)]]"
 					)
 						.nickname [[item.nickname]]
 						csw-icon(icon="edit" on-click="_rename_contact" tooltip="Rename contact")

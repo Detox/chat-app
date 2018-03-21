@@ -243,7 +243,9 @@ function Wrapper (detox-utils, async-eventer)
 			@_local_state.ui.active_contact = new_active_contact
 			@_update_contact_with_unread_messages(new_active_contact)
 			@'fire'('ui_active_contact_changed', new_active_contact, old_active_contact)
-			@_update_contact_last_read_message(old_active_contact)
+			if old_active_contact
+				@_update_contact_last_read_message(old_active_contact)
+				@_update_contact_with_unread_messages(old_active_contact)
 		/**
 		 * @return {boolean}
 		 */
@@ -387,12 +389,12 @@ function Wrapper (detox-utils, async-eventer)
 		 * @return {!Array<!Uint8Array>}
 		 */
 		'get_contacts_with_pending_messages' : ->
-			@_local_state.contacts_with_pending_messages
+			Array.from(@_local_state.contacts_with_pending_messages.values())
 		/**
 		 * @return {!Array<!Uint8Array>}
 		 */
 		'get_contacts_with_unread_messages' : ->
-			@_local_state.contacts_with_unread_messages
+			Array.from(@_local_state.contacts_with_unread_messages.values())
 		/**
 		 * @param {!Uint8Array} contact_id
 		 */

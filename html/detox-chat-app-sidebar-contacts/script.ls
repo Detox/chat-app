@@ -9,33 +9,37 @@ Polymer(
 		detox-chat-app.behaviors.state
 	]
 	properties	:
-		add_contact			:
+		add_contact						:
 			type	: Boolean
 			value	: false
-		contacts			:
+		contacts						:
 			type	: Array
 			value	: []
-		contacts_requests	:
+		contacts_requests				:
 			type	: Array
 			value	: []
-		new_contact_id		: String
-		new_contact_name	: String
-		online_contacts		:
+		contacts_with_pending_messages	: Object
+		contacts_with_unread_messages	: Object
+		new_contact_id					: String
+		new_contact_name				: String
+		online_contacts					:
 			type	: Object
-		ui_active_contact	:
+		ui_active_contact				:
 			type	: Object
 	ready : !->
 		Promise.all([
 			require(['@detox/utils'])
 			@_state_instance_ready
 		]).then ([[detox-utils]]) !~>
-			ArraySet			= detox-utils.ArraySet
+			ArraySet	= detox-utils.ArraySet
 
-			state				= @_state_instance
-			@contacts			= state.get_contacts()
-			@online_contacts	= ArraySet(state.get_online_contacts())
-			@contacts_requests	= state.get_contacts_requests()
-			@ui_active_contact	= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
+			state							= @_state_instance
+			@contacts						= state.get_contacts()
+			@online_contacts				= ArraySet(state.get_online_contacts())
+			@contacts_requests				= state.get_contacts_requests()
+			@contacts_with_pending_messages	= ArraySet(state.get_contacts_with_pending_messages())
+			@contacts_with_unread_messages	= ArraySet(state.get_contacts_with_unread_messages())
+			@ui_active_contact				= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
 			state
 				.on('contacts_changed', !~>
 					# TODO: Sort contacts
@@ -48,6 +52,12 @@ Polymer(
 					# TODO: Sort contacts
 					contacts_requests	= state.get_contacts_requests()
 					@contacts_requests	= contacts_requests
+				)
+				.on('contacts_with_pending_messages_changed', !~>
+					@contacts_with_pending_messages	= ArraySet(state.get_contacts_with_pending_messages())
+				)
+				.on('contacts_with_unread_messages_changed', !~>
+					@contacts_with_unread_messages	= ArraySet(state.get_contacts_with_unread_messages())
 				)
 				.on('ui_active_contact_changed', !~>
 					@ui_active_contact	= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
@@ -113,8 +123,14 @@ Polymer(
 		modal.querySelector('#cancel').addEventListener('click', !->
 			modal.close()
 		)
-	_online : (contact_id, online_contacts) ->
-		online_contacts.has(contact_id)
-	_selected : (contact_id, ui_active_contact) ->
-		ui_active_contact.has(contact_id)
+	_online : (contact, online_contacts) ->
+		online_contacts.has(contact.id)
+	_selected : (contact, ui_active_contact) ->
+		ui_active_contact.has(contact.id)
+	_unconfirmed : (contact) ->
+		!contact.local_secret
+	_unread : (contact, ui_active_contact, contacts_with_unread_messages) ->
+		!@_selected(contact, ui_active_contact) && contacts_with_unread_messages.has(contact.id)
+	_pending : (contact, contacts_with_pending_messages) ->
+		contacts_with_pending_messages.has(contact.id)
 )

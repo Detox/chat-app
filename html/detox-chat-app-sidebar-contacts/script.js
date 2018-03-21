@@ -21,6 +21,8 @@
         type: Array,
         value: []
       },
+      contacts_with_pending_messages: Object,
+      contacts_with_unread_messages: Object,
       new_contact_id: String,
       new_contact_name: String,
       online_contacts: {
@@ -40,6 +42,8 @@
         this$.contacts = state.get_contacts();
         this$.online_contacts = ArraySet(state.get_online_contacts());
         this$.contacts_requests = state.get_contacts_requests();
+        this$.contacts_with_pending_messages = ArraySet(state.get_contacts_with_pending_messages());
+        this$.contacts_with_unread_messages = ArraySet(state.get_contacts_with_unread_messages());
         this$.ui_active_contact = ArraySet([state.get_ui_active_contact() || new Uint8Array(0)]);
         state.on('contacts_changed', function(){
           this$.contacts = state.get_contacts();
@@ -49,6 +53,10 @@
           var contacts_requests;
           contacts_requests = state.get_contacts_requests();
           this$.contacts_requests = contacts_requests;
+        }).on('contacts_with_pending_messages_changed', function(){
+          this$.contacts_with_pending_messages = ArraySet(state.get_contacts_with_pending_messages());
+        }).on('contacts_with_unread_messages_changed', function(){
+          this$.contacts_with_unread_messages = ArraySet(state.get_contacts_with_unread_messages());
         }).on('ui_active_contact_changed', function(){
           this$.ui_active_contact = ArraySet([state.get_ui_active_contact() || new Uint8Array(0)]);
         });
@@ -128,11 +136,20 @@
         modal.close();
       });
     },
-    _online: function(contact_id, online_contacts){
-      return online_contacts.has(contact_id);
+    _online: function(contact, online_contacts){
+      return online_contacts.has(contact.id);
     },
-    _selected: function(contact_id, ui_active_contact){
-      return ui_active_contact.has(contact_id);
+    _selected: function(contact, ui_active_contact){
+      return ui_active_contact.has(contact.id);
+    },
+    _unconfirmed: function(contact){
+      return !contact.local_secret;
+    },
+    _unread: function(contact, ui_active_contact, contacts_with_unread_messages){
+      return !this._selected(contact, ui_active_contact) && contacts_with_unread_messages.has(contact.id);
+    },
+    _pending: function(contact, contacts_with_pending_messages){
+      return contacts_with_pending_messages.has(contact.id);
     }
   });
 }).call(this);
