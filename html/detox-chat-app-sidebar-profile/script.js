@@ -9,7 +9,16 @@
     is: 'detox-chat-app-sidebar-profile',
     behaviors: [detoxChatApp.behaviors.state],
     properties: {
+      add_secret: {
+        type: Boolean,
+        value: false
+      },
       id_base58: String,
+      new_secret_name: String,
+      new_secret_length: {
+        type: Number,
+        value: 4
+      },
       nickname: {
         observer: '_nickname_changed',
         type: String
@@ -60,22 +69,27 @@
       e.target.select();
     },
     _add_secret: function(){
-      var content, modal, this$ = this;
-      content = "<csw-form>\n	<form>\n		<label>Secret name:</label>\n		<label>\n			<csw-input-text>\n				<input id=\"name\">\n			</csw-input-text>\n		</label>\n		<label>Secret length (1..32):</label>\n		<label>\n			<csw-input-text>\n				<input type=\"number\" id=\"length\" min=\"1\" max=\"32\" value=\"4\">\n			</csw-input-text>\n		</label>\n	</form>\n</csw-form>";
-      modal = csw.functions.confirm(content, function(){
-        var name, length;
-        name = modal.querySelector('#name').value;
-        if (!name) {
-          return;
-        }
-        length = modal.querySelector('#length').value;
-        require(['@detox/chat']).then(function(arg$){
-          var detoxChat, secret;
-          detoxChat = arg$[0];
-          secret = detoxChat.generate_secret().slice(0, length);
-          this$._state_instance.add_secret(secret, name);
-        });
+      this.add_secret = true;
+    },
+    _add_secret_confirm: function(){
+      var this$ = this;
+      if (!this.new_secret_name) {
+        csw.functions.notify('Secret name is required', 'error', 'right', 3);
+        return;
+      }
+      require(['@detox/chat']).then(function(arg$){
+        var detoxChat, secret;
+        detoxChat = arg$[0];
+        secret = detoxChat.generate_secret().slice(0, this$.new_secret_length);
+        this$._state_instance.add_secret(secret, this$.new_secret_name);
+        csw.functions.notify('Secret added', 'success', 'right', 3);
+        this$.add_secret = false;
+        this$.new_secret_name = '';
+        this$.new_secret_length = 4;
       });
+    },
+    _add_secret_cancel: function(){
+      this.add_secret = false;
     },
     _help: function(){
       var content;

@@ -9,7 +9,14 @@ Polymer(
 		detox-chat-app.behaviors.state
 	]
 	properties	:
+		add_secret			:
+			type	: Boolean
+			value	: false
 		id_base58			: String
+		new_secret_name		: String
+		new_secret_length	:
+			type	: Number
+			value	: 4
 		nickname			:
 			observer	: '_nickname_changed'
 			type		: String
@@ -48,33 +55,20 @@ Polymer(
 	_id_click : (e) !->
 		e.target.select()
 	_add_secret : !->
-		content	= """
-			<csw-form>
-				<form>
-					<label>Secret name:</label>
-					<label>
-						<csw-input-text>
-							<input id="name">
-						</csw-input-text>
-					</label>
-					<label>Secret length (1..32):</label>
-					<label>
-						<csw-input-text>
-							<input type="number" id="length" min="1" max="32" value="4">
-						</csw-input-text>
-					</label>
-				</form>
-			</csw-form>
-		"""
-		modal	= csw.functions.confirm(content, !~>
-			name	= modal.querySelector('#name').value
-			if !name
-				return
-			length	= modal.querySelector('#length').value
-			([detox-chat])	<~! require(['@detox/chat']).then
-			secret	= detox-chat.generate_secret().slice(0, length)
-			@_state_instance.add_secret(secret, name)
-		)
+		@add_secret	= true
+	_add_secret_confirm : !->
+		if !@new_secret_name
+			csw.functions.notify('Secret name is required', 'error', 'right', 3)
+			return
+		([detox-chat])	<~! require(['@detox/chat']).then
+		secret	= detox-chat.generate_secret().slice(0, @new_secret_length)
+		@_state_instance.add_secret(secret, @new_secret_name)
+		csw.functions.notify('Secret added', 'success', 'right', 3)
+		@add_secret			= false
+		@new_secret_name	= ''
+		@new_secret_length	= 4
+	_add_secret_cancel : !->
+		@add_secret	= false
 	_help : !->
 		content	= """
 			<p>Secrets are used as anti-spam system. You can create different secrets for different purposes.<br>
