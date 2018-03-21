@@ -77,7 +77,6 @@ Polymer(
 		@text_message	= ''
 		state			= @_state_instance
 		contact_id		= state.get_ui_active_contact()
-		# TODO: Sent date should be updated
 		state.add_contact_message(contact_id, false, +(new Date), 0, text_message)
 	_format_date : (date) ->
 		if !date
