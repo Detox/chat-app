@@ -13,6 +13,10 @@ dom-module(id="detox-chat-app-sidebar-settings")
 					input(type="radio" value="1")
 					| Yes
 			label
+				div Block contact requests X days*:
+				csw-icon(mono icon="question" on-click="_help_settings_block_contact_requests_for" tooltip="What is blocking contacts requests?")
+			csw-input-text: input(type="number" min="0" value="{{settings_block_contact_requests_for}}")
+			label
 				div Bootstrap nodes*:
 				csw-icon(mono icon="question" on-click="_help_settings_bootstrap_nodes" tooltip="What are bootstrap nodes?")
 			csw-textarea: textarea(rows="10" wrap="off" value="{{bootstrap_nodes_string}}" on-blur="_bootstrap_node_blur")

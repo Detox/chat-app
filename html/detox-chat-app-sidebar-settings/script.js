@@ -13,6 +13,10 @@
         observer: '_settings_announce_changed',
         type: String
       },
+      settings_block_contact_requests_for: {
+        observer: '_settings_block_contact_requests_for_changed',
+        type: Number
+      },
       bootstrap_nodes: {
         observer: '_settings_bootstrap_nodes_changed',
         type: Object
@@ -25,13 +29,13 @@
         var state;
         state = this$._state_instance;
         this$.settings_announce = this$._bool_to_string(state.get_settings_announce());
+        this$.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
         this$.bootstrap_nodes = state.get_settings_bootstrap_nodes();
         state.on('settings_announce_changed', function(new_settings_announce){
           new_settings_announce = this$._bool_to_string(new_settings_announce);
-          if (this$.settings_announce !== new_settings_announce) {
-            this$.settings_announce = new_settings_announce;
-          }
-        }).on('settings_bootstrap_nodes_changed', function(new_settings_announce){
+        }).on('settings_block_contact_requests_for_changed', function(){
+          this$.block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
+        }).on('settings_bootstrap_nodes_changed', function(){
           this$.bootstrap_nodes = state.get_settings_bootstrap_nodes();
         });
       });
@@ -52,6 +56,17 @@
     _help_settings_announce: function(){
       var content;
       content = "<p>Announcement is a process of publishing own contact information to the network, so that contacts can find and connect to this node.</p>\n<p>It is possible to use Detox Chat without announcing itself to the network.<br>\nIn this case incoming connections from contacts will not be possible, but it will be possible to initiate connection to other contacts if needed.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_block_contact_requests_for_changed: function(){
+      if (this.settings_block_contact_requests_for !== this._state_instance.get_settings_block_contact_requests_for()) {
+        this._state_instance.set_settings_block_contact_requests_for(this.settings_block_contact_requests_for) * 60 * 60 * 24;
+        csw.functions.notify('Saved changes to block contacts request for setting', 'success', 'right', 3);
+      }
+    },
+    _help_settings_block_contact_requests_for: function(){
+      var content;
+      content = "<p>When you reject contact request, nothing is sent back to that contact.<br>\nThis results in subsequent contacts requests being received even after rejection.</p>\n<p>This option makes your life better by blocking subsequent contacts requests after first rejection for some time, so that you're not annoyed by the same contact request all the time.</p>";
       csw.functions.simple_modal(content);
     },
     _settings_bootstrap_nodes_changed: function(bootstrap_nodes){

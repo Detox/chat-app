@@ -72,7 +72,7 @@ function Wrapper (detox-utils, async-eventer)
 				..'settings'					=
 					'announce'						: true
 					# Block request from contact we've already rejected for 30 days
-					'block_contacts_request_for'	: 30 * 24 * 60 * 60
+					'block_contact_requests_for'	: 30 * 24 * 60 * 60
 					'bootstrap_nodes'				: [
 						# TODO: This is just for demo purposes, in future must change to real bootstrap node(s)
 						{
@@ -276,14 +276,14 @@ function Wrapper (detox-utils, async-eventer)
 		/**
 		 * @return {number} In seconds
 		 */
-		'get_settings_block_contacts_request_for' : ->
-			@_state['settings']['block_contacts_request_for']
+		'get_settings_block_contact_requests_for' : ->
+			@_state['settings']['block_contact_requests_for']
 		/**
 		 * @return {number} In seconds
 		 */
-		'set_settings_block_contacts_request_for' : (block_contacts_request_for) ->
-			@_state['settings']['block_contacts_request_for']	= block_contacts_request_for
-			@'fire'('settings_block_contacts_request_for_changed')
+		'set_settings_block_contact_requests_for' : (block_contact_requests_for) ->
+			@_state['settings']['block_contact_requests_for']	= block_contact_requests_for
+			@'fire'('settings_block_contact_requests_for_changed')
 		/**
 		 * @param {string}		node_id
 		 * @param {string}		host
@@ -544,7 +544,7 @@ function Wrapper (detox-utils, async-eventer)
 			if !old_contact_request
 				return
 			@_state['contacts_requests'].delete(contact_id)
-			blocked_until	= (new Date) + @'get_settings_block_contacts_request_for'()
+			blocked_until	= (new Date) + @'get_settings_block_contact_requests_for'()
 			@_state['contacts_requests_blocked'].set(contact_id, ContactRequestBlocked([contact_id, blocked_until]))
 			@'fire'('contact_request_deleted', old_contact_request)
 			@'fire'('contacts_requests_changed')

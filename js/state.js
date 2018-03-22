@@ -75,7 +75,7 @@
         x$['seed'] = null;
         x$['settings'] = {
           'announce': true,
-          'block_contacts_request_for': 30 * 24 * 60 * 60,
+          'block_contact_requests_for': 30 * 24 * 60 * 60,
           'bootstrap_nodes': [{
             'node_id': '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29',
             'host': '127.0.0.1',
@@ -285,15 +285,15 @@
       /**
        * @return {number} In seconds
        */,
-      'get_settings_block_contacts_request_for': function(){
-        return this._state['settings']['block_contacts_request_for'];
+      'get_settings_block_contact_requests_for': function(){
+        return this._state['settings']['block_contact_requests_for'];
       }
       /**
        * @return {number} In seconds
        */,
-      'set_settings_block_contacts_request_for': function(block_contacts_request_for){
-        this._state['settings']['block_contacts_request_for'] = block_contacts_request_for;
-        return this['fire']('settings_block_contacts_request_for_changed');
+      'set_settings_block_contact_requests_for': function(block_contact_requests_for){
+        this._state['settings']['block_contact_requests_for'] = block_contact_requests_for;
+        return this['fire']('settings_block_contact_requests_for_changed');
       }
       /**
        * @param {string}		node_id
@@ -617,7 +617,7 @@
           return;
         }
         this._state['contacts_requests']['delete'](contact_id);
-        blocked_until = new Date + this['get_settings_block_contacts_request_for']();
+        blocked_until = new Date + this['get_settings_block_contact_requests_for']();
         this._state['contacts_requests_blocked'].set(contact_id, ContactRequestBlocked([contact_id, blocked_until]));
         this['fire']('contact_request_deleted', old_contact_request);
         this['fire']('contacts_requests_changed');
