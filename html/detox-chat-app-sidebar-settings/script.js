@@ -12,7 +12,12 @@
       settings_announce: {
         observer: '_settings_announce_changed',
         type: String
-      }
+      },
+      bootstrap_nodes: {
+        observer: '_settings_bootstrap_nodes_changed',
+        type: Object
+      },
+      bootstrap_nodes_string: String
     },
     ready: function(){
       var this$ = this;
@@ -20,11 +25,14 @@
         var state;
         state = this$._state_instance;
         this$.settings_announce = this$._bool_to_string(state.get_settings_announce());
+        this$.bootstrap_nodes = state.get_settings_bootstrap_nodes();
         state.on('settings_announce_changed', function(new_settings_announce){
           new_settings_announce = this$._bool_to_string(new_settings_announce);
           if (this$.settings_announce !== new_settings_announce) {
             this$.settings_announce = new_settings_announce;
           }
+        }).on('settings_bootstrap_nodes_changed', function(new_settings_announce){
+          this$.bootstrap_nodes = state.get_settings_bootstrap_nodes();
         });
       });
     },
@@ -38,11 +46,34 @@
     _settings_announce_changed: function(){
       if (this.settings_announce !== this._bool_to_string(this._state_instance.get_settings_announce())) {
         this._state_instance.set_settings_announce(this.settings_announce === '1');
+        csw.functions.notify('Saved changes to announcement setting', 'success', 'right', 3);
       }
     },
     _help_settings_announce: function(){
       var content;
       content = "<p>It is possible to use Detox Chat without announcing itself to the network.<br>\nIn this case incoming connections from contacts will not be possible, but it will be possible to initiate connection to other contacts if needed.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_bootstrap_nodes_changed: function(bootstrap_nodes){
+      this.bootstrap_nodes_string = JSON.stringify(bootstrap_nodes, null, "\t");
+    },
+    _bootstrap_node_blur: function(){
+      var bootstrap_nodes, e;
+      try {
+        bootstrap_nodes = JSON.parse(this.bootstrap_nodes_string);
+        if (JSON.stringify(this.bootstrap_nodes) === JSON.stringify(bootstrap_nodes)) {
+          return;
+        }
+        this._state_instance.set_settings_bootstrap_nodes(bootstrap_nodes);
+        csw.functions.notify('Saved changes to bootstrap nodes setting', 'success', 'right', 3);
+      } catch (e$) {
+        e = e$;
+        csw.functions.notify('Bootstrap nodes syntax error, changes were not saved', 'error', 'right', 3);
+      }
+    },
+    _help_settings_bootstrap_nodes: function(){
+      var content;
+      content = "<p>Bootstrap nodes are used on start in order to get information about other nodes in the network.<br>\nThese nodes are crucial for operation and should be selected carefully, as they can return misleading information.<br>\nBad bootstrap nodes may result in anything from drastic reduction in anonymity to being unable to communicate with other nodes in the network.<br>\nDo not change this setting unless you know what you're doing.</p>";
       csw.functions.simple_modal(content);
     }
   });
