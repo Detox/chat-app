@@ -38,6 +38,7 @@ Polymer(
 			csw.functions.notify('Saved changes to announcement setting', 'success', 'right', 3)
 	_help_settings_announce : !->
 		content	= """
+			<p>Announcement is a process of publishing own contact information to the network, so that contacts can find and connect to this node.</p>
 			<p>It is possible to use Detox Chat without announcing itself to the network.<br>
 			In this case incoming connections from contacts will not be possible, but it will be possible to initiate connection to other contacts if needed.</p>
 		"""
@@ -56,9 +57,9 @@ Polymer(
 			csw.functions.notify('Bootstrap nodes syntax error, changes were not saved', 'error', 'right', 3)
 	_help_settings_bootstrap_nodes : !->
 		content	= """
-			<p>Bootstrap nodes are used on start in order to get information about other nodes in the network.<br>
-			These nodes are crucial for operation and should be selected carefully, as they can return misleading information.<br>
-			Bad bootstrap nodes may result in anything from drastic reduction in anonymity to being unable to communicate with other nodes in the network.<br>
+			<p>Bootstrap nodes are special kind of nodes used during application startup in order to get information about other nodes in the network and establish initial connections with them.<br>
+			These nodes are crucial for operation and should be selected carefully.<br>
+			Bootstrap nodes that return misleading information cause anything from drastic reduction of anonymity to being unable to communicate with other nodes in the network.<br>
 			Do not change this setting unless you know what you're doing.</p>
 		"""
 		csw.functions.simple_modal(content)

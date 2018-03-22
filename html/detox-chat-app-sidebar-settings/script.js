@@ -51,7 +51,7 @@
     },
     _help_settings_announce: function(){
       var content;
-      content = "<p>It is possible to use Detox Chat without announcing itself to the network.<br>\nIn this case incoming connections from contacts will not be possible, but it will be possible to initiate connection to other contacts if needed.</p>";
+      content = "<p>Announcement is a process of publishing own contact information to the network, so that contacts can find and connect to this node.</p>\n<p>It is possible to use Detox Chat without announcing itself to the network.<br>\nIn this case incoming connections from contacts will not be possible, but it will be possible to initiate connection to other contacts if needed.</p>";
       csw.functions.simple_modal(content);
     },
     _settings_bootstrap_nodes_changed: function(bootstrap_nodes){
@@ -73,7 +73,7 @@
     },
     _help_settings_bootstrap_nodes: function(){
       var content;
-      content = "<p>Bootstrap nodes are used on start in order to get information about other nodes in the network.<br>\nThese nodes are crucial for operation and should be selected carefully, as they can return misleading information.<br>\nBad bootstrap nodes may result in anything from drastic reduction in anonymity to being unable to communicate with other nodes in the network.<br>\nDo not change this setting unless you know what you're doing.</p>";
+      content = "<p>Bootstrap nodes are special kind of nodes used during application startup in order to get information about other nodes in the network and establish initial connections with them.<br>\nThese nodes are crucial for operation and should be selected carefully.<br>\nBootstrap nodes that return misleading information cause anything from drastic reduction of anonymity to being unable to communicate with other nodes in the network.<br>\nDo not change this setting unless you know what you're doing.</p>";
       csw.functions.simple_modal(content);
     }
   });
