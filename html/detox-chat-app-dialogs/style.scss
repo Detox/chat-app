@@ -20,6 +20,10 @@
 
 #welcome {
 	padding : var(--block-padding);
+
+	h4 {
+		margin-top : 0;
+	}
 }
 
 #messages-list {
