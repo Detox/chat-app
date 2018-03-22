@@ -66,11 +66,13 @@ function Wrapper (detox-utils, async-eventer)
 		# v0 of the state structure
 		if !('version' of @_state)
 			@_state
-				..'version'				= 0
-				..'nickname'			= ''
-				..'seed'				= null
-				..'settings'			=
+				..'version'						= 0
+				..'nickname'					= ''
+				..'seed'						= null
+				..'settings'					=
 					'announce'						: true
+					# Block request from contact we've already rejected for 30 days
+					'block_contacts_request_for'	: 30 * 24 * 60 * 60
 					'bootstrap_nodes'				: [
 						# TODO: This is just for demo purposes, in future must change to real bootstrap node(s)
 						{
@@ -97,7 +99,7 @@ function Wrapper (detox-utils, async-eventer)
 						[100, 300]
 						[Number.MAX_SAFE_INTEGER, 600]
 					]
-				..'contacts'			= [
+				..'contacts'					= [
 					# TODO: This is just for demo purposes
 					[
 						[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125]
@@ -118,28 +120,35 @@ function Wrapper (detox-utils, async-eventer)
 						null
 					]
 				]
-				..'contacts_requests'	= []
-				..'secrets'				= []
+				..'contacts_requests'			= []
+				..'contacts_requests_blocked'	= []
+				..'secrets'						= []
 
 		# Denormalize state after deserialization
 		if @_state['seed']
 			@_state['seed']	= Uint8Array.from(@_state['seed'])
 
-		@_state['contacts']	= ArrayMap(
+		@_state['contacts']						= ArrayMap(
 			for contact in @_state['contacts']
 				contact[0]	= Uint8Array.from(contact[0])
 				contact 	= Contact(contact)
 				[contact['id'], contact]
 		)
-
-		@_state['contacts_requests']	= ArrayMap(
+		@_state['contacts_requests']			= ArrayMap(
 			for contact in @_state['contacts_requests']
 				contact[0]	= Uint8Array.from(contact[0])
 				contact 	= ContactRequest(contact)
 				[contact['id'], contact]
 		)
-
-		@_state['secrets']	= ArrayMap(
+		current_date							= +(new Date)
+		@_state['contacts_requests_blocked']	= ArrayMap(
+			for contact in @_state['contacts_requests_blocked']
+				if contact.blocked_until > current_date
+					contact[0]	= Uint8Array.from(contact[0])
+					contact 	= ContactRequestBlocked(contact)
+					[contact['id'], contact]
+		)
+		@_state['secrets']						= ArrayMap(
 			for secret in @_state['secrets']
 				secret[0]	= Uint8Array.from(secret[0])
 				secret	 	= Secret(secret)
@@ -264,6 +273,17 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'get_settings_bootstrap_nodes' : ->
 			@_state['settings']['bootstrap_nodes']
+		/**
+		 * @return {number} In seconds
+		 */
+		'get_settings_block_contacts_request_for' : ->
+			@_state['settings']['block_contacts_request_for']
+		/**
+		 * @return {number} In seconds
+		 */
+		'set_settings_block_contacts_request_for' : (block_contacts_request_for) ->
+			@_state['settings']['block_contacts_request_for']	= block_contacts_request_for
+			@'fire'('settings_block_contacts_request_for_changed')
 		/**
 		 * @param {string}		node_id
 		 * @param {string}		host
@@ -524,8 +544,24 @@ function Wrapper (detox-utils, async-eventer)
 			if !old_contact_request
 				return
 			@_state['contacts_requests'].delete(contact_id)
+			blocked_until	= (new Date) + @'get_settings_block_contacts_request_for'()
+			@_state['contacts_requests_blocked'].set(contact_id, ContactRequestBlocked([contact_id, blocked_until]))
 			@'fire'('contact_request_deleted', old_contact_request)
 			@'fire'('contacts_requests_changed')
+		/**
+		 * @return {!Array<!ContactRequestBlocked>}
+		 */
+		'get_contacts_requests_blocked' : ->
+			Array.from(@_state['contacts_requests_blocked'].values())
+		/**
+		 * @param {!Uint8Array}	contact_id
+		 */
+		'has_contact_request_blocked' : (contact_id) ->
+			contact_request_blocked	= @_state['contacts_requests_blocked'].get(contact_id)
+			if contacts_requests_blocked && contact_request_blocked.blocked_until > +(new Date)
+				true
+			else
+				@_state['contacts_requests_blocked'].delete(contact_id)
 		/**
 		 * @return {!Array<!Uint8Array>}
 		 */
@@ -680,24 +716,26 @@ function Wrapper (detox-utils, async-eventer)
 	 * Local secret is used by remote friend to connect to us.
 	 * Old local secret is kept in addition to local secret until it is proven that remote friend updated its remote secret.
 	 */
-	Contact			= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret'])
-	ContactRequest	= create_array_object(['id', 'name', 'secret_name'])
-	Message			= create_array_object(['id', 'from', 'date_written', 'date_sent', 'text'])
-	Secret			= create_array_object(['secret', 'name'])
+	Contact					= create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret'])
+	ContactRequest			= create_array_object(['id', 'name', 'secret_name'])
+	ContactRequestBlocked	= create_array_object(['id', 'blocked_until'])
+	Message					= create_array_object(['id', 'from', 'date_written', 'date_sent', 'text'])
+	Secret					= create_array_object(['secret', 'name'])
 
 	{
-		'Contact'			: Contact
-		'ContactRequest'	: ContactRequest
-		'Message'			: Message
-		'Secret'			: Secret
-		'State'				: State
+		'Contact'				: Contact
+		'ContactRequest'		: ContactRequest
+		'ContactRequestBlocked'	: ContactRequest
+		'Message'				: Message
+		'Secret'				: Secret
+		'State'					: State
 		/**
 		 * @param {string}	name
 		 * @param {!Object}	initial_state
 		 *
 		 * @return {!detoxState}
 		 */
-		'get_instance'		: (name, initial_state) ->
+		'get_instance'			: (name, initial_state) ->
 			if !(name of global_state)
 				global_state[name]	= State(initial_state)
 			global_state[name]

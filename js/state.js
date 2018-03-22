@@ -35,7 +35,7 @@
     }
   }
   function Wrapper(detoxUtils, asyncEventer){
-    var are_arrays_equal, ArrayMap, ArraySet, base58_encode, global_state, Contact, ContactRequest, Message, Secret;
+    var are_arrays_equal, ArrayMap, ArraySet, base58_encode, global_state, Contact, ContactRequest, ContactRequestBlocked, Message, Secret;
     are_arrays_equal = detoxUtils['are_arrays_equal'];
     ArrayMap = detoxUtils['ArrayMap'];
     ArraySet = detoxUtils['ArraySet'];
@@ -45,7 +45,7 @@
      * @constructor
      */
     function State(name, initial_state){
-      var x$, contact, secret, i$, ref$, len$, contact_id, this$ = this;
+      var x$, contact, current_date, secret, i$, ref$, len$, contact_id, this$ = this;
       if (!(this instanceof State)) {
         return new State(name, initial_state);
       }
@@ -75,6 +75,7 @@
         x$['seed'] = null;
         x$['settings'] = {
           'announce': true,
+          'block_contacts_request_for': 30 * 24 * 60 * 60,
           'bootstrap_nodes': [{
             'node_id': '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29',
             'host': '127.0.0.1',
@@ -97,6 +98,7 @@
         };
         x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact #1', 0, 0, null, null, null], [[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 126], 'Fake contact #2', 0, 0, null, null, null]];
         x$['contacts_requests'] = [];
+        x$['contacts_requests_blocked'] = [];
         x$['secrets'] = [];
       }
       if (this._state['seed']) {
@@ -119,6 +121,19 @@
           contact[0] = Uint8Array.from(contact[0]);
           contact = ContactRequest(contact);
           results$.push([contact['id'], contact]);
+        }
+        return results$;
+      }.call(this)));
+      current_date = +new Date;
+      this._state['contacts_requests_blocked'] = ArrayMap((function(){
+        var i$, ref$, len$, results$ = [];
+        for (i$ = 0, len$ = (ref$ = this._state['contacts_requests_blocked']).length; i$ < len$; ++i$) {
+          contact = ref$[i$];
+          if (contact.blocked_until > current_date) {
+            contact[0] = Uint8Array.from(contact[0]);
+            contact = ContactRequestBlocked(contact);
+            results$.push([contact['id'], contact]);
+          }
         }
         return results$;
       }.call(this)));
@@ -266,6 +281,19 @@
        */,
       'get_settings_bootstrap_nodes': function(){
         return this._state['settings']['bootstrap_nodes'];
+      }
+      /**
+       * @return {number} In seconds
+       */,
+      'get_settings_block_contacts_request_for': function(){
+        return this._state['settings']['block_contacts_request_for'];
+      }
+      /**
+       * @return {number} In seconds
+       */,
+      'set_settings_block_contacts_request_for': function(block_contacts_request_for){
+        this._state['settings']['block_contacts_request_for'] = block_contacts_request_for;
+        return this['fire']('settings_block_contacts_request_for_changed');
       }
       /**
        * @param {string}		node_id
@@ -583,14 +611,34 @@
        * @param {!Uint8Array} contact_id
        */,
       'del_contact_request': function(contact_id){
-        var old_contact_request;
+        var old_contact_request, blocked_until;
         old_contact_request = this._state['contacts_requests'].get(contact_id);
         if (!old_contact_request) {
           return;
         }
         this._state['contacts_requests']['delete'](contact_id);
+        blocked_until = new Date + this['get_settings_block_contacts_request_for']();
+        this._state['contacts_requests_blocked'].set(contact_id, ContactRequestBlocked([contact_id, blocked_until]));
         this['fire']('contact_request_deleted', old_contact_request);
         this['fire']('contacts_requests_changed');
+      }
+      /**
+       * @return {!Array<!ContactRequestBlocked>}
+       */,
+      'get_contacts_requests_blocked': function(){
+        return Array.from(this._state['contacts_requests_blocked'].values());
+      }
+      /**
+       * @param {!Uint8Array}	contact_id
+       */,
+      'has_contact_request_blocked': function(contact_id){
+        var contact_request_blocked;
+        contact_request_blocked = this._state['contacts_requests_blocked'].get(contact_id);
+        if (contacts_requests_blocked && contact_request_blocked.blocked_until > +new Date) {
+          return true;
+        } else {
+          return this._state['contacts_requests_blocked']['delete'](contact_id);
+        }
       }
       /**
        * @return {!Array<!Uint8Array>}
@@ -787,11 +835,13 @@
      */
     Contact = create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret']);
     ContactRequest = create_array_object(['id', 'name', 'secret_name']);
+    ContactRequestBlocked = create_array_object(['id', 'blocked_until']);
     Message = create_array_object(['id', 'from', 'date_written', 'date_sent', 'text']);
     Secret = create_array_object(['secret', 'name']);
     return {
       'Contact': Contact,
       'ContactRequest': ContactRequest,
+      'ContactRequestBlocked': ContactRequest,
       'Message': Message,
       'Secret': Secret,
       'State': State
