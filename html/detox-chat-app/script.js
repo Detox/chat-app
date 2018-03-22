@@ -116,6 +116,9 @@
         var contact, secret_length, i$, ref$, len$, local_secret, x$, padded_secret;
         contact = state.get_contact(contact_id);
         if (!contact) {
+          if (state.has_contact_request_blocked(contact_id)) {
+            return;
+          }
           secret_length = secret.length;
           for (i$ = 0, len$ = (ref$ = state.get_secrets()).length; i$ < len$; ++i$) {
             local_secret = ref$[i$];

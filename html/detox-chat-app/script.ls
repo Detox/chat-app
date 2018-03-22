@@ -107,6 +107,8 @@ Polymer(
 			.on('introduction', (contact_id, secret) ->
 				contact	= state.get_contact(contact_id)
 				if !contact
+					if state.has_contact_request_blocked(contact_id)
+						return
 					secret_length	= secret.length
 					for local_secret in state.get_secrets()
 						padded_secret	= new Uint8Array(secret_length)
