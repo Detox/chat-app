@@ -50,7 +50,12 @@
       settings_packets_per_second: {
         observer: '_settings_packets_per_second_changed',
         type: Number
-      }
+      },
+      settings_reconnects_intervals: {
+        observer: '_settings_reconnects_intervals_changed',
+        type: Object
+      },
+      settings_reconnects_intervals_string: String
     },
     ready: function(){
       var this$ = this;
@@ -67,6 +72,7 @@
         this$.settings_number_of_introduction_nodes = state.get_settings_number_of_introduction_nodes();
         this$.settings_online = this$._bool_to_string(state.get_settings_online());
         this$.settings_packets_per_second = state.get_settings_packets_per_second();
+        this$.settings_reconnects_intervals = state.get_settings_reconnects_intervals();
         state.on('settings_announce_changed', function(new_settings_announce){
           new_settings_announce = this$._bool_to_string(new_settings_announce);
         }).on('settings_block_contact_requests_for_changed', function(block_contact_requests_for){
@@ -87,6 +93,8 @@
           new_settings_online = this$._bool_to_string(new_settings_online);
         }).on('settings_packets_per_second_changed', function(settings_packets_per_second){
           this$.settings_packets_per_second = settings_packets_per_second;
+        }).on('settings_reconnects_intervals_changed', function(settings_reconnects_intervals){
+          this$.settings_reconnects_intervals = settings_reconnects_intervals;
         });
       });
     },
@@ -229,6 +237,28 @@
     _help_settings_packets_per_second: function(){
       var content;
       content = "<p>Detox network sends data at fixed rate on each opened connection regardless of how much bandwidth is actually utilized, this option specifies how may packets of 512 bytes will be sent on each link during one second.</p>\n<p>Bigger number means higher peak throughput and lower latencies (to some degree, as these can be bottlenecked by other nodes in particular routing path), but significantly increases requirements to Internet connection.<br>\nYou may increase or decrease this option slightly, but don't go too far unless you know what you're doing.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_reconnects_intervals_changed: function(settings_reconnects_intervals){
+      this.settings_reconnects_intervals_string = JSON.stringify(settings_reconnects_intervals, null, '  ');
+    },
+    _settings_reconnects_intervals_blur: function(){
+      var settings_reconnects_intervals, e;
+      try {
+        settings_reconnects_intervals = JSON.parse(this.settings_reconnects_intervals_string);
+        if (JSON.stringify(this.settings_reconnects_intervals) === JSON.stringify(settings_reconnects_intervals)) {
+          return;
+        }
+        this._state_instance.set_settings_reconnects_intervals(settings_reconnects_intervals);
+        csw.functions.notify('Saved changes to reconnects intervals setting', 'success', 'right', 3);
+      } catch (e$) {
+        e = e$;
+        csw.functions.notify('Reconnects intervals syntax error, changes were not saved', 'error', 'right', 3);
+      }
+    },
+    _help_settings_reconnects_intervals: function(){
+      var content;
+      content = "<p>When you need to connect to one of your contacts, connection will not always succeed.</p>\n<p>This option controls time intervals (in seconds) between connection attempts.</p>\n<p>First number is max number of attempts and second is number is delay for it. More attempts is made, larger delays become.<br>\nDo not change this setting unless you know what you're doing.</p>";
       csw.functions.simple_modal(content);
     }
   });

@@ -41,6 +41,10 @@ Polymer(
 		settings_packets_per_second				:
 			observer	: '_settings_packets_per_second_changed'
 			type		: Number
+		settings_reconnects_intervals			:
+			observer	: '_settings_reconnects_intervals_changed'
+			type		: Object
+		settings_reconnects_intervals_string	: String
 	ready : !->
 		<~! @_state_instance_ready.then
 		state									= @_state_instance
@@ -54,6 +58,7 @@ Polymer(
 		@settings_number_of_introduction_nodes	= state.get_settings_number_of_introduction_nodes()
 		@settings_online						= @_bool_to_string(state.get_settings_online())
 		@settings_packets_per_second			= state.get_settings_packets_per_second()
+		@settings_reconnects_intervals			= state.get_settings_reconnects_intervals()
 		state
 			.on('settings_announce_changed', (new_settings_announce) !~>
 				new_settings_announce	= @_bool_to_string(new_settings_announce)
@@ -71,6 +76,7 @@ Polymer(
 				new_settings_online	= @_bool_to_string(new_settings_online)
 			)
 			.on('settings_packets_per_second_changed', (@settings_packets_per_second) !~>)
+			.on('settings_reconnects_intervals_changed', (@settings_reconnects_intervals) !~>)
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
 	_settings_announce_changed : !->
@@ -200,6 +206,26 @@ Polymer(
 			<p>Detox network sends data at fixed rate on each opened connection regardless of how much bandwidth is actually utilized, this option specifies how may packets of 512 bytes will be sent on each link during one second.</p>
 			<p>Bigger number means higher peak throughput and lower latencies (to some degree, as these can be bottlenecked by other nodes in particular routing path), but significantly increases requirements to Internet connection.<br>
 			You may increase or decrease this option slightly, but don't go too far unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_reconnects_intervals_changed : (settings_reconnects_intervals) !->
+		@settings_reconnects_intervals_string	= JSON.stringify(settings_reconnects_intervals, null, '  ')
+	_settings_reconnects_intervals_blur : !->
+		try
+			settings_reconnects_intervals	= JSON.parse(@settings_reconnects_intervals_string)
+			if JSON.stringify(@settings_reconnects_intervals) == JSON.stringify(settings_reconnects_intervals)
+				return
+			# TODO: Check if object structure is valid
+			@_state_instance.set_settings_reconnects_intervals(settings_reconnects_intervals)
+			csw.functions.notify('Saved changes to reconnects intervals setting', 'success', 'right', 3)
+		catch
+			csw.functions.notify('Reconnects intervals syntax error, changes were not saved', 'error', 'right', 3)
+	_help_settings_reconnects_intervals : !->
+		content	= """
+			<p>When you need to connect to one of your contacts, connection will not always succeed.</p>
+			<p>This option controls time intervals (in seconds) between connection attempts.</p>
+			<p>First number is max number of attempts and second is number is delay for it. More attempts is made, larger delays become.<br>
+			Do not change this setting unless you know what you're doing.</p>
 		"""
 		csw.functions.simple_modal(content)
 )
