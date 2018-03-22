@@ -6,7 +6,7 @@
  */
 (function(){
   Polymer({
-    is: 'detox-chat-app-sidebar',
+    is: 'detox-chat-app-sidebar-settings',
     behaviors: [detoxChatApp.behaviors.state],
     properties: {
       settings_announce: {

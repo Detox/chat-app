@@ -4,7 +4,7 @@
  * @license 0BSD
  */
 Polymer(
-	is			: 'detox-chat-app-sidebar'
+	is			: 'detox-chat-app-sidebar-settings'
 	behaviors	: [
 		detox-chat-app.behaviors.state
 	]

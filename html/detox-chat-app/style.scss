@@ -10,10 +10,30 @@
 	width    : 100vw;
 }
 
-detox-chat-app-sidebar {
-	flex-basis : 20%;
-	max-width  : 420px;
-	min-width  : 300px;
+#sidebar {
+	background     : var(--background-color-sidebar);
+	border-right   : var(--border-base);
+	color          : var(--text-color-base);
+	display        : flex;
+	flex-basis     : 20%;
+	flex-direction : column;
+	max-width      : 420px;
+	min-width      : 300px;
+
+	csw-tabs,
+	detox-chat-sidebar-status {
+		flex-shrink : 0;
+	}
+
+	csw-switcher {
+		flex-grow  : 1;
+		height     : 100%;
+		overflow-y : auto;
+	}
+
+	detox-chat-sidebar-status {
+		border-top : var(--border-base);
+	}
 }
 
 detox-chat-app-dialogs {
