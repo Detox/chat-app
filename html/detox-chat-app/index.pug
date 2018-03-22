@@ -3,9 +3,9 @@ dom-module(id="detox-chat-app")
 	template
 		#sidebar
 			csw-tabs
-				csw-button: button Contacts
-				csw-button: button Profile
-				csw-button: button Settings
+				csw-button: button(type="button") Contacts
+				csw-button: button(type="button") Profile
+				csw-button(icon="cogs" tooltip="Settings"): button(type="button")
 			csw-switcher
 				detox-chat-app-sidebar-contacts(chat-id="[[chat-id]]")
 				detox-chat-app-sidebar-profile(chat-id="[[chat-id]]")

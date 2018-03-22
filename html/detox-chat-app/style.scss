@@ -25,6 +25,12 @@
 		flex-shrink : 0;
 	}
 
+	csw-tabs {
+		csw-button:last-of-type {
+			margin-left : auto;
+		}
+	}
+
 	csw-switcher {
 		flex-grow  : 1;
 		height     : 100%;
