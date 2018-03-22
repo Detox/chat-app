@@ -274,13 +274,6 @@
         old_announce = this._state['settings']['announce'];
         new_announce = announce;
         this._state['settings']['announce'] = new_announce;
-        this['fire']('settings_announce_changed', new_announce, old_announce);
-      }
-      /**
-       * @return {!Array<!Object>}
-       */,
-      'get_settings_bootstrap_nodes': function(){
-        return this._state['settings']['bootstrap_nodes'];
       }
       /**
        * @return {number} In seconds
@@ -295,23 +288,14 @@
         var old_block_contact_requests_for;
         old_block_contact_requests_for = this._state['settings']['block_contact_requests_for'];
         this._state['settings']['block_contact_requests_for'] = block_contact_requests_for;
-        return this['fire']('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for);
+        this['fire']('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for);
+        return this['fire']('settings_announce_changed', new_announce, old_announce);
       }
       /**
-       * @param {string}		node_id
-       * @param {string}		host
-       * @param {number}		port
+       * @return {!Array<!Object>}
        */,
-      'add_settings_bootstrap_node': function(node_id, host, port){
-        var bootstrap_node;
-        bootstrap_node = {
-          'node_id': node_id,
-          'host': host,
-          'port': port
-        };
-        this._state['settings']['bootstrap_nodes'].push(bootstrap_node);
-        this['fire']('settings_bootstrap_node_added', bootstrap_node);
-        this['fire']('settings_bootstrap_nodes_changed');
+      'get_settings_bootstrap_nodes': function(){
+        return this._state['settings']['bootstrap_nodes'];
       }
       /**
        * @param {!Array<!Object>} bootstrap_nodes

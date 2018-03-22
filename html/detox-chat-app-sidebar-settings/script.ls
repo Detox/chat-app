@@ -9,32 +9,35 @@ Polymer(
 		detox-chat-app.behaviors.state
 	]
 	properties	:
-		settings_announce					:
+		settings_announce						:
 			observer	: '_settings_announce_changed'
 			type		: String
-		settings_block_contact_requests_for	:
+		settings_block_contact_requests_for		:
 			observer	: '_settings_block_contact_requests_for_changed'
 			type		: Number
-		settings_bootstrap_nodes			:
+		settings_bootstrap_nodes				:
 			observer	: '_settings_bootstrap_nodes_changed'
 			type		: Object
-		settings_bootstrap_nodes_string		: String
-		settings_bucket_size				:
+		settings_bootstrap_nodes_string			: String
+		settings_bucket_size					:
 			observer	: '_settings_bucket_size_changed'
 			type		: Number
-		settings_ice_servers				:
+		settings_ice_servers					:
 			observer	: '_settings_ice_servers_changed'
 			type		: Object
-		settings_ice_servers_string			: String
-		settings_max_pending_segments				:
+		settings_ice_servers_string				: String
+		settings_max_pending_segments			:
 			observer	: '_settings_max_pending_segments_changed'
 			type		: Number
-		settings_number_of_intermediate_nodes				:
+		settings_number_of_intermediate_nodes	:
 			observer	: '_settings_number_of_intermediate_nodes_changed'
 			type		: Number
-		settings_number_of_introduction_nodes				:
+		settings_number_of_introduction_nodes	:
 			observer	: '_settings_number_of_introduction_nodes_changed'
 			type		: Number
+		settings_online							:
+			observer	: '_settings_online_changed'
+			type		: String
 		settings_packets_per_second				:
 			observer	: '_settings_packets_per_second_changed'
 			type		: Number
@@ -49,6 +52,7 @@ Polymer(
 		@settings_max_pending_segments			= state.get_settings_max_pending_segments()
 		@settings_number_of_intermediate_nodes	= state.get_settings_number_of_intermediate_nodes()
 		@settings_number_of_introduction_nodes	= state.get_settings_number_of_introduction_nodes()
+		@settings_online						= @_bool_to_string(state.get_settings_online())
 		@settings_packets_per_second			= state.get_settings_packets_per_second()
 		state
 			.on('settings_announce_changed', (new_settings_announce) !~>
@@ -63,6 +67,9 @@ Polymer(
 			.on('settings_max_pending_segments_changed', (@settings_max_pending_segments) !~>)
 			.on('settings_number_of_intermediate_nodes_changed', (@settings_number_of_intermediate_nodes) !~>)
 			.on('settings_number_of_introduction_nodes_changed', (@settings_number_of_introduction_nodes) !~>)
+			.on('settings_online_changed', (new_settings_online) !~>
+				new_settings_online	= @_bool_to_string(new_settings_online)
+			)
 			.on('settings_packets_per_second_changed', (@settings_packets_per_second) !~>)
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
@@ -86,7 +93,8 @@ Polymer(
 		content	= """
 			<p>When you reject contact request, nothing is sent back to that contact.<br>
 			This results in subsequent contacts requests being received even after rejection.</p>
-			<p>This option makes your life better by blocking subsequent contacts requests after first rejection for some time, so that you're not annoyed by the same contact request all the time.</p>
+			<p>This option makes your life better by blocking subsequent contacts requests after first rejection for some time, so that you're not annoyed by the same contact request all the time.<br>
+			Changing this option will not affect already blocked contacts requests.</p>
 		"""
 		csw.functions.simple_modal(content)
 	_settings_bootstrap_nodes_changed : (settings_bootstrap_nodes) !->
@@ -158,7 +166,7 @@ Polymer(
 			csw.functions.notify('Saved changes to number of intermediate nodes setting', 'success', 'right', 3)
 	_help_settings_number_of_intermediate_nodes : !->
 		content	= """
-			<p>Intermediate nodes are nodes between this node and interested target node, used for routing paths creation in transport layer of of Detox network implementation.</p>
+			<p>Intermediate nodes are nodes between this node and interested target node, used for routing paths creation in transport layer of Detox network implementation.</p>
 			<p>More intermediate nodes means longer routing path and slower its creation. Lower numbers decrease anonymity, numbers higher than 3 are generally considered to be redundant.<br>
 			Do not change this setting unless you know what you're doing.</p>
 		"""
@@ -172,6 +180,15 @@ Polymer(
 			<p>Introduction nodes are nodes to which announcement is made.</p>
 			<p>More than one node is recommended to ensure good reliability of incoming connections, but very high numbers are redundant.<br>
 			Do not change this setting unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_online_changed : !->
+		if @settings_online != @_bool_to_string(@_state_instance.get_settings_online())
+			@_state_instance.set_settings_online(@settings_online == '1')
+			csw.functions.notify('Saved changes to online setting', 'success', 'right', 3)
+	_help_settings_online : !->
+		content	= """
+			<p>If not online then on next start application will not try to connect to Detox network and related functionality will not work properly.</p>
 		"""
 		csw.functions.simple_modal(content)
 	_settings_packets_per_second_changed : !->

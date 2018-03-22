@@ -43,6 +43,10 @@
         observer: '_settings_number_of_introduction_nodes_changed',
         type: Number
       },
+      settings_online: {
+        observer: '_settings_online_changed',
+        type: String
+      },
       settings_packets_per_second: {
         observer: '_settings_packets_per_second_changed',
         type: Number
@@ -61,6 +65,7 @@
         this$.settings_max_pending_segments = state.get_settings_max_pending_segments();
         this$.settings_number_of_intermediate_nodes = state.get_settings_number_of_intermediate_nodes();
         this$.settings_number_of_introduction_nodes = state.get_settings_number_of_introduction_nodes();
+        this$.settings_online = this$._bool_to_string(state.get_settings_online());
         this$.settings_packets_per_second = state.get_settings_packets_per_second();
         state.on('settings_announce_changed', function(new_settings_announce){
           new_settings_announce = this$._bool_to_string(new_settings_announce);
@@ -78,6 +83,8 @@
           this$.settings_number_of_intermediate_nodes = settings_number_of_intermediate_nodes;
         }).on('settings_number_of_introduction_nodes_changed', function(settings_number_of_introduction_nodes){
           this$.settings_number_of_introduction_nodes = settings_number_of_introduction_nodes;
+        }).on('settings_online_changed', function(new_settings_online){
+          new_settings_online = this$._bool_to_string(new_settings_online);
         }).on('settings_packets_per_second_changed', function(settings_packets_per_second){
           this$.settings_packets_per_second = settings_packets_per_second;
         });
@@ -111,7 +118,7 @@
     },
     _help_settings_block_contact_requests_for: function(){
       var content;
-      content = "<p>When you reject contact request, nothing is sent back to that contact.<br>\nThis results in subsequent contacts requests being received even after rejection.</p>\n<p>This option makes your life better by blocking subsequent contacts requests after first rejection for some time, so that you're not annoyed by the same contact request all the time.</p>";
+      content = "<p>When you reject contact request, nothing is sent back to that contact.<br>\nThis results in subsequent contacts requests being received even after rejection.</p>\n<p>This option makes your life better by blocking subsequent contacts requests after first rejection for some time, so that you're not annoyed by the same contact request all the time.<br>\nChanging this option will not affect already blocked contacts requests.</p>";
       csw.functions.simple_modal(content);
     },
     _settings_bootstrap_nodes_changed: function(settings_bootstrap_nodes){
@@ -188,7 +195,7 @@
     },
     _help_settings_number_of_intermediate_nodes: function(){
       var content;
-      content = "<p>Intermediate nodes are nodes between this node and interested target node, used for routing paths creation in transport layer of of Detox network implementation.</p>\n<p>More intermediate nodes means longer routing path and slower its creation. Lower numbers decrease anonymity, numbers higher than 3 are generally considered to be redundant.<br>\nDo not change this setting unless you know what you're doing.</p>";
+      content = "<p>Intermediate nodes are nodes between this node and interested target node, used for routing paths creation in transport layer of Detox network implementation.</p>\n<p>More intermediate nodes means longer routing path and slower its creation. Lower numbers decrease anonymity, numbers higher than 3 are generally considered to be redundant.<br>\nDo not change this setting unless you know what you're doing.</p>";
       csw.functions.simple_modal(content);
     },
     _settings_number_of_introduction_nodes_changed: function(){
@@ -200,6 +207,17 @@
     _help_settings_number_of_introduction_nodes: function(){
       var content;
       content = "<p>Introduction nodes are nodes to which announcement is made.</p>\n<p>More than one node is recommended to ensure good reliability of incoming connections, but very high numbers are redundant.<br>\nDo not change this setting unless you know what you're doing.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_online_changed: function(){
+      if (this.settings_online !== this._bool_to_string(this._state_instance.get_settings_online())) {
+        this._state_instance.set_settings_online(this.settings_online === '1');
+        csw.functions.notify('Saved changes to online setting', 'success', 'right', 3);
+      }
+    },
+    _help_settings_online: function(){
+      var content;
+      content = "<p>If not online then on next start application will not try to connect to Detox network and related functionality will not work properly.</p>";
       csw.functions.simple_modal(content);
     },
     _settings_packets_per_second_changed: function(){

@@ -40,7 +40,16 @@ dom-module(id="detox-chat-app-sidebar-settings")
 				div Number of introduction nodes*:
 				csw-icon(mono icon="question" on-click="_help_settings_number_of_introduction_nodes" tooltip="What are introduction nodes?")
 			csw-input-text: input(type="number" min="1" value="{{settings_number_of_introduction_nodes}}")
-			//- TODO: online
+			label
+				div Online*:
+				csw-icon(mono icon="question" on-click="_help_settings_online" tooltip="What online means?")
+			csw-group
+				csw-label-button(value="{{settings_online}}"): label
+					input(type="radio" value="0")
+					| No
+				csw-label-button: label
+					input(type="radio" value="1")
+					| Yes
 			label
 				div Packets per second*:
 				csw-icon(mono icon="question" on-click="_help_settings_packets_per_second" tooltip="What are packets per second?")
