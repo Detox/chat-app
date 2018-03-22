@@ -26,6 +26,18 @@ Polymer(
 			observer	: '_settings_ice_servers_changed'
 			type		: Object
 		settings_ice_servers_string			: String
+		settings_max_pending_segments				:
+			observer	: '_settings_max_pending_segments_changed'
+			type		: Number
+		settings_number_of_intermediate_nodes				:
+			observer	: '_settings_number_of_intermediate_nodes_changed'
+			type		: Number
+		settings_number_of_introduction_nodes				:
+			observer	: '_settings_number_of_introduction_nodes_changed'
+			type		: Number
+		settings_packets_per_second				:
+			observer	: '_settings_packets_per_second_changed'
+			type		: Number
 	ready : !->
 		<~! @_state_instance_ready.then
 		state									= @_state_instance
@@ -34,6 +46,10 @@ Polymer(
 		@settings_bootstrap_nodes				= state.get_settings_bootstrap_nodes()
 		@settings_bucket_size					= state.get_settings_bucket_size()
 		@settings_ice_servers					= state.get_settings_ice_servers()
+		@settings_max_pending_segments			= state.get_settings_max_pending_segments()
+		@settings_number_of_intermediate_nodes	= state.get_settings_number_of_intermediate_nodes()
+		@settings_number_of_introduction_nodes	= state.get_settings_number_of_introduction_nodes()
+		@settings_packets_per_second			= state.get_settings_packets_per_second()
 		state
 			.on('settings_announce_changed', (new_settings_announce) !~>
 				new_settings_announce	= @_bool_to_string(new_settings_announce)
@@ -44,6 +60,10 @@ Polymer(
 			.on('settings_bootstrap_nodes_changed', (@settings_bootstrap_nodes) !~>)
 			.on('settings_bucket_size_changed', (@settings_bucket_size) !~>)
 			.on('settings_ice_servers_changed', (@settings_ice_servers) !~>)
+			.on('settings_max_pending_segments_changed', (@settings_max_pending_segments) !~>)
+			.on('settings_number_of_intermediate_nodes_changed', (@settings_number_of_intermediate_nodes) !~>)
+			.on('settings_number_of_introduction_nodes_changed', (@settings_number_of_introduction_nodes) !~>)
+			.on('settings_packets_per_second_changed', (@settings_packets_per_second) !~>)
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
 	_settings_announce_changed : !->
@@ -120,6 +140,49 @@ Polymer(
 			If connection is not possible, TURN server can act as relay to enable communication even behind restricted NAT or firewall.</p>
 			<p>Most of the time ICE servers are crucial for operation and should be selected carefully.<br>
 			Do not change this setting unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_max_pending_segments_changed : !->
+		if @settings_max_pending_segments != @_state_instance.get_settings_max_pending_segments()
+			@_state_instance.set_settings_max_pending_segments(@settings_max_pending_segments)
+			csw.functions.notify('Saved changes to max pending segments setting', 'success', 'right', 3)
+	_help_settings_max_pending_segments : !->
+		content	= """
+			<p>Pending segments is a low-level state of segments from transport layer of Detox network implementation that appear during routing paths construction.</p>
+			<p>Do not change this setting unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_number_of_intermediate_nodes_changed : !->
+		if @settings_number_of_intermediate_nodes != @_state_instance.get_settings_number_of_intermediate_nodes()
+			@_state_instance.set_settings_number_of_intermediate_nodes(@settings_number_of_intermediate_nodes)
+			csw.functions.notify('Saved changes to number of intermediate nodes setting', 'success', 'right', 3)
+	_help_settings_number_of_intermediate_nodes : !->
+		content	= """
+			<p>Intermediate nodes are nodes between this node and interested target node, used for routing paths creation in transport layer of of Detox network implementation.</p>
+			<p>More intermediate nodes means longer routing path and slower its creation. Lower numbers decrease anonymity, numbers higher than 3 are generally considered to be redundant.<br>
+			Do not change this setting unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_number_of_introduction_nodes_changed : !->
+		if @settings_number_of_introduction_nodes != @_state_instance.get_settings_number_of_introduction_nodes()
+			@_state_instance.set_settings_number_of_introduction_nodes(@settings_number_of_introduction_nodes)
+			csw.functions.notify('Saved changes to number of introduction nodes setting', 'success', 'right', 3)
+	_help_settings_number_of_introduction_nodes : !->
+		content	= """
+			<p>Introduction nodes are nodes to which announcement is made.</p>
+			<p>More than one node is recommended to ensure good reliability of incoming connections, but very high numbers are redundant.<br>
+			Do not change this setting unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_packets_per_second_changed : !->
+		if @settings_packets_per_second != @_state_instance.get_settings_packets_per_second()
+			@_state_instance.set_settings_packets_per_second(@settings_packets_per_second)
+			csw.functions.notify('Saved changes to packets per second setting', 'success', 'right', 3)
+	_help_settings_packets_per_second : !->
+		content	= """
+			<p>Detox network sends data at fixed rate on each opened connection regardless of how much bandwidth is actually utilized, this option specifies how may packets of 512 bytes will be sent on each link during one second.</p>
+			<p>Bigger number means higher peak throughput and lower latencies (to some degree, as these can be bottlenecked by other nodes in particular routing path), but significantly increases requirements to Internet connection.<br>
+			You may increase or decrease this option slightly, but don't go too far unless you know what you're doing.</p>
 		"""
 		csw.functions.simple_modal(content)
 )

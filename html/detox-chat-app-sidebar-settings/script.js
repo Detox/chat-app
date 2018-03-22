@@ -30,7 +30,23 @@
         observer: '_settings_ice_servers_changed',
         type: Object
       },
-      settings_ice_servers_string: String
+      settings_ice_servers_string: String,
+      settings_max_pending_segments: {
+        observer: '_settings_max_pending_segments_changed',
+        type: Number
+      },
+      settings_number_of_intermediate_nodes: {
+        observer: '_settings_number_of_intermediate_nodes_changed',
+        type: Number
+      },
+      settings_number_of_introduction_nodes: {
+        observer: '_settings_number_of_introduction_nodes_changed',
+        type: Number
+      },
+      settings_packets_per_second: {
+        observer: '_settings_packets_per_second_changed',
+        type: Number
+      }
     },
     ready: function(){
       var this$ = this;
@@ -42,6 +58,10 @@
         this$.settings_bootstrap_nodes = state.get_settings_bootstrap_nodes();
         this$.settings_bucket_size = state.get_settings_bucket_size();
         this$.settings_ice_servers = state.get_settings_ice_servers();
+        this$.settings_max_pending_segments = state.get_settings_max_pending_segments();
+        this$.settings_number_of_intermediate_nodes = state.get_settings_number_of_intermediate_nodes();
+        this$.settings_number_of_introduction_nodes = state.get_settings_number_of_introduction_nodes();
+        this$.settings_packets_per_second = state.get_settings_packets_per_second();
         state.on('settings_announce_changed', function(new_settings_announce){
           new_settings_announce = this$._bool_to_string(new_settings_announce);
         }).on('settings_block_contact_requests_for_changed', function(block_contact_requests_for){
@@ -52,6 +72,14 @@
           this$.settings_bucket_size = settings_bucket_size;
         }).on('settings_ice_servers_changed', function(settings_ice_servers){
           this$.settings_ice_servers = settings_ice_servers;
+        }).on('settings_max_pending_segments_changed', function(settings_max_pending_segments){
+          this$.settings_max_pending_segments = settings_max_pending_segments;
+        }).on('settings_number_of_intermediate_nodes_changed', function(settings_number_of_intermediate_nodes){
+          this$.settings_number_of_intermediate_nodes = settings_number_of_intermediate_nodes;
+        }).on('settings_number_of_introduction_nodes_changed', function(settings_number_of_introduction_nodes){
+          this$.settings_number_of_introduction_nodes = settings_number_of_introduction_nodes;
+        }).on('settings_packets_per_second_changed', function(settings_packets_per_second){
+          this$.settings_packets_per_second = settings_packets_per_second;
         });
       });
     },
@@ -139,6 +167,50 @@
     _help_settings_ice_servers: function(){
       var content;
       content = "<p>ICE servers are used during connections to other nodes in the network.</p>\n<p>There are two kinds of ICE servers: STUN and TURN.<br>\nSTUN helps to figure out how to connect to this node from the outside if it is behind Network Address Translation (NAT) or firewall.<br>\nIf connection is not possible, TURN server can act as relay to enable communication even behind restricted NAT or firewall.</p>\n<p>Most of the time ICE servers are crucial for operation and should be selected carefully.<br>\nDo not change this setting unless you know what you're doing.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_max_pending_segments_changed: function(){
+      if (this.settings_max_pending_segments !== this._state_instance.get_settings_max_pending_segments()) {
+        this._state_instance.set_settings_max_pending_segments(this.settings_max_pending_segments);
+        csw.functions.notify('Saved changes to max pending segments setting', 'success', 'right', 3);
+      }
+    },
+    _help_settings_max_pending_segments: function(){
+      var content;
+      content = "<p>Pending segments is a low-level state of segments from transport layer of Detox network implementation that appear during routing paths construction.</p>\n<p>Do not change this setting unless you know what you're doing.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_number_of_intermediate_nodes_changed: function(){
+      if (this.settings_number_of_intermediate_nodes !== this._state_instance.get_settings_number_of_intermediate_nodes()) {
+        this._state_instance.set_settings_number_of_intermediate_nodes(this.settings_number_of_intermediate_nodes);
+        csw.functions.notify('Saved changes to number of intermediate nodes setting', 'success', 'right', 3);
+      }
+    },
+    _help_settings_number_of_intermediate_nodes: function(){
+      var content;
+      content = "<p>Intermediate nodes are nodes between this node and interested target node, used for routing paths creation in transport layer of of Detox network implementation.</p>\n<p>More intermediate nodes means longer routing path and slower its creation. Lower numbers decrease anonymity, numbers higher than 3 are generally considered to be redundant.<br>\nDo not change this setting unless you know what you're doing.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_number_of_introduction_nodes_changed: function(){
+      if (this.settings_number_of_introduction_nodes !== this._state_instance.get_settings_number_of_introduction_nodes()) {
+        this._state_instance.set_settings_number_of_introduction_nodes(this.settings_number_of_introduction_nodes);
+        csw.functions.notify('Saved changes to number of introduction nodes setting', 'success', 'right', 3);
+      }
+    },
+    _help_settings_number_of_introduction_nodes: function(){
+      var content;
+      content = "<p>Introduction nodes are nodes to which announcement is made.</p>\n<p>More than one node is recommended to ensure good reliability of incoming connections, but very high numbers are redundant.<br>\nDo not change this setting unless you know what you're doing.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_packets_per_second_changed: function(){
+      if (this.settings_packets_per_second !== this._state_instance.get_settings_packets_per_second()) {
+        this._state_instance.set_settings_packets_per_second(this.settings_packets_per_second);
+        csw.functions.notify('Saved changes to packets per second setting', 'success', 'right', 3);
+      }
+    },
+    _help_settings_packets_per_second: function(){
+      var content;
+      content = "<p>Detox network sends data at fixed rate on each opened connection regardless of how much bandwidth is actually utilized, this option specifies how may packets of 512 bytes will be sent on each link during one second.</p>\n<p>Bigger number means higher peak throughput and lower latencies (to some degree, as these can be bottlenecked by other nodes in particular routing path), but significantly increases requirements to Internet connection.<br>\nYou may increase or decrease this option slightly, but don't go too far unless you know what you're doing.</p>";
       csw.functions.simple_modal(content);
     }
   });
