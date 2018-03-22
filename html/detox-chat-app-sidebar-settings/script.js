@@ -21,7 +21,11 @@
         observer: '_settings_bootstrap_nodes_changed',
         type: Object
       },
-      bootstrap_nodes_string: String
+      bootstrap_nodes_string: String,
+      settings_bucket_size: {
+        observer: '_settings_bucket_size_changed',
+        type: Number
+      }
     },
     ready: function(){
       var this$ = this;
@@ -31,12 +35,15 @@
         this$.settings_announce = this$._bool_to_string(state.get_settings_announce());
         this$.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
         this$.bootstrap_nodes = state.get_settings_bootstrap_nodes();
+        this$.settings_bucket_size = state.get_settings_bucket_size();
         state.on('settings_announce_changed', function(new_settings_announce){
           new_settings_announce = this$._bool_to_string(new_settings_announce);
-        }).on('settings_block_contact_requests_for_changed', function(){
-          this$.block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
-        }).on('settings_bootstrap_nodes_changed', function(){
-          this$.bootstrap_nodes = state.get_settings_bootstrap_nodes();
+        }).on('settings_block_contact_requests_for_changed', function(block_contact_requests_for){
+          this$.block_contact_requests_for = block_contact_requests_for / 60 / 60 / 24;
+        }).on('settings_bootstrap_nodes_changed', function(bootstrap_nodes){
+          this$.bootstrap_nodes = bootstrap_nodes;
+        }).on('settings_bucket_size_changed', function(settings_bucket_size){
+          this$.settings_bucket_size = settings_bucket_size;
         });
       });
     },
@@ -59,8 +66,10 @@
       csw.functions.simple_modal(content);
     },
     _settings_block_contact_requests_for_changed: function(){
-      if (this.settings_block_contact_requests_for !== this._state_instance.get_settings_block_contact_requests_for()) {
-        this._state_instance.set_settings_block_contact_requests_for(this.settings_block_contact_requests_for) * 60 * 60 * 24;
+      var settings_block_contact_requests_for;
+      settings_block_contact_requests_for = this.settings_block_contact_requests_for * 60 * 60 * 24;
+      if (settings_block_contact_requests_for !== this._state_instance.get_settings_block_contact_requests_for()) {
+        this._state_instance.set_settings_block_contact_requests_for(settings_block_contact_requests_for);
         csw.functions.notify('Saved changes to block contacts request for setting', 'success', 'right', 3);
       }
     },
@@ -89,6 +98,17 @@
     _help_settings_bootstrap_nodes: function(){
       var content;
       content = "<p>Bootstrap nodes are special kind of nodes used during application startup in order to get information about other nodes in the network and establish initial connections with them.<br>\nThese nodes are crucial for operation and should be selected carefully.<br>\nBootstrap nodes that return misleading information cause anything from drastic reduction of anonymity to being unable to communicate with other nodes in the network.<br>\nDo not change this setting unless you know what you're doing.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_bucket_size_changed: function(){
+      if (this.settings_bucket_size !== this._state_instance.get_settings_bucket_size()) {
+        this._state_instance.set_settings_bucket_size(this.settings_bucket_size);
+        csw.functions.notify('Saved changes to bucket size setting', 'success', 'right', 3);
+      }
+    },
+    _help_settings_bucket_size: function(){
+      var content;
+      content = "<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>\n<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>\nDo not change this setting unless you know what you're doing.</p>";
       csw.functions.simple_modal(content);
     }
   });

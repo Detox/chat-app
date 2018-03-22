@@ -282,8 +282,9 @@ function Wrapper (detox-utils, async-eventer)
 		 * @return {number} In seconds
 		 */
 		'set_settings_block_contact_requests_for' : (block_contact_requests_for) ->
+			old_block_contact_requests_for						= @_state['settings']['block_contact_requests_for']
 			@_state['settings']['block_contact_requests_for']	= block_contact_requests_for
-			@'fire'('settings_block_contact_requests_for_changed')
+			@'fire'('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for)
 		/**
 		 * @param {string}		node_id
 		 * @param {string}		host

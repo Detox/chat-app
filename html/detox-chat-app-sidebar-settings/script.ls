@@ -18,23 +18,26 @@ Polymer(
 		bootstrap_nodes						:
 			observer	: '_settings_bootstrap_nodes_changed'
 			type		: Object
-		bootstrap_nodes_string	: String
+		bootstrap_nodes_string				: String
+		settings_bucket_size				:
+			observer	: '_settings_bucket_size_changed'
+			type		: Number
 	ready : !->
 		<~! @_state_instance_ready.then
 		state									= @_state_instance
 		@settings_announce						= @_bool_to_string(state.get_settings_announce())
 		@settings_block_contact_requests_for	= state.get_settings_block_contact_requests_for() / 60 / 60 / 24 # In days
 		@bootstrap_nodes						= state.get_settings_bootstrap_nodes()
+		@settings_bucket_size					= state.get_settings_bucket_size()
 		state
 			.on('settings_announce_changed', (new_settings_announce) !~>
 				new_settings_announce	= @_bool_to_string(new_settings_announce)
 			)
-			.on('settings_block_contact_requests_for_changed', !~>
-				@block_contact_requests_for	= state.get_settings_block_contact_requests_for() / 60 / 60 / 24 # In days
+			.on('settings_block_contact_requests_for_changed', (block_contact_requests_for) !~>
+				@block_contact_requests_for	= block_contact_requests_for / 60 / 60 / 24 # In days
 			)
-			.on('settings_bootstrap_nodes_changed', !~>
-				@bootstrap_nodes	= state.get_settings_bootstrap_nodes()
-			)
+			.on('settings_bootstrap_nodes_changed', (@bootstrap_nodes) !~>)
+			.on('settings_bucket_size_changed', (@settings_bucket_size) !~>)
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
 	_settings_announce_changed : !->
@@ -49,8 +52,9 @@ Polymer(
 		"""
 		csw.functions.simple_modal(content)
 	_settings_block_contact_requests_for_changed : !->
-		if @settings_block_contact_requests_for != @_state_instance.get_settings_block_contact_requests_for()
-			@_state_instance.set_settings_block_contact_requests_for(@settings_block_contact_requests_for) * 60 * 60 * 24 # In days
+		settings_block_contact_requests_for	= @settings_block_contact_requests_for * 60 * 60 * 24 # In days
+		if settings_block_contact_requests_for != @_state_instance.get_settings_block_contact_requests_for()
+			@_state_instance.set_settings_block_contact_requests_for(settings_block_contact_requests_for)
 			csw.functions.notify('Saved changes to block contacts request for setting', 'success', 'right', 3)
 	_help_settings_block_contact_requests_for : !->
 		content	= """
@@ -76,6 +80,17 @@ Polymer(
 			<p>Bootstrap nodes are special kind of nodes used during application startup in order to get information about other nodes in the network and establish initial connections with them.<br>
 			These nodes are crucial for operation and should be selected carefully.<br>
 			Bootstrap nodes that return misleading information cause anything from drastic reduction of anonymity to being unable to communicate with other nodes in the network.<br>
+			Do not change this setting unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_bucket_size_changed : !->
+		if @settings_bucket_size != @_state_instance.get_settings_bucket_size()
+			@_state_instance.set_settings_bucket_size(@settings_bucket_size)
+			csw.functions.notify('Saved changes to bucket size setting', 'success', 'right', 3)
+	_help_settings_bucket_size : !->
+		content	= """
+			<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>
+			<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>
 			Do not change this setting unless you know what you're doing.</p>
 		"""
 		csw.functions.simple_modal(content)

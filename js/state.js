@@ -292,8 +292,10 @@
        * @return {number} In seconds
        */,
       'set_settings_block_contact_requests_for': function(block_contact_requests_for){
+        var old_block_contact_requests_for;
+        old_block_contact_requests_for = this._state['settings']['block_contact_requests_for'];
         this._state['settings']['block_contact_requests_for'] = block_contact_requests_for;
-        return this['fire']('settings_block_contact_requests_for_changed');
+        return this['fire']('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for);
       }
       /**
        * @param {string}		node_id
