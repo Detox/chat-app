@@ -7,7 +7,7 @@
 	display : block;
 }
 
-h4 {
+h3 {
 	display         : flex;
 	justify-content : space-between;
 	align-items     : center;
@@ -16,9 +16,13 @@ h4 {
 		margin-top : 0;
 	}
 
-	button {
-		height : 2em;
-		width  : 2em;
+	csw-icon {
+		color  : var(--text-color-base-disabled);
+		cursor : pointer;
+
+		&:hover {
+			color : var(--button-hover-color);
+		}
 	}
 }
 
@@ -69,11 +73,11 @@ csw-group {
 		}
 
 		&:hover {
-			color            : var(--text-color-base-active);
+			color            : var(--button-hover-color);
 			background-color : var(--background-color-highlight);
 
 			csw-icon {
-				display : inline-block;
+				display : inline-flex;
 			}
 		}
 
@@ -130,7 +134,7 @@ csw-group {
 			margin-left : calc(var(--block-padding) / 2);
 
 			&:hover {
-				color : var(--text-color-active);
+				color : var(--button-hover-color);
 			}
 		}
 	}

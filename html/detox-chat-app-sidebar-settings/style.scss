@@ -14,21 +14,14 @@ label {
 		flex-grow : 1;
 	}
 
-	&:hover {
-		csw-icon {
-			display : inline-block;
-		}
-	}
-
 	csw-icon {
 		color       : var(--text-color-base-disabled);
 		cursor      : pointer;
-		display     : none;
 		margin-left : calc(var(--block-padding) / 2);
 		width       : auto !important;
 
 		&:hover {
-			color : var(--text-color-active);
+			color : var(--button-hover-color);
 		}
 	}
 }

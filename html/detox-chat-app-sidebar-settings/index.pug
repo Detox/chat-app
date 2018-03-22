@@ -3,8 +3,8 @@ dom-module(id="detox-chat-app-sidebar-settings")
 	template
 		csw-form: form
 			label
-				dev Announce to the network*:
-				csw-icon(icon="question" on-click="_help_settings_announce")
+				div Announce to the network*:
+				csw-icon(mono icon="question" on-click="_help_settings_announce")
 			csw-group
 				csw-label-button(value="{{settings_announce}}"): label
 					input(type="radio" value="0")
@@ -14,7 +14,7 @@ dom-module(id="detox-chat-app-sidebar-settings")
 					| Yes
 			label
 				div Bootstrap nodes*:
-				csw-icon(icon="question" on-click="_help_settings_bootstrap_nodes")
+				csw-icon(mono icon="question" on-click="_help_settings_bootstrap_nodes")
 			csw-textarea: textarea(rows="10" wrap="off" value="{{bootstrap_nodes_string}}" on-blur="_bootstrap_node_blur")
 		p.restart-warning * Changing these settings require application restart in order to take effect
 	script(src="script.js")

@@ -7,9 +7,10 @@ dom-module(id="detox-chat-app-sidebar-profile")
 			label Nickname:
 			csw-textarea: textarea(rows="3" value="{{nickname}}")
 			div(hidden="[[add_secret]]")
-				csw-group
-					csw-button(icon="plus"): button(type="button" on-click="_add_secret") Add new secret
-					csw-button(icon="question"): button(type="button" on-click="_help")
+				h3
+					div Secrets
+					csw-icon(mono icon="plus" on-click="_add_secret" tooltip="Add secret")
+					csw-icon(mono icon="question" on-click="_help" tooltip="What are secrets?")
 		csw-form.add-secret(hidden="[[!add_secret]]"): form
 			label Secret name:
 			csw-input-text: input(type="text" value="{{new_secret_name}}")
@@ -21,7 +22,7 @@ dom-module(id="detox-chat-app-sidebar-profile")
 			template(is="dom-repeat" items="{{secrets}}")
 				label.secret-name
 					div ID for secret <i>[[item.name]]</i>:
-					csw-icon(icon="edit" on-click="_rename_secret" tooltip="Rename secret")
-					csw-icon(icon="trash" on-click="_del_secret" tooltip="Delete secret")
+					csw-icon(mono icon="edit" on-click="_rename_secret" tooltip="Rename secret")
+					csw-icon(mono icon="trash" on-click="_del_secret" tooltip="Delete secret")
 				csw-textarea: textarea(readonly on-click="_id_click" rows="4" value="[[item.id]]")
 	script(src="script.js")

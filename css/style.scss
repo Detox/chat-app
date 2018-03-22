@@ -8,7 +8,7 @@ html {
 
 	--text-color-base                          : #c0c0c0;
 	--text-color-base-disabled                 : #949494;
-	--text-color-base-active                   : #fff;
+	--text-color-active                        : #fff;
 	--text-color-primary                       : #00a8e6;
 	--text-color-success                       : #8cc14c;
 	--text-color-warning                       : #faa732;
@@ -45,7 +45,7 @@ html {
 	--form-element-background                  : var(--background-color-sidebar);
 	--form-element-border                      : var(--border-base);
 	--form-element-color                       : var(--text-color-base);
-	--form-element-focus-color                 : var(--text-color-base-active);
+	--form-element-focus-color                 : var(--text-color-active);
 	--form-element-box-shadow                  : 0 0 0 .1em rgba(0, 0, 0, .15) inset;
 	--form-element-inner-box-shadow            : 0 0 .5em rgba(0, 0, 0, .2) inset;
 	--form-element-height                      : 2.5em;
@@ -67,7 +67,7 @@ html {
 	--button-text-color-primary-disabled       : #e0e0e0;
 	--button-background-color-primary          : #1f8dd6;
 	--button-background-color-primary-disabled : #5886a1;
-	--button-hover-color                       : var(--text-color-base-active);
+	--button-hover-color                       : var(--text-color-active);
 	--button-hover-background                  : var(--background-color-highlight);
 	--button-active-color                      : var(--text-color-base);
 	--button-active-background                 : var(--border-color-base);

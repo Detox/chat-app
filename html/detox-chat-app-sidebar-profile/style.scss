@@ -13,6 +13,10 @@ csw-textarea {
 	textarea {
 		height : auto;
 		resize : none;
+
+		&[readonly] {
+			cursor : copy;
+		}
 	}
 }
 
@@ -20,28 +24,20 @@ csw-button {
 	margin-bottom : var(--block-padding);
 }
 
-.secret-name {
+.secret-name, h3 {
 	display : flex !important;
 
 	div {
 		flex-grow : 1;
 	}
 
-	&:hover {
-		csw-icon {
-			display : inline-block;
-		}
-	}
-
 	csw-icon {
 		color       : var(--text-color-base-disabled);
 		cursor      : pointer;
-		display     : none;
 		margin-left : calc(var(--block-padding) / 2);
-		width       : auto;
 
 		&:hover {
-			color : var(--text-color-active);
+			color : var(--button-hover-color);
 		}
 	}
 }
