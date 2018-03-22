@@ -27,4 +27,10 @@ Polymer(
 	_settings_announce_changed : !->
 		if @settings_announce != @_bool_to_string(@_state_instance.get_settings_announce())
 			@_state_instance.set_settings_announce(@settings_announce == '1')
+	_help_settings_announce : !->
+		content	= """
+			<p>It is possible to use Detox Chat without announcing itself to the network.<br>
+			In this case incoming connections from contacts will not be possible, but it will be possible to initiate connection to other contacts if needed.</p>
+		"""
+		csw.functions.simple_modal(content)
 )

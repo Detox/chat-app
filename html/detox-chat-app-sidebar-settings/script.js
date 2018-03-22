@@ -39,6 +39,11 @@
       if (this.settings_announce !== this._bool_to_string(this._state_instance.get_settings_announce())) {
         this._state_instance.set_settings_announce(this.settings_announce === '1');
       }
+    },
+    _help_settings_announce: function(){
+      var content;
+      content = "<p>It is possible to use Detox Chat without announcing itself to the network.<br>\nIn this case incoming connections from contacts will not be possible, but it will be possible to initiate connection to other contacts if needed.</p>";
+      csw.functions.simple_modal(content);
     }
   });
 }).call(this);
