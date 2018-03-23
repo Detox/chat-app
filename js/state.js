@@ -658,13 +658,21 @@
        */,
       'add_contact_request': function(contact_id, secret_name){
         var new_contact_request;
-        if (this._state['contacts_requests'].has(contact_id)) {
+        if (this['has_contact_request'](contact_id)) {
           return;
         }
         new_contact_request = ContactRequest([contact_id, id_encode(contact_id, new Uint8Array(0)), secret_name]);
         this._state['contacts_requests'].set(contact_id, new_contact_request);
         this['fire']('contact_request_added', new_contact_request);
         this['fire']('contacts_requests_changed');
+      }
+      /**
+       * @param {!Uint8Array} contact_id
+       *
+       * @return {boolean}
+       */,
+      'has_contact_request': function(contact_id){
+        return this._state['contacts_requests'].has(contact_id);
       }
       /**
        * @param {!Uint8Array} contact_id

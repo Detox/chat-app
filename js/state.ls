@@ -580,12 +580,19 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 * @param {string}		secret_name
 		 */
 		'add_contact_request' : (contact_id, secret_name) !->
-			if @_state['contacts_requests'].has(contact_id)
+			if @'has_contact_request'(contact_id)
 				return
 			new_contact_request	= ContactRequest([contact_id, id_encode(contact_id, new Uint8Array(0)), secret_name])
 			@_state['contacts_requests'].set(contact_id, new_contact_request)
 			@'fire'('contact_request_added', new_contact_request)
 			@'fire'('contacts_requests_changed')
+		/**
+		 * @param {!Uint8Array} contact_id
+		 *
+		 * @return {boolean}
+		 */
+		'has_contact_request' : (contact_id) ->
+			@_state['contacts_requests'].has(contact_id)
 		/**
 		 * @param {!Uint8Array} contact_id
 		 */
