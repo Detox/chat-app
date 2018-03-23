@@ -16,7 +16,7 @@
       }
       this['array'] = array;
     }
-    ArrayObject.prototype['clone'] = function(){
+    ArrayObject.prototype.clone = function(){
       return ArrayObject(this['array'].slice());
     };
     for (i$ = 0, len$ = properties_list.length; i$ < len$; ++i$) {
@@ -558,7 +558,7 @@
         if (!old_contact) {
           return;
         }
-        new_contact = old_contact['clone']();
+        new_contact = old_contact.clone();
         for (property in properties) {
           value = properties[property];
           new_contact[property] = value;
@@ -864,7 +864,7 @@
       'set_secret_name': function(secret, name){
         var old_secret, new_secret;
         old_secret = this._state['secrets'].get(secret);
-        new_secret = old_secret['clone']();
+        new_secret = old_secret.clone();
         new_secret['name'] = name;
         this._state['secrets'].set(secret, new_secret);
         this['fire']('secrets_changed');

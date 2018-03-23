@@ -13,7 +13,7 @@ function create_array_object (properties_list)
 
 		@'array'	= array
 
-	ArrayObject::'clone'	= ->
+	ArrayObject::clone	= ->
 		ArrayObject(@'array'slice())
 
 	for let property, array_index in properties_list
@@ -498,7 +498,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_contact	= @'get_contact'(contact_id)
 			if !old_contact
 				return
-			new_contact	= old_contact['clone']()
+			new_contact	= old_contact.clone()
 			for property, value of properties
 				new_contact[property]	= value
 			@_state['contacts'].set(contact_id, new_contact)
@@ -743,7 +743,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_secret_name' : (secret, name) !->
 			old_secret			= @_state['secrets'].get(secret)
-			new_secret			= old_secret['clone']()
+			new_secret			= old_secret.clone()
 			new_secret['name']	= name
 			@_state['secrets'].set(secret, new_secret)
 			@'fire'('secrets_changed')
