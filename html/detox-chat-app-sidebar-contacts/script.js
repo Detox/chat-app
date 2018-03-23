@@ -99,6 +99,11 @@
     _add_contact_cancel: function(){
       this.add_contact = false;
     },
+    _help: function(){
+      var content;
+      content = "<p>You need to add contact in order to communicate, addition is make using IDs.</p>\n<p>There are 2 kinds of IDs: without secrets and with secrets. Look at <i>Profile</i> tab for more details on those.</p>\n<p>Each contact in the list might have some of the corners highlighted, which indicates some information about its state.</p>\n<p>Top left corner is highlighted when there is an active connection to contact right now.<br>\nBottom left corner is highlighted means that there was never an active connection, for instance you've added someone to contacts, but they didn't accept request (yet).<br>\nTop right corner is highlighted when there are unread messages from that contact.<br>\nBottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>";
+      csw.functions.simple_modal(content);
+    },
     _set_active_contact: function(e){
       this._state_instance.set_ui_active_contact(e.model.item.id);
     },

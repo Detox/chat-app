@@ -16,9 +16,14 @@ h3 {
 		margin-top : 0;
 	}
 
+	div {
+		flex-grow : 1;
+	}
+
 	csw-icon {
-		color  : var(--text-color-base-disabled);
-		cursor : pointer;
+		color       : var(--text-color-base-disabled);
+		cursor      : pointer;
+		margin-left : calc(var(--block-padding) / 2);
 
 		&:hover {
 			color : var(--button-hover-color);

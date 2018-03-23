@@ -87,6 +87,17 @@ Polymer(
 			csw.functions.notify('Incorrect ID, check for typos and try again', 'error', 'right', 3)
 	_add_contact_cancel : !->
 		@add_contact	= false
+	_help : !->
+		content	= """
+			<p>You need to add contact in order to communicate, addition is make using IDs.</p>
+			<p>There are 2 kinds of IDs: without secrets and with secrets. Look at <i>Profile</i> tab for more details on those.</p>
+			<p>Each contact in the list might have some of the corners highlighted, which indicates some information about its state.</p>
+			<p>Top left corner is highlighted when there is an active connection to contact right now.<br>
+			Bottom left corner is highlighted means that there was never an active connection, for instance you've added someone to contacts, but they didn't accept request (yet).<br>
+			Top right corner is highlighted when there are unread messages from that contact.<br>
+			Bottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>
+		"""
+		csw.functions.simple_modal(content)
 	_set_active_contact : (e) !->
 		@_state_instance.set_ui_active_contact(e.model.item.id)
 	_rename_contact : (e) !->
