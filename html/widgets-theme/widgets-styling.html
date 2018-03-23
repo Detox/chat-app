@@ -195,22 +195,22 @@
 		/* Modal */
 
 		--csw-modal: {
-			opacity     : 0;
-			transform   : scale(0);
-			transition  : opacity var(--transition-duration) var(--transition-duration-short), transform 0s var(--transition-duration);
-			will-change : opacity;
-
-			@apply --layout;
-			@apply --layout-center-center;
+			align-items     : center;
+			display         : flex;
+			justify-content : center;
+			opacity         : 0;
+			transform       : scale(0);
+			transition      : opacity var(--transition-duration) var(--transition-duration-short), transform 0s var(--transition-duration);
+			will-change     : opacity;
 		};
 
 		--csw-modal-open: {
-			opacity    : 1;
-			transform  : scale(1);
-			transition : opacity var(--transition-duration);
-
-			@apply --layout;
-			@apply --layout-center-center;
+			align-items     : center;
+			display         : flex;
+			justify-content : center;
+			opacity         : 1;
+			transform       : scale(1);
+			transition      : opacity var(--transition-duration);
 		};
 
 		--csw-modal-body: {
@@ -264,17 +264,16 @@
 		/* Tooltip */
 
 		--csw-tooltip: {
+			align-items : center;
 			background  : var(--tooltip-background);
 			border      : var(--border-base);
 			color       : var(--tooltip-color);
+			display     : flex;
 			margin-top  : calc(-1 * var(--tooltip-arrow-height));
 			opacity     : 0;
 			transform   : scale(0);
 			transition  : opacity var(--transition-duration-short) var(--transition-duration-short), transform 0s var(--transition-duration);
 			will-change : opacity, transform;
-
-			@apply --layout;
-			@apply --layout-center;
 		};
 
 		--csw-tooltip-top: {
@@ -282,12 +281,11 @@
 		};
 
 		--csw-tooltip-show: {
-			opacity    : 1;
-			transform  : scale(1);
-			transition : opacity var(--transition-duration) var(--transition-duration-short);
-
-			@apply --layout;
-			@apply --layout-center;
+			align-items : center;
+			display     : flex;
+			opacity     : 1;
+			transform   : scale(1);
+			transition  : opacity var(--transition-duration) var(--transition-duration-short);
 		};
 
 		--csw-tooltip-show-quick: {
