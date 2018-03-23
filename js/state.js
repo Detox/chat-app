@@ -34,12 +34,12 @@
       });
     }
   }
-  function Wrapper(detoxUtils, asyncEventer){
-    var are_arrays_equal, ArrayMap, ArraySet, base58_encode, global_state, Contact, ContactRequest, ContactRequestBlocked, Message, Secret;
+  function Wrapper(detoxChat, detoxUtils, asyncEventer){
+    var id_encode, are_arrays_equal, ArrayMap, ArraySet, global_state, Contact, ContactRequest, ContactRequestBlocked, Message, Secret;
+    id_encode = detoxChat['id_encode'];
     are_arrays_equal = detoxUtils['are_arrays_equal'];
     ArrayMap = detoxUtils['ArrayMap'];
     ArraySet = detoxUtils['ArraySet'];
-    base58_encode = detoxUtils['base58_encode'];
     global_state = Object.create(null);
     /**
      * @constructor
@@ -535,7 +535,7 @@
         }
         nickname = nickname.trim();
         if (!nickname) {
-          nickname = base58_encode(contact_id);
+          nickname = id_encode(contact_id);
         }
         new_contact = Contact([contact_id, nickname, 0, 0, remote_secret, null, null]);
         this._state['contacts'].set(contact_id, new_contact);
@@ -573,7 +573,7 @@
        */,
       'set_contact_nickname': function(contact_id, nickname){
         if (!nickname) {
-          nickname = base58_encode(contact_id);
+          nickname = id_encode(contact_id);
         }
         this._set_contact(contact_id, {
           'nickname': nickname
@@ -661,7 +661,7 @@
         if (this._state['contacts_requests'].has(contact_id)) {
           return;
         }
-        new_contact_request = ContactRequest([contact_id, base58_encode(contact_id), secret_name]);
+        new_contact_request = ContactRequest([contact_id, id_encode(contact_id), secret_name]);
         this._state['contacts_requests'].set(contact_id, new_contact_request);
         this['fire']('contact_request_added', new_contact_request);
         this['fire']('contacts_requests_changed');
@@ -917,5 +917,5 @@
       }
     };
   }
-  define(['@detox/utils', 'async-eventer'], Wrapper);
+  define(['@detox/chat', '@detox/utils', 'async-eventer'], Wrapper);
 }).call(this);

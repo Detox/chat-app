@@ -25,11 +25,11 @@ function create_array_object (properties_list)
 		)
 	ArrayObject
 
-function Wrapper (detox-utils, async-eventer)
+function Wrapper (detox-chat, detox-utils, async-eventer)
+	id_encode			= detox-chat['id_encode']
 	are_arrays_equal	= detox-utils['are_arrays_equal']
 	ArrayMap			= detox-utils['ArrayMap']
 	ArraySet			= detox-utils['ArraySet']
-	base58_encode		= detox-utils['base58_encode']
 
 	global_state		= Object.create(null)
 	/**
@@ -480,7 +480,7 @@ function Wrapper (detox-utils, async-eventer)
 				return
 			nickname	= nickname.trim()
 			if !nickname
-				nickname = base58_encode(contact_id)
+				nickname = id_encode(contact_id)
 			new_contact	= Contact([contact_id, nickname, 0, 0, remote_secret, null, null])
 			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_added', new_contact)
@@ -510,7 +510,7 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'set_contact_nickname' : (contact_id, nickname) !->
 			if !nickname
-				nickname = base58_encode(contact_id)
+				nickname = id_encode(contact_id)
 			@_set_contact(contact_id, {
 				'nickname'	: nickname
 			})
@@ -582,7 +582,7 @@ function Wrapper (detox-utils, async-eventer)
 		'add_contact_request' : (contact_id, secret_name) !->
 			if @_state['contacts_requests'].has(contact_id)
 				return
-			new_contact_request	= ContactRequest([contact_id, base58_encode(contact_id), secret_name])
+			new_contact_request	= ContactRequest([contact_id, id_encode(contact_id), secret_name])
 			@_state['contacts_requests'].set(contact_id, new_contact_request)
 			@'fire'('contact_request_added', new_contact_request)
 			@'fire'('contacts_requests_changed')
@@ -790,4 +790,4 @@ function Wrapper (detox-utils, async-eventer)
 			global_state[name]
 	}
 
-define(['@detox/utils', 'async-eventer'], Wrapper)
+define(['@detox/chat', '@detox/utils', 'async-eventer'], Wrapper)
