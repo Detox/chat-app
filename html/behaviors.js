@@ -7,7 +7,7 @@
 (function(){
   var x$, ref$;
   x$ = (ref$ = window.detoxChatApp || (window.detoxChatApp = {})).behaviors || (ref$.behaviors = {});
-  x$['state'] = {
+  x$.state = {
     properties: {
       chatId: {
         type: String,
@@ -16,7 +16,7 @@
     },
     created: function(){
       var this$ = this;
-      this['_state_instance_ready'] = require(['@detox/chat', 'state']).then(function(arg$){
+      this._state_instance_ready = require(['@detox/chat', 'state']).then(function(arg$){
         var detoxChat, state;
         detoxChat = arg$[0], state = arg$[1];
         this$._state_instance = state.get_instance(this$.chatId);
@@ -28,4 +28,21 @@
       });
     }
   };
+  x$.help = [
+    detoxChatApp.behaviors.state, {
+      properties: {
+        help: Boolean
+      },
+      created: function(){
+        var this$ = this;
+        this._state_instance_ready.then(function(){
+          this$.help = this$._state_instance.get_settings_help();
+          this$._state_instance.on('settings_help_changed', function(help){
+            this$.help = help;
+            console.log('x');
+          });
+        });
+      }
+    }
+  ];
 }).call(this);

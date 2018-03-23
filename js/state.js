@@ -82,6 +82,7 @@
             'port': 16882
           }],
           'bucket_size': 5,
+          'help': true,
           'ice_servers': [
             {
               urls: 'stun:stun.l.google.com:19302'
@@ -274,6 +275,7 @@
         old_announce = this._state['settings']['announce'];
         new_announce = announce;
         this._state['settings']['announce'] = new_announce;
+        this['fire']('settings_announce_changed', new_announce, old_announce);
       }
       /**
        * @return {number} In seconds
@@ -288,8 +290,7 @@
         var old_block_contact_requests_for;
         old_block_contact_requests_for = this._state['settings']['block_contact_requests_for'];
         this._state['settings']['block_contact_requests_for'] = block_contact_requests_for;
-        this['fire']('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for);
-        return this['fire']('settings_announce_changed', new_announce, old_announce);
+        return this['fire']('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for);
       }
       /**
        * @return {!Array<!Object>}
@@ -320,6 +321,22 @@
         old_bucket_size = this._state['bucket_size'];
         this._state['settings']['bucket_size'] = bucket_size;
         this['fire']('settings_bucket_size_changed', bucket_size, old_bucket_size);
+      }
+      /**
+       * @return {boolean}
+       */,
+      'get_settings_help': function(){
+        return this._state['settings']['help'];
+      }
+      /**
+       * @param {boolean} help
+       */,
+      'set_settings_help': function(help){
+        var old_help, new_help;
+        old_help = this._state['settings']['help'];
+        new_help = help;
+        this._state['settings']['help'] = new_help;
+        this['fire']('settings_help_changed', new_help, old_help);
       }
       /**
        * @return {!Array<!Object>}

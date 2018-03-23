@@ -11,7 +11,7 @@ dom-module(id="detox-chat-app-sidebar-contacts")
 			h3
 				div Contacts
 				csw-icon(mono icon="plus" on-click="_add_contact" tooltip="Add new contact")
-				csw-icon(mono icon="question" on-click="_help" tooltip="About contacts")
+				csw-icon(mono icon="question" on-click="_help" tooltip="About contacts" hidden="[[!help]]")
 		csw-form.add-contact(hidden="[[!add_contact]]"): form
 			label Contact ID:
 			csw-textarea: textarea(rows="4" value="{{new_contact_id}}")

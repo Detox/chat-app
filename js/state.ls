@@ -82,6 +82,7 @@ function Wrapper (detox-utils, async-eventer)
 						}
 					]
 					'bucket_size'					: 5
+					'help'							: true
 					'ice_servers'					: [
 						{urls: 'stun:stun.l.google.com:19302'}
 						{urls: 'stun:global.stun.twilio.com:3478?transport=udp'}
@@ -267,6 +268,7 @@ function Wrapper (detox-utils, async-eventer)
 			old_announce					= @_state['settings']['announce']
 			new_announce					= announce
 			@_state['settings']['announce']	= new_announce
+			@'fire'('settings_announce_changed', new_announce, old_announce)
 		/**
 		 * @return {number} In seconds
 		 */
@@ -279,7 +281,6 @@ function Wrapper (detox-utils, async-eventer)
 			old_block_contact_requests_for						= @_state['settings']['block_contact_requests_for']
 			@_state['settings']['block_contact_requests_for']	= block_contact_requests_for
 			@'fire'('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for)
-			@'fire'('settings_announce_changed', new_announce, old_announce)
 		/**
 		 * @return {!Array<!Object>}
 		 */
@@ -304,6 +305,19 @@ function Wrapper (detox-utils, async-eventer)
 			old_bucket_size						= @_state['bucket_size']
 			@_state['settings']['bucket_size']	= bucket_size
 			@'fire'('settings_bucket_size_changed', bucket_size, old_bucket_size)
+		/**
+		 * @return {boolean}
+		 */
+		'get_settings_help' : ->
+			@_state['settings']['help']
+		/**
+		 * @param {boolean} help
+		 */
+		'set_settings_help' : (help) !->
+			old_help					= @_state['settings']['help']
+			new_help					= help
+			@_state['settings']['help']	= new_help
+			@'fire'('settings_help_changed', new_help, old_help)
 		/**
 		 * @return {!Array<!Object>}
 		 */

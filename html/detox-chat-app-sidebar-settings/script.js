@@ -7,7 +7,7 @@
 (function(){
   Polymer({
     is: 'detox-chat-app-sidebar-settings',
-    behaviors: [detoxChatApp.behaviors.state],
+    behaviors: [detoxChatApp.behaviors.state, detoxChatApp.behaviors.help],
     properties: {
       settings_announce: {
         observer: '_settings_announce_changed',
@@ -25,6 +25,10 @@
       settings_bucket_size: {
         observer: '_settings_bucket_size_changed',
         type: Number
+      },
+      settings_help: {
+        observer: '_settings_help_changed',
+        type: String
       },
       settings_ice_servers: {
         observer: '_settings_ice_servers_changed',
@@ -66,6 +70,7 @@
         this$.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
         this$.settings_bootstrap_nodes = state.get_settings_bootstrap_nodes();
         this$.settings_bucket_size = state.get_settings_bucket_size();
+        this$.settings_help = this$._bool_to_string(state.get_settings_help());
         this$.settings_ice_servers = state.get_settings_ice_servers();
         this$.settings_max_pending_segments = state.get_settings_max_pending_segments();
         this$.settings_number_of_intermediate_nodes = state.get_settings_number_of_intermediate_nodes();
@@ -81,6 +86,8 @@
           this$.settings_bootstrap_nodes = settings_bootstrap_nodes;
         }).on('settings_bucket_size_changed', function(settings_bucket_size){
           this$.settings_bucket_size = settings_bucket_size;
+        }).on('settings_help_changed', function(new_settings_help){
+          new_settings_help = this$._bool_to_string(new_settings_help);
         }).on('settings_ice_servers_changed', function(settings_ice_servers){
           this$.settings_ice_servers = settings_ice_servers;
         }).on('settings_max_pending_segments_changed', function(settings_max_pending_segments){
@@ -160,6 +167,17 @@
     _help_settings_bucket_size: function(){
       var content;
       content = "<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>\n<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>\nDo not change this setting unless you know what you're doing.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_help_changed: function(){
+      if (this.settings_help !== this._bool_to_string(this._state_instance.get_settings_help())) {
+        this._state_instance.set_settings_help(this.settings_help === '1');
+        csw.functions.notify('Saved changes to help setting', 'success', 'right', 3);
+      }
+    },
+    _help_settings_help: function(){
+      var content;
+      content = "<p>Help buttons, one of which you've just clicked, are useful when you just started using Detox Chat, but may annoy later.<br>\nUse this option to hide them if needed.</p>";
       csw.functions.simple_modal(content);
     },
     _settings_ice_servers_changed: function(settings_ice_servers){

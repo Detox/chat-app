@@ -7,6 +7,7 @@ Polymer(
 	is			: 'detox-chat-app-sidebar-settings'
 	behaviors	: [
 		detox-chat-app.behaviors.state
+		detox-chat-app.behaviors.help
 	]
 	properties	:
 		settings_announce						:
@@ -22,6 +23,9 @@ Polymer(
 		settings_bucket_size					:
 			observer	: '_settings_bucket_size_changed'
 			type		: Number
+		settings_help							:
+			observer	: '_settings_help_changed'
+			type		: String
 		settings_ice_servers					:
 			observer	: '_settings_ice_servers_changed'
 			type		: Object
@@ -52,6 +56,7 @@ Polymer(
 		@settings_block_contact_requests_for	= state.get_settings_block_contact_requests_for() / 60 / 60 / 24 # In days
 		@settings_bootstrap_nodes				= state.get_settings_bootstrap_nodes()
 		@settings_bucket_size					= state.get_settings_bucket_size()
+		@settings_help							= @_bool_to_string(state.get_settings_help())
 		@settings_ice_servers					= state.get_settings_ice_servers()
 		@settings_max_pending_segments			= state.get_settings_max_pending_segments()
 		@settings_number_of_intermediate_nodes	= state.get_settings_number_of_intermediate_nodes()
@@ -68,6 +73,9 @@ Polymer(
 			)
 			.on('settings_bootstrap_nodes_changed', (@settings_bootstrap_nodes) !~>)
 			.on('settings_bucket_size_changed', (@settings_bucket_size) !~>)
+			.on('settings_help_changed', (new_settings_help) !~>
+				new_settings_help	= @_bool_to_string(new_settings_help)
+			)
 			.on('settings_ice_servers_changed', (@settings_ice_servers) !~>)
 			.on('settings_max_pending_segments_changed', (@settings_max_pending_segments) !~>)
 			.on('settings_number_of_intermediate_nodes_changed', (@settings_number_of_intermediate_nodes) !~>)
@@ -132,6 +140,16 @@ Polymer(
 			<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>
 			<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>
 			Do not change this setting unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_help_changed : !->
+		if @settings_help != @_bool_to_string(@_state_instance.get_settings_help())
+			@_state_instance.set_settings_help(@settings_help == '1')
+			csw.functions.notify('Saved changes to help setting', 'success', 'right', 3)
+	_help_settings_help : !->
+		content	= """
+			<p>Help buttons, one of which you've just clicked, are useful when you just started using Detox Chat, but may annoy later.<br>
+			Use this option to hide them if needed.</p>
 		"""
 		csw.functions.simple_modal(content)
 	_settings_ice_servers_changed : (settings_ice_servers) !->

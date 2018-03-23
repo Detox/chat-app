@@ -10,7 +10,7 @@ dom-module(id="detox-chat-app-sidebar-profile")
 				h3
 					div Secrets
 					csw-icon(mono icon="plus" on-click="_add_secret" tooltip="Add secret")
-					csw-icon(mono icon="question" on-click="_help" tooltip="What are secrets?")
+					csw-icon(mono icon="question" on-click="_help" tooltip="What are secrets?" hidden="[[!help]]")
 		csw-form.add-secret(hidden="[[!add_secret]]"): form
 			label Secret name:
 			csw-input-text: input(type="text" value="{{new_secret_name}}")

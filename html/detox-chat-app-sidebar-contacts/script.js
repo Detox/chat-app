@@ -7,7 +7,7 @@
 (function(){
   Polymer({
     is: 'detox-chat-app-sidebar-contacts',
-    behaviors: [detoxChatApp.behaviors.state],
+    behaviors: [detoxChatApp.behaviors.state, detoxChatApp.behaviors.help],
     properties: {
       add_contact: {
         type: Boolean,

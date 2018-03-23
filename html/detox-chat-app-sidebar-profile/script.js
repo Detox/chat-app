@@ -7,7 +7,7 @@
 (function(){
   Polymer({
     is: 'detox-chat-app-sidebar-profile',
-    behaviors: [detoxChatApp.behaviors.state],
+    behaviors: [detoxChatApp.behaviors.state, detoxChatApp.behaviors.help],
     properties: {
       add_secret: {
         type: Boolean,
