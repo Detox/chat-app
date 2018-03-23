@@ -907,7 +907,7 @@
     return {
       'Contact': Contact,
       'ContactRequest': ContactRequest,
-      'ContactRequestBlocked': ContactRequest,
+      'ContactRequestBlocked': ContactRequestBlocked,
       'Message': Message,
       'Secret': Secret,
       'State': State

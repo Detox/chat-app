@@ -781,7 +781,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 	{
 		'Contact'				: Contact
 		'ContactRequest'		: ContactRequest
-		'ContactRequestBlocked'	: ContactRequest
+		'ContactRequestBlocked'	: ContactRequestBlocked
 		'Message'				: Message
 		'Secret'				: Secret
 		'State'					: State
