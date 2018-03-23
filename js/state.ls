@@ -480,7 +480,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				return
 			nickname	= nickname.trim()
 			if !nickname
-				nickname = id_encode(contact_id)
+				nickname = id_encode(contact_id, new Uint8Array(0))
 			new_contact	= Contact([contact_id, nickname, 0, 0, remote_secret, null, null])
 			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_added', new_contact)
@@ -510,7 +510,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_contact_nickname' : (contact_id, nickname) !->
 			if !nickname
-				nickname = id_encode(contact_id)
+				nickname = id_encode(contact_id, new Uint8Array(0))
 			@_set_contact(contact_id, {
 				'nickname'	: nickname
 			})
@@ -582,7 +582,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		'add_contact_request' : (contact_id, secret_name) !->
 			if @_state['contacts_requests'].has(contact_id)
 				return
-			new_contact_request	= ContactRequest([contact_id, id_encode(contact_id), secret_name])
+			new_contact_request	= ContactRequest([contact_id, id_encode(contact_id, new Uint8Array(0)), secret_name])
 			@_state['contacts_requests'].set(contact_id, new_contact_request)
 			@'fire'('contact_request_added', new_contact_request)
 			@'fire'('contacts_requests_changed')

@@ -535,7 +535,7 @@
         }
         nickname = nickname.trim();
         if (!nickname) {
-          nickname = id_encode(contact_id);
+          nickname = id_encode(contact_id, new Uint8Array(0));
         }
         new_contact = Contact([contact_id, nickname, 0, 0, remote_secret, null, null]);
         this._state['contacts'].set(contact_id, new_contact);
@@ -573,7 +573,7 @@
        */,
       'set_contact_nickname': function(contact_id, nickname){
         if (!nickname) {
-          nickname = id_encode(contact_id);
+          nickname = id_encode(contact_id, new Uint8Array(0));
         }
         this._set_contact(contact_id, {
           'nickname': nickname
@@ -661,7 +661,7 @@
         if (this._state['contacts_requests'].has(contact_id)) {
           return;
         }
-        new_contact_request = ContactRequest([contact_id, id_encode(contact_id), secret_name]);
+        new_contact_request = ContactRequest([contact_id, id_encode(contact_id, new Uint8Array(0)), secret_name]);
         this._state['contacts_requests'].set(contact_id, new_contact_request);
         this['fire']('contact_request_added', new_contact_request);
         this['fire']('contacts_requests_changed');
