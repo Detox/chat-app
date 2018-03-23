@@ -152,7 +152,7 @@
         }
         return results$;
       }.call(this)));
-      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([0, true, +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.']), Message([1, false, +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])]);
+      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([1, true, +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.']), Message([2, false, +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])]);
       for (i$ = 0, len$ = (ref$ = Array.from(this._state['contacts'].keys())).length; i$ < len$; ++i$) {
         contact_id = ref$[i$];
         this._update_contact_with_pending_messages(contact_id);
@@ -799,7 +799,7 @@
           this._local_state.messages.set(contact_id, []);
         }
         messages = this._local_state.messages.get(contact_id);
-        id = messages.length ? messages[messages.length - 1]['id'] + 1 : 0;
+        id = messages.length ? messages[messages.length - 1]['id'] + 1 : 1;
         message = Message([id, from, date_written, date_sent, text]);
         messages.push(message);
         if (from) {
@@ -808,9 +808,7 @@
             this._update_contact_with_unread_messages(contact_id);
           }
         } else {
-          if (!this['has_online_contact'](contact_id)) {
-            this._update_contact_with_pending_messages(contact_id);
-          }
+          this._update_contact_with_pending_messages(contact_id);
         }
         this['fire']('contact_message_added', contact_id, message);
         this['fire']('contact_messages_changed', contact_id);

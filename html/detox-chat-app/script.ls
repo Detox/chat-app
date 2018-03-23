@@ -188,7 +188,7 @@ Polymer(
 						last_message_received = old_message
 						break
 				# `date_sent` always increases, `date_written` never decreases
-				if last_message_received && (last_message_received.date_sent <= date_sent || last_message_received.date_written < date_written)
+				if last_message_received && (last_message_received.date_sent > date_sent || last_message_received.date_written >= date_written)
 					return
 				state.add_contact_message(contact_id, true, date_written, date_sent, text_message)
 			)

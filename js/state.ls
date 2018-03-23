@@ -164,8 +164,8 @@ function Wrapper (detox-utils, async-eventer)
 		@_local_state.messages.set(
 			Array.from(@_state['contacts'].keys())[0],
 			[
-				Message([0, true, +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])
-				Message([1, false, +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])
+				Message([1, true, +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])
+				Message([2, false, +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])
 			]
 		)
 
@@ -691,7 +691,7 @@ function Wrapper (detox-utils, async-eventer)
 			if !@_local_state.messages.has(contact_id)
 				@_local_state.messages.set(contact_id, [])
 			messages	= @_local_state.messages.get(contact_id)
-			id			= if messages.length then messages[* - 1]['id'] + 1 else 0
+			id			= if messages.length then messages[* - 1]['id'] + 1 else 1
 			message		= Message([id, from, date_written, date_sent, text])
 			messages.push(message)
 			if from
@@ -699,8 +699,7 @@ function Wrapper (detox-utils, async-eventer)
 				if !are_arrays_equal(@'get_ui_active_contact'() || new Uint8Array(0), contact_id)
 					@_update_contact_with_unread_messages(contact_id)
 			else
-				if !@'has_online_contact'(contact_id)
-					@_update_contact_with_pending_messages(contact_id)
+				@_update_contact_with_pending_messages(contact_id)
 			@'fire'('contact_message_added', contact_id, message)
 			@'fire'('contact_messages_changed', contact_id)
 			id
