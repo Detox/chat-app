@@ -1,7 +1,13 @@
 {
 	"name"            : "@detox/chat-app",
-	"description"     : "",
-	"keywords"        : [],
+	"description"     : "Reference implementation of Chat application on top of Detox network using Detox Chat protocol",
+	"keywords"        : [
+		"detox",
+		"chat",
+		"anonymous",
+		"distributed",
+		"p2p"
+	],
 	"version"         : "",
 	"homepage"        : "https://github.com/Detox/chat-app",
 	"author"          : "Nazar Mokrynskyi <nazar@mokrynskyi.com>",
