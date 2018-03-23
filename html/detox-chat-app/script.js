@@ -24,7 +24,7 @@
       });
     },
     _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){
-      var are_arrays_equal, timeoutSet, ArrayMap, secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat, this$ = this;
+      var are_arrays_equal, timeoutSet, ArrayMap, secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat, nickname_update, this$ = this;
       are_arrays_equal = detoxUtils.are_arrays_equal;
       timeoutSet = detoxUtils.timeoutSet;
       ArrayMap = detoxUtils.ArrayMap;
@@ -222,6 +222,21 @@
           return;
         }
         send_message(contact_id, message);
+      }).on('nickname_changed', function(new_nickname){
+        if (nickname_update) {
+          clearTimeout(nickname_update);
+        }
+        new_nickname = new_nickname.trim();
+        if (!new_nickname) {
+          return;
+        }
+        nickname_update = timeoutSet(1, function(){
+          var i$, ref$, len$, contact;
+          for (i$ = 0, len$ = (ref$ = state.get_online_contacts()).length; i$ < len$; ++i$) {
+            contact = ref$[i$];
+            chat.nickname(contact, new_nickname);
+          }
+        });
       });
       this._core_instance = core;
       this._chat_instance = chat;

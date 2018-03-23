@@ -205,6 +205,7 @@ Polymer(
 
 				do_reconnect_if_needed(contact_id)
 			)
+		var nickname_update
 		state
 			.on('contact_added', (new_contact) !~>
 				chat.connect_to(new_contact.id, new_contact.remote_secret)
@@ -218,6 +219,18 @@ Polymer(
 					do_reconnect_if_needed(contact_id)
 					return
 				send_message(contact_id, message)
+			)
+			.on('nickname_changed', (new_nickname) !->
+				if nickname_update
+					clearTimeout(nickname_update)
+				new_nickname	= new_nickname.trim()
+				if !new_nickname
+					return
+				# Make sure not to send updated nickname on each typed character
+				nickname_update	:= timeoutSet(1, !->
+					for contact in state.get_online_contacts()
+						chat.nickname(contact, new_nickname)
+				)
 			)
 		@_core_instance	= core
 		@_chat_instance	= chat
