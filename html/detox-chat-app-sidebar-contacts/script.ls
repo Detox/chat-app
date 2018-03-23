@@ -21,8 +21,12 @@ Polymer(
 			value	: []
 		contacts_with_pending_messages	: Object
 		contacts_with_unread_messages	: Object
-		new_contact_id					: String
-		new_contact_name				: String
+		new_contact_id					:
+			type	: String
+			value	: ''
+		new_contact_name				:
+			type	: String
+			value	: ''
 		online_contacts					:
 			type	: Object
 		ui_active_contact				:
@@ -132,10 +136,12 @@ Polymer(
 			state.add_contact(item.id, '', new Uint8Array(0))
 			state.del_contact_request(item.id)
 			modal.close()
+			csw.functions.notify('Contact added', 'success', 'right', 3)
 		)
 		modal.querySelector('#reject').addEventListener('click', !->
 			state.del_contact_request(item.id)
 			modal.close()
+			csw.functions.notify('Contact request rejected', 'warning', 'right', 3)
 		)
 		modal.querySelector('#cancel').addEventListener('click', !->
 			modal.close()

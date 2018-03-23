@@ -16,6 +16,22 @@
       announced: {
         type: Boolean,
         value: false
+      },
+      connected_nodes_count: {
+        type: Number,
+        value: 0
+      },
+      aware_of_nodes_count: {
+        type: Number,
+        value: 0
+      },
+      routing_paths_count: {
+        type: Number,
+        value: 0
+      },
+      application_connections_count: {
+        type: Number,
+        value: 0
       }
     },
     ready: function(){
@@ -27,21 +43,29 @@
           this$.online = new_online;
         }).on('announced_changed', function(new_announced){
           this$.announced = new_announced;
+        }).on('connected_nodes_count_changed', function(connected_nodes_count){
+          this$.connected_nodes_count = connected_nodes_count;
+        }).on('aware_of_nodes_count_changed', function(aware_of_nodes_count){
+          this$.aware_of_nodes_count = aware_of_nodes_count;
+        }).on('routing_paths_count_changed', function(routing_paths_count){
+          this$.routing_paths_count = routing_paths_count;
+        }).on('application_connections_count_changed', function(application_connections_count){
+          this$.application_connections_count = application_connections_count;
         });
       });
     },
     _online: function(online){
       if (online) {
-        return 'Online';
+        return 'online';
       } else {
-        return 'Offline';
+        return 'offline';
       }
     },
     _announced: function(announced){
       if (announced) {
-        return 'Yes';
+        return 'announced';
       } else {
-        return 'No';
+        return 'not announced';
       }
     }
   });

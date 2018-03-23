@@ -100,6 +100,18 @@ Polymer(
 				for contact in state.get_contacts()
 					do_reconnect_if_needed(contact.id)
 			)
+			.on('connected_nodes_count', (count) !->
+				state.set_connected_nodes_count(count)
+			)
+			.on('aware_of_nodes_count', (count) !->
+				state.set_aware_of_nodes_count(count)
+			)
+			.on('routing_paths_count', (count) !->
+				state.set_routing_paths_count(count)
+			)
+			.on('application_connections_count', (count) !->
+				state.set_application_connections_count(count)
+			)
 		chat
 			.once('announced', !->
 				state.set_announced(true)
@@ -115,6 +127,7 @@ Polymer(
 							..set(local_secret.secret)
 						if are_arrays_equal(secret, padded_secret)
 							state.add_contact_request(contact_id, local_secret.name)
+							csw.functions.notify('Incoming contact request received', 'warning', 'right', 3)
 							break
 					false
 				else if (

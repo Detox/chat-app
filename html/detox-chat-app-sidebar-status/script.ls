@@ -9,12 +9,24 @@ Polymer(
 		detox-chat-app.behaviors.state
 	]
 	properties	:
-		online		:
+		online							:
 			type	: Boolean
 			value	: false
-		announced	:
+		announced						:
 			type	: Boolean
 			value	: false
+		connected_nodes_count			:
+			type	: Number
+			value	: 0
+		aware_of_nodes_count			:
+			type	: Number
+			value	: 0
+		routing_paths_count				:
+			type	: Number
+			value	: 0
+		application_connections_count	:
+			type	: Number
+			value	: 0
 	ready : !->
 		<~! @_state_instance_ready.then
 		state	= @_state_instance
@@ -25,14 +37,18 @@ Polymer(
 			.on('announced_changed', (new_announced) !~>
 				@announced	= new_announced
 			)
+			.on('connected_nodes_count_changed', (@connected_nodes_count) !~>)
+			.on('aware_of_nodes_count_changed', (@aware_of_nodes_count) !~>)
+			.on('routing_paths_count_changed', (@routing_paths_count) !~>)
+			.on('application_connections_count_changed', (@application_connections_count) !~>)
 	_online : (online) ->
 		if online
-			'Online'
+			'online'
 		else
-			'Offline'
+			'offline'
 	_announced : (announced) ->
 		if announced
-			'Yes'
+			'announced'
 		else
-			'No'
+			'not announced'
 )

@@ -56,6 +56,10 @@ function Wrapper (detox-utils, async-eventer)
 		@_local_state =
 			online							: false
 			announced						: false
+			connected_nodes_count			: 0
+			aware_of_nodes_count			: 0
+			routing_paths_count				: 0
+			application_connections_count	: 0
 			messages						: ArrayMap()
 			ui								:
 				active_contact	: null
@@ -240,6 +244,50 @@ function Wrapper (detox-utils, async-eventer)
 			new_announced			= !!announced
 			@_local_state.announced	= new_announced
 			@'fire'('announced_changed', new_announced, old_announced)
+		/**
+		 * @return {number}
+		 */
+		'get_connected_nodes_count' : ->
+			@_local_state.connected_nodes_count
+		/**
+		 * @param {number} count
+		 */
+		'set_connected_nodes_count' : (count) !->
+			@_local_state.connected_nodes_count	= count
+			@'fire'('connected_nodes_count_changed', count)
+		/**
+		 * @return {number}
+		 */
+		'get_aware_of_nodes_count' : ->
+			@_local_state.aware_of_nodes_count
+		/**
+		 * @param {number} count
+		 */
+		'set_aware_of_nodes_count' : (count) !->
+			@_local_state.aware_of_nodes_count	= count
+			@'fire'('aware_of_nodes_count_changed', count)
+		/**
+		 * @return {number}
+		 */
+		'get_routing_paths_count' : ->
+			@_local_state.routing_paths_count
+		/**
+		 * @param {number} count
+		 */
+		'set_routing_paths_count' : (count) !->
+			@_local_state.routing_paths_count	= count
+			@'fire'('routing_paths_count_changed', count)
+		/**
+		 * @return {number}
+		 */
+		'get_application_connections_count' : ->
+			@_local_state.application_connections_count
+		/**
+		 * @param {number} count
+		 */
+		'set_application_connections_count' : (count) !->
+			@_local_state.application_connections_count	= count
+			@'fire'('application_connections_count_changed', count)
 		/**
 		 * @return {Uint8Array}
 		 */
@@ -560,7 +608,7 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'has_contact_request_blocked' : (contact_id) ->
 			contact_request_blocked	= @_state['contacts_requests_blocked'].get(contact_id)
-			if contacts_requests_blocked && contact_request_blocked.blocked_until > +(new Date)
+			if contact_request_blocked && contact_request_blocked.blocked_until > +(new Date)
 				true
 			else
 				@_state['contacts_requests_blocked'].delete(contact_id)
@@ -594,7 +642,7 @@ function Wrapper (detox-utils, async-eventer)
 		 * @param {!Uint8Array} contact_id
 		 */
 		_update_contact_with_pending_messages : (contact_id) !->
-			for message in @'get_contact_messages'(contact_id)
+			for message in @'get_contact_messages'(contact_id) by -1
 				if !message['from'] && !message['date_sent']
 					if !@_local_state.contacts_with_pending_messages.has(contact_id)
 						@_local_state.contacts_with_pending_messages.add(contact_id)
@@ -629,7 +677,7 @@ function Wrapper (detox-utils, async-eventer)
 		 */
 		'get_contact_messages_to_be_sent' : (contact_id) ->
 			@'get_contact_messages'(contact_id).filter (message) ->
-				!message['date_sent']
+				!message['from'] && !message['date_sent']
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {boolean}		from			`true` if message was received and `false` if sent to a friend
@@ -648,7 +696,7 @@ function Wrapper (detox-utils, async-eventer)
 			messages.push(message)
 			if from
 				@_update_contact_last_active(contact_id)
-				if !are_arrays_equal(@'get_ui_active_contact'(), contact_id)
+				if !are_arrays_equal(@'get_ui_active_contact'() || new Uint8Array(0), contact_id)
 					@_update_contact_with_unread_messages(contact_id)
 			else
 				if !@'has_online_contact'(contact_id)
@@ -667,7 +715,7 @@ function Wrapper (detox-utils, async-eventer)
 				if message['id'] == message_id
 					message['date_sent']	= date
 					@_update_contact_with_pending_messages(contact_id)
-					# TODO: Fire an event?
+					@'fire'('contact_messages_changed', contact_id)
 					break
 		/**
 		 * @return {!Array<!Object>}

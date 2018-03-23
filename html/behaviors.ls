@@ -25,7 +25,5 @@ window.{}detox-chat-app.{}behaviors
 		created : !->
 			@_state_instance_ready.then !~>
 				@help	= @_state_instance.get_settings_help()
-				@_state_instance.on('settings_help_changed', (@help) !~>
-					console.log 'x'
-				)
+				@_state_instance.on('settings_help_changed', (@help) !~>)
 	]

@@ -60,6 +60,10 @@
       this._local_state = {
         online: false,
         announced: false,
+        connected_nodes_count: 0,
+        aware_of_nodes_count: 0,
+        routing_paths_count: 0,
+        application_connections_count: 0,
         messages: ArrayMap(),
         ui: {
           active_contact: null
@@ -240,6 +244,58 @@
         new_announced = !!announced;
         this._local_state.announced = new_announced;
         this['fire']('announced_changed', new_announced, old_announced);
+      }
+      /**
+       * @return {number}
+       */,
+      'get_connected_nodes_count': function(){
+        return this._local_state.connected_nodes_count;
+      }
+      /**
+       * @param {number} count
+       */,
+      'set_connected_nodes_count': function(count){
+        this._local_state.connected_nodes_count = count;
+        this['fire']('connected_nodes_count_changed', count);
+      }
+      /**
+       * @return {number}
+       */,
+      'get_aware_of_nodes_count': function(){
+        return this._local_state.aware_of_nodes_count;
+      }
+      /**
+       * @param {number} count
+       */,
+      'set_aware_of_nodes_count': function(count){
+        this._local_state.aware_of_nodes_count = count;
+        this['fire']('aware_of_nodes_count_changed', count);
+      }
+      /**
+       * @return {number}
+       */,
+      'get_routing_paths_count': function(){
+        return this._local_state.routing_paths_count;
+      }
+      /**
+       * @param {number} count
+       */,
+      'set_routing_paths_count': function(count){
+        this._local_state.routing_paths_count = count;
+        this['fire']('routing_paths_count_changed', count);
+      }
+      /**
+       * @return {number}
+       */,
+      'get_application_connections_count': function(){
+        return this._local_state.application_connections_count;
+      }
+      /**
+       * @param {number} count
+       */,
+      'set_application_connections_count': function(count){
+        this._local_state.application_connections_count = count;
+        this['fire']('application_connections_count_changed', count);
       }
       /**
        * @return {Uint8Array}
@@ -637,7 +693,7 @@
       'has_contact_request_blocked': function(contact_id){
         var contact_request_blocked;
         contact_request_blocked = this._state['contacts_requests_blocked'].get(contact_id);
-        if (contacts_requests_blocked && contact_request_blocked.blocked_until > +new Date) {
+        if (contact_request_blocked && contact_request_blocked.blocked_until > +new Date) {
           return true;
         } else {
           return this._state['contacts_requests_blocked']['delete'](contact_id);
@@ -677,8 +733,8 @@
        * @param {!Uint8Array} contact_id
        */,
       _update_contact_with_pending_messages: function(contact_id){
-        var i$, ref$, len$, message;
-        for (i$ = 0, len$ = (ref$ = this['get_contact_messages'](contact_id)).length; i$ < len$; ++i$) {
+        var i$, ref$, message;
+        for (i$ = (ref$ = this['get_contact_messages'](contact_id)).length - 1; i$ >= 0; --i$) {
           message = ref$[i$];
           if (!message['from'] && !message['date_sent']) {
             if (!this._local_state.contacts_with_pending_messages.has(contact_id)) {
@@ -725,7 +781,7 @@
        */,
       'get_contact_messages_to_be_sent': function(contact_id){
         return this['get_contact_messages'](contact_id).filter(function(message){
-          return !message['date_sent'];
+          return !message['from'] && !message['date_sent'];
         });
       }
       /**
@@ -748,7 +804,7 @@
         messages.push(message);
         if (from) {
           this._update_contact_last_active(contact_id);
-          if (!are_arrays_equal(this['get_ui_active_contact'](), contact_id)) {
+          if (!are_arrays_equal(this['get_ui_active_contact']() || new Uint8Array(0), contact_id)) {
             this._update_contact_with_unread_messages(contact_id);
           }
         } else {
@@ -773,6 +829,7 @@
           if (message['id'] === message_id) {
             message['date_sent'] = date;
             this._update_contact_with_pending_messages(contact_id);
+            this['fire']('contact_messages_changed', contact_id);
             break;
           }
         }

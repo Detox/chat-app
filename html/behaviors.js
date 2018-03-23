@@ -39,7 +39,6 @@
           this$.help = this$._state_instance.get_settings_help();
           this$._state_instance.on('settings_help_changed', function(help){
             this$.help = help;
-            console.log('x');
           });
         });
       }
