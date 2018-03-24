@@ -31,9 +31,13 @@ const SOURCE_FILE	= 'html/index.html'
 const MINIFIED_FILE	= 'html/index.min.html'
 const MINIFIED_DIR	= 'html'
 
+# TODO: Place everything into `dist`
 gulp
-	.task('build', ['minify-html', 'minify-js', 'build-index'])
-	.task('minify-html', ['bundle-webcomponents'], ->
+	.task('dist', ['dist-css', 'dist-html', 'dist-js', 'dist-index'])
+	.task('dist-css', !->
+		# TODO: Minify css/* files
+	)
+	.task('dist-html', ['bundle-webcomponents'], ->
 		gulp.src('html/index.min.html')
 			.pipe(htmlmin(
 				decodeEntities				: true
@@ -63,9 +67,9 @@ gulp
 			callback(error)
 		)
 	)
-	.task('minify-js', !->
+	.task('dist-js', !->
 		# TODO: Minify js/* files and potentially RequireJS modules in future
 	)
-	.task('build-index', !->
+	.task('dist-index', !->
 		# TODO: Build production index.html that will consume minified versions of everything
 	)

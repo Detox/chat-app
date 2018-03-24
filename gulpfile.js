@@ -37,7 +37,7 @@
   SOURCE_FILE = 'html/index.html';
   MINIFIED_FILE = 'html/index.min.html';
   MINIFIED_DIR = 'html';
-  gulp.task('build', ['minify-html', 'minify-js', 'build-index']).task('minify-html', ['bundle-webcomponents'], function(){
+  gulp.task('dist', ['dist-css', 'dist-html', 'dist-js', 'dist-index']).task('dist-css', function(){}).task('dist-html', ['bundle-webcomponents'], function(){
     return gulp.src('html/index.min.html').pipe(htmlmin({
       decodeEntities: true,
       minifyCSS: minifyCss,
@@ -62,5 +62,5 @@
       fs.writeFileSync(MINIFIED_FILE, code);
       callback(error);
     });
-  }).task('minify-js', function(){}).task('build-index', function(){});
+  }).task('dist-js', function(){}).task('dist-index', function(){});
 }).call(this);
