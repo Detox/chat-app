@@ -52,26 +52,12 @@ csw-group {
 	display : block;
 
 	.contact-item {
-		align-items           : center;
-		background-color      : var(--background-color-interactive);
-		cursor                : pointer;
-		display               : flex;
-		padding               : var(--block-padding);
-		width                 : calc(100% - var(--block-padding));
-
-		--corner-bottom-left  : 45deg;
-		--corner-bottom-right : 315deg;
-		--corner-end          : 6%;
-		--corner-start        : 2%;
-		--corner-top-left     : 135deg;
-		--corner-top-right    : 225deg;
-		--online-color        : rgba(0, 255, 0, 0.5);
-		--online-corner       : linear-gradient(var(--corner-top-left), var(--online-color) var(--corner-start), transparent var(--corner-end));
-		--unread-color        : rgba(255, 255, 0, 0.5);
-		--unread-corner       : linear-gradient(var(--corner-top-right), var(--unread-color) var(--corner-start), transparent var(--corner-end));
-		--pending-corner      : linear-gradient(var(--corner-bottom-right), var(--unread-color) var(--corner-start), transparent var(--corner-end));
-		--unconfirmed-color   : rgb(128, 128, 128, 0.5);
-		--unconfirmed-corner  : linear-gradient(var(--corner-bottom-left), var(--unconfirmed-color) var(--corner-start), transparent var(--corner-end));
+		align-items      : center;
+		background-color : var(--background-color-interactive);
+		cursor           : pointer;
+		display          : flex;
+		padding          : var(--block-padding);
+		width            : calc(100% - var(--block-padding));
 
 		&:nth-of-type(n+2) {
 			border-top : var(--border-base);
@@ -91,39 +77,39 @@ csw-group {
 		}
 
 		&[unconfirmed] {
-			background-image : var(--unconfirmed-corner);
+			background-image : var(--sidebar-contact-unconfirmed-corner);
 		}
 
 		&[unconfirmed][pending] {
-			background-image : var(--unconfirmed-corner), var(--pending-corner);
+			background-image : var(--sidebar-contact-unconfirmed-corner), var(--sidebar-contact-pending-corner);
 		}
 
 		&[online] {
-			background-image : var(--online-corner);
+			background-image : var(--sidebar-contact-online-corner);
 		}
 
 		&[online][unread] {
-			background-image : var(--online-corner), var(--unread-corner);
+			background-image : var(--sidebar-contact-online-corner), var(--sidebar-contact-unread-corner);
 		}
 
 		&[online][pending] {
-			background-image : var(--online-corner), var(--pending-corner);
+			background-image : var(--sidebar-contact-online-corner), var(--sidebar-contact-pending-corner);
 		}
 
 		&[online][unread][pending] {
-			background-image : var(--online-corner), var(--unread-corner), var(--pending-corner);
+			background-image : var(--sidebar-contact-online-corner), var(--sidebar-contact-unread-corner), var(--sidebar-contact-pending-corner);
 		}
 
 		&[unread] {
-			background-image : var(--unread-corner);
+			background-image : var(--sidebar-contact-unread-corner);
 		}
 
 		&[unread][pending] {
-			background-image : var(--unread-corner), var(--pending-corner);
+			background-image : var(--sidebar-contact-unread-corner), var(--sidebar-contact-pending-corner);
 		}
 
 		&[pending] {
-			background-image : var(--pending-corner);
+			background-image : var(--sidebar-contact-pending-corner);
 		}
 
 		.nickname {

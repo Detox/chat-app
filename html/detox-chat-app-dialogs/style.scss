@@ -11,10 +11,10 @@
 }
 
 #contact-details {
-	height        : 2.5em;
+	height        : var(--form-element-height);
 	background    : var(--background-sidebar);
 	border-bottom : var(--border-base);
-	line-height   : 2.5em;
+	line-height   : var(--form-element-height);
 	padding       : 0 var(--block-padding);
 }
 
@@ -62,7 +62,7 @@
 		.message-content {
 			background    : var(--background-color-highlight);
 			border-radius : var(--block-padding) var(--block-padding) var(--block-padding) 0;
-			max-width     : 70%;
+			max-width     : var(--dialog-message-content-width-max);
 			padding       : var(--block-padding);
 			word-break    : break-word;
 		}

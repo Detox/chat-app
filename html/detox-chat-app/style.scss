@@ -5,9 +5,7 @@
  */
 :host {
 	display  : flex;
-	height   : 100vh;
 	overflow : hidden;
-	width    : 100vw;
 }
 
 #sidebar {
@@ -15,10 +13,10 @@
 	border-right   : var(--border-base);
 	color          : var(--text-color-base);
 	display        : flex;
-	flex-basis     : 20%;
+	flex-basis     : var(--sidebar-width-base);
 	flex-direction : column;
-	max-width      : 420px;
-	min-width      : 300px;
+	max-width      : var(--sidebar-width-max);
+	min-width      : var(--sidebar-width-min);
 
 	csw-tabs,
 	detox-chat-sidebar-status {
@@ -43,6 +41,6 @@
 }
 
 detox-chat-app-dialogs {
-	flex-basis : 80%;
+	flex-basis : calc(100% - var(--sidebar-width-base));
 	flex-grow  : 1;
 }

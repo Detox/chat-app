@@ -59,10 +59,6 @@ html {
 	--form-element-padding                     : var(--form-element-padding-vertical) var(--form-element-padding-horizontal);
 	--form-element-width                       : 100%;
 
-	/* Form-specific styles */
-
-	--form-legend-border                       : .1em solid #ddd;
-
 	/* Button-specific styles */
 
 	--button-color                             : var(--text-color-base);
@@ -97,6 +93,7 @@ html {
 	--modal-content-background                 : #161616;
 	--modal-content-padding                    : 2em;
 	--modal-content-translate                  : 10vh;
+	--modal-overlay-opacity                    : .95;
 
 	/* Tooltip-specific styles */
 
@@ -116,9 +113,26 @@ html {
 	--notify-translate                         : 50vh;
 	--notify-content-padding                   : var(--block-padding) 2.5em var(--block-padding) var(--block-padding);
 
-	/* Dropdown-specific styles */
+	--sidebar-width-min                        : 300px;
+	--sidebar-width-max                        : 420px;
+	--sidebar-width-base                       : 20%;
 
-	--dropdown-translate                       : 1em;
+	--sidebar-contact-corner-bottom-left       : 45deg;
+	--sidebar-contact-corner-bottom-right      : 315deg;
+	--sidebar-contact-corner-end               : 6%;
+	--sidebar-contact-corner-start             : 2%;
+	--sidebar-contact-corner-top-left          : 135deg;
+	--sidebar-contact-corner-top-right         : 225deg;
+	--sidebar-contact-online-color             : rgba(0, 255, 0, 0.5);
+	--sidebar-contact-online-corner            : linear-gradient(var(--sidebar-contact-corner-top-left), var(--sidebar-contact-online-color) var(--sidebar-contact-corner-start), transparent var(--sidebar-contact-corner-end));
+	--sidebar-contact-unread-color             : rgba(255, 255, 0, 0.5);
+	--sidebar-contact-unread-corner            : linear-gradient(var(--sidebar-contact-corner-top-right), var(--sidebar-contact-unread-color) var(--sidebar-contact-corner-start), transparent var(--sidebar-contact-corner-end));
+	--sidebar-contact-pending-color            : var(--sidebar-contact-unread-color);
+	--sidebar-contact-pending-corner           : linear-gradient(var(--sidebar-contact-corner-bottom-right), var(--sidebar-contact-pending-color) var(--sidebar-contact-corner-start), transparent var(--sidebar-contact-corner-end));
+	--sidebar-contact-unconfirmed-color        : rgb(128, 128, 128, 0.5);
+	--sidebar-contact-unconfirmed-corner       : linear-gradient(var(--sidebar-contact-corner-bottom-left), var(--sidebar-contact-unconfirmed-color) var(--sidebar-contact-corner-start), transparent var(--sidebar-contact-corner-end));
+
+	--dialog-message-content-width-max         : 70%;
 }
 
 /**
@@ -136,8 +150,13 @@ html {
 	font-family     : var(--font-family-base);
 	font-size       : var(--font-size-base);
 	line-height     : 1.2;
-}
 
-body {
-	margin : 0;
+	body {
+		margin : 0;
+
+		detox-chat-app {
+			height : 100vh;
+			width  : 100vw;
+		}
+	}
 }
