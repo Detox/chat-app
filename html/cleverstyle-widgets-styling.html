@@ -12,12 +12,6 @@
 
 		/* Form */
 
-		--csw-form-legend: {
-			border-bottom : var(--form-legend-border);
-			font-size     : 1.4em;
-			margin-bottom : var(--block-padding);
-		};
-
 		--csw-form-label: {
 			font-weight   : bold;
 			margin-bottom : var(--block-padding);
@@ -164,32 +158,6 @@
 
 		--csw-label-button: {
 			padding : var(--form-element-padding);
-		};
-
-		/* Label switcher */
-
-		--csw-label-switcher: {
-			cursor  : pointer;
-			height  : var(--form-element-height);
-			padding : var(--form-element-padding);
-		};
-
-		--csw-label-switcher-icon: {
-			font-size : 1.2em;
-			opacity   : .1;
-		};
-
-		--csw-label-switcher-hover-icon: {
-			opacity : .2;
-		};
-
-		--csw-label-switcher-focus-icon: {
-			box-shadow : var(--form-element-box-shadow), var(--form-element-inner-box-shadow);
-			opacity    : .8;
-		};
-
-		--csw-label-switcher-active-icon: {
-			opacity : 1 !important;
 		};
 
 		/* Modal */
@@ -389,60 +357,6 @@
 		--csw-notify-show: {
 			transform  : translateY(0);
 			transition : all var(--notify-transition-duration) cubic-bezier(0.39, 0.58, 0.57, 1); /* Out - Sine */
-		};
-
-		/* Progress */
-
-		--csw-progress: {
-			padding : 0;
-			width   : var(--form-element-width);
-		};
-
-		--csw-progress-text: {
-			color         : var(--text-color-base);
-		};
-
-		--csw-progress-bar: {
-			padding    : 0;
-			transition : width var(--transition-duration-short) ease-out;
-		};
-
-		--csw-progress-primary: {
-		};
-
-		--csw-progress-text-primary: {
-			color : var(--button-text-color-primary);
-		};
-
-		--csw-progress-bar-primary: {
-		};
-
-		/* Dropdown */
-
-		--csw-dropdown: {
-			display    : block;
-			margin-top : var(--dropdown-translate);
-			opacity    : 0;
-			transform  : scale(0);
-			transition : margin-top var(--transition-duration), opacity var(--transition-duration), transform 0s var(--transition-duration);
-		};
-
-		--csw-dropdown-open: {
-			margin-top : 0;
-			opacity    : 1;
-			transform  : scale(1);
-			transition : margin-top var(--transition-duration), opacity var(--transition-duration);
-		};
-
-		--csw-dropdown-content: {
-			background : var(--background-color-element);
-			padding    : var(--tooltip-padding);
-		};
-
-		--csw-dropdown-content-as-is: {
-			background : transparent;
-			box-shadow : none;
-			padding    : 0;
 		};
 	}
 </style></custom-style>
