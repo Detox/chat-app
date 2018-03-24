@@ -55,6 +55,8 @@ Polymer(
 			@_state_instance.set_nickname(@nickname)
 	_id_click : (e) !->
 		e.target.select()
+		document.execCommand('copy')
+		csw.functions.notify('ID copied to clipboard', 'success', 'right', 3)
 	_add_secret : !->
 		@add_secret	= true
 	_add_secret_confirm : !->

@@ -67,6 +67,8 @@
     },
     _id_click: function(e){
       e.target.select();
+      document.execCommand('copy');
+      csw.functions.notify('ID copied to clipboard', 'success', 'right', 3);
     },
     _add_secret: function(){
       this.add_secret = true;
