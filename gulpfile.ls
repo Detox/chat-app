@@ -14,8 +14,22 @@ const MINIFIED_FILE	= 'html/index.min.html'
 const MINIFIED_DIR	= 'html'
 
 gulp
-	.task('build', ['bundle', 'minify'])
-	.task('bundle', (callback) !->
+	.task('build', ['minify-html', 'minify-js', 'build-index'])
+	.task('minify-html', ['bundle-webcomponents'], ->
+		gulp.src('html/index.min.html')
+			.pipe(htmlmin(
+				decodeEntities				: true
+				minifyCSS					: true
+				minifyJS					: (text) ->
+					result	= minify(text)
+					if result.error
+						console.log(result.error)
+					result.code
+				removeComments				: true
+			))
+			.pipe(gulp.dest('html'))
+	)
+	.task('bundle-webcomponents', (callback) !->
 		command		= "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html #MINIFIED_FILE #SOURCE_FILE"
 		exec(command, (error, stdout, stderr) !->
 			if stdout
@@ -33,17 +47,9 @@ gulp
 			callback(error)
 		)
 	)
-	.task('minify', ['bundle'], ->
-		gulp.src('html/index.min.html')
-			.pipe(htmlmin(
-				decodeEntities				: true
-				minifyCSS					: true
-				minifyJS					: (text) ->
-					result	= minify(text)
-					if result.error
-						console.log(result.error)
-					result.code
-				removeComments				: true
-			))
-			.pipe(gulp.dest('html'))
+	.task('minify-js', !->
+		# TODO: Minify js/* files and potentially RequireJS modules in future
+	)
+	.task('build-index', !->
+		# TODO: Build production index.html that will consume minified versions of everything
 	)

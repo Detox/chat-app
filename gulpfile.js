@@ -14,7 +14,21 @@
   SOURCE_FILE = 'html/index.html';
   MINIFIED_FILE = 'html/index.min.html';
   MINIFIED_DIR = 'html';
-  gulp.task('build', ['bundle', 'minify']).task('bundle', function(callback){
+  gulp.task('build', ['minify-html', 'minify-js', 'build-index']).task('minify-html', ['bundle-webcomponents'], function(){
+    return gulp.src('html/index.min.html').pipe(htmlmin({
+      decodeEntities: true,
+      minifyCSS: true,
+      minifyJS: function(text){
+        var result;
+        result = minify(text);
+        if (result.error) {
+          console.log(result.error);
+        }
+        return result.code;
+      },
+      removeComments: true
+    })).pipe(gulp.dest('html'));
+  }).task('bundle-webcomponents', function(callback){
     var command;
     command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + MINIFIED_FILE + " " + SOURCE_FILE;
     exec(command, function(error, stdout, stderr){
@@ -32,19 +46,5 @@
       fs.writeFileSync(MINIFIED_FILE, code);
       callback(error);
     });
-  }).task('minify', ['bundle'], function(){
-    return gulp.src('html/index.min.html').pipe(htmlmin({
-      decodeEntities: true,
-      minifyCSS: true,
-      minifyJS: function(text){
-        var result;
-        result = minify(text);
-        if (result.error) {
-          console.log(result.error);
-        }
-        return result.code;
-      },
-      removeComments: true
-    })).pipe(gulp.dest('html'));
-  });
+  }).task('minify-js', function(){}).task('build-index', function(){});
 }).call(this);
