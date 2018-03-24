@@ -17,7 +17,11 @@ html {
 	/* Generic colors :: Background */
 
 	--background-color-dialogs                 : #222;
+	--background-image-dialogs                 : url(/img/brick-wall.svg);
+	--background-dialogs                       : var(--background-color-dialogs) var(--background-image-dialogs);
 	--background-color-sidebar                 : #181818;
+	--background-image-sidebar                 : url(/img/cross-stripes.svg);
+	--background-sidebar                       : var(--background-color-sidebar) var(--background-image-sidebar);
 	--background-color-interactive             : #202020;
 	--background-color-highlight               : #333;
 	--background-color-element                 : #181818;
@@ -116,6 +120,7 @@ html {
 
 	--dropdown-translate                       : 1em;
 }
+
 /**
  * The MIT License (MIT)
  * Copyright (c) 2014 Sam Herbert
