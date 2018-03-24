@@ -90,7 +90,6 @@ html {
 	/* Modal-specific styles */
 
 	--modal-blur-radius                        : 1em;
-	--modal-overlay-background                 : rgba(0, 0, 0, .3);
 	--modal-content-background                 : #161616;
 	--modal-content-padding                    : 2em;
 	--modal-content-translate                  : 10vh;
@@ -119,10 +118,11 @@ html {
 }
 
 html {
-	color       : var(--text-color-base);
-	font-family : var(--font-family-base);
-	font-size   : var(--font-size-base);
-	line-height : 1.2;
+	background-color : var(--background-color-dialogs);
+	color            : var(--text-color-base);
+	font-family      : var(--font-family-base);
+	font-size        : var(--font-size-base);
+	line-height      : 1.2;
 }
 
 body {

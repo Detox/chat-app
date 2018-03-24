@@ -205,37 +205,34 @@
 		};
 
 		--csw-modal-open: {
-			align-items     : center;
-			display         : flex;
-			justify-content : center;
-			opacity         : 1;
-			transform       : scale(1);
-			transition      : opacity var(--transition-duration);
-		};
-
-		--csw-modal-body: {
-			transition : filter var(--transition-duration) var(--transition-duration);
-		};
-
-		--csw-modal-body-open: {
-			filter   : blur(var(--modal-blur-radius));
-			overflow : hidden;
+			display    : flex;
+			opacity    : 1;
+			transform  : scale(1);
+			transition : opacity var(--transition-duration);
 		};
 
 		--csw-modal-overlay: {
-			display    : block;
-			background : var(--modal-overlay-background);
+			background  : var(--modal-content-background);
+			display     : block;
+			transition  : opacity var(--transition-duration) var(--transition-duration);
+			opacity     : 0;
+			will-change : opacity;
 		};
 
 		--csw-modal-content: {
 			background          : var(--modal-content-background);
+			border              : var(--border-base);
 			display             : block;
 			opacity             : 0;
 			padding             : var(--modal-content-padding);
 			transform           : translateY(var(--modal-content-translate));
-			transition          : var(--transition-duration) var(--transition-duration-short);
+			transition          : var(--transition-duration);
 			transition-property : opacity, transform;
 			will-change         : opacity, transform;
+		};
+
+		--csw-modal-overlay-open: {
+			opacity : .95;
 		};
 
 		--csw-modal-content-open: {
