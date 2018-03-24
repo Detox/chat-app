@@ -3,9 +3,11 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-requirejs.config(
-	baseUrl		: '/node_modules/'
-	paths		:
+const DEBUG	= 'debug' in location.search.substr(1).split('&') || sessionStorage['debug']
+
+requirejs_config	=
+	'baseUrl'	: '/node_modules/'
+	'paths'		:
 		'@detox/base-x'				: '@detox/base-x/index'
 		'@detox/chat'				: '@detox/chat/src/index'
 		'@detox/core'				: '@detox/core/src/index'
@@ -18,32 +20,41 @@ requirejs.config(
 		'ronion'					: 'ronion/dist/ronion.browser'
 		'pako'						: 'pako/dist/pako'
 		'state'						: '/js/state'
-	packages	: [
+	'packages'	: [
 		{
-			name		: 'aez.wasm',
-			location	: 'aez.wasm',
-			main		: 'src/index'
+			'name'		: 'aez.wasm',
+			'location'	: 'aez.wasm',
+			'main'		: 'src/index'
 		}
 		{
-			name		: 'ed25519-to-x25519.wasm',
-			location	: 'ed25519-to-x25519.wasm',
-			main		: 'src/index'
+			'name'		: 'ed25519-to-x25519.wasm',
+			'location'	: 'ed25519-to-x25519.wasm',
+			'main'		: 'src/index'
 		}
 		{
-			name		: 'noise-c.wasm',
-			location	: 'noise-c.wasm',
-			main		: 'src/index'
+			'name'		: 'noise-c.wasm',
+			'location'	: 'noise-c.wasm',
+			'main'		: 'src/index'
 		}
 		{
-			name		: 'supercop.wasm',
-			location	: 'supercop.wasm',
-			main		: 'src/index'
+			'name'		: 'supercop.wasm',
+			'location'	: 'supercop.wasm',
+			'main'		: 'src/index'
 		}
 	]
-)
+if !DEBUG
+	let paths = requirejs_config['paths']
+		for pkg, main of paths
+			if main.substr(0, 1) != '/'
+				paths[pkg]	+= '.min'
+	let packages = requirejs_config['packages']
+		for pkg in packages
+			pkg['main']	+= '.min'
+
+requirejs['config'](requirejs_config)
 
 ready = new Promise (resolve) !->
-	if window.WebComponents?.ready
+	if window['WebComponents']?['ready']
 		resolve()
 	else
 		window.addEventListener('WebComponentsReady', resolve)
