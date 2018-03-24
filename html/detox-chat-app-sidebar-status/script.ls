@@ -41,8 +41,8 @@ Polymer(
 			.on('aware_of_nodes_count_changed', (@aware_of_nodes_count) !~>)
 			.on('routing_paths_count_changed', (@routing_paths_count) !~>)
 			.on('application_connections_count_changed', (@application_connections_count) !~>)
-	_online : (online) ->
-		if online
+	_online : (online, connected_nodes_count) ->
+		if online && connected_nodes_count
 			'online'
 		else
 			'offline'

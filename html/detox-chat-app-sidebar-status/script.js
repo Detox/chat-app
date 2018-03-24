@@ -54,8 +54,8 @@
         });
       });
     },
-    _online: function(online){
-      if (online) {
+    _online: function(online, connected_nodes_count){
+      if (online && connected_nodes_count) {
         return 'online';
       } else {
         return 'offline';

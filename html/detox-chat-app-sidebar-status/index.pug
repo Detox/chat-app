@@ -1,7 +1,7 @@
 dom-module(id="detox-chat-app-sidebar-status")
 	link(rel="import" href="style.css" type="css")
 	template
-		span Network state: [[_online(online)]]/[[_announced(announced)]]
+		span Network state: [[_online(online, connected_nodes_count)]]/[[_announced(announced)]]
 		span(tooltip="connected nodes/aware of nodes/routing paths/contacts connected")
 			|  [[connected_nodes_count]]/[[aware_of_nodes_count]]/[[routing_paths_count]]/[[application_connections_count]]
 			csw-tooltip
