@@ -5,8 +5,9 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, exec, fs, gulp, htmlmin, uglifyEs, minifyCss, instance, minifyJs, SOURCE_FILE, MINIFIED_FILE, MINIFIED_DIR;
+  var cleanCss, del, exec, fs, gulp, htmlmin, uglifyEs, minifyCss, instance, minifyJs, SOURCE_HTML, DESTINATION, MINIFIED_HTML;
   cleanCss = require('clean-css');
+  del = require('del');
   exec = require('child_process').exec;
   fs = require('fs');
   gulp = require('gulp');
@@ -34,19 +35,21 @@
     }
     return result.code;
   };
-  SOURCE_FILE = 'html/index.html';
-  MINIFIED_FILE = 'html/index.min.html';
-  MINIFIED_DIR = 'html';
-  gulp.task('dist', ['dist-css', 'dist-html', 'dist-js', 'dist-index']).task('dist-css', function(){}).task('dist-html', ['bundle-webcomponents'], function(){
-    return gulp.src('html/index.min.html').pipe(htmlmin({
+  SOURCE_HTML = 'html/index.html';
+  DESTINATION = 'dist';
+  MINIFIED_HTML = 'index.min.html';
+  gulp.task('dist', ['clean', 'dist-css', 'dist-html', 'dist-js', 'dist-index']).task('clean', function(){
+    return del(DESTINATION + "/*");
+  }).task('dist-css', function(){}).task('dist-html', ['bundle-webcomponents'], function(){
+    return gulp.src(DESTINATION + "/" + MINIFIED_HTML).pipe(htmlmin({
       decodeEntities: true,
       minifyCSS: minifyCss,
       minifyJS: minifyJs,
       removeComments: true
-    })).pipe(gulp.dest('html'));
+    })).pipe(gulp.dest(DESTINATION));
   }).task('bundle-webcomponents', function(callback){
     var command;
-    command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + MINIFIED_FILE + " " + SOURCE_FILE;
+    command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + DESTINATION + "/" + MINIFIED_HTML + " " + SOURCE_HTML;
     exec(command, function(error, stdout, stderr){
       var code;
       if (stdout) {
@@ -55,11 +58,11 @@
       if (stderr) {
         console.error(stderr);
       }
-      code = fs.readFileSync(MINIFIED_FILE, {
+      code = fs.readFileSync(DESTINATION + "/" + MINIFIED_HTML, {
         encoding: 'utf8'
       });
       code = code.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(/<\/script>\n+<script>/g, '');
-      fs.writeFileSync(MINIFIED_FILE, code);
+      fs.writeFileSync(DESTINATION + "/" + MINIFIED_HTML, code);
       callback(error);
     });
   }).task('dist-js', function(){}).task('dist-index', function(){});

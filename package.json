@@ -18,10 +18,12 @@
 	"license"         : "0BSD",
 	"files"           : [
 		"css",
+		"dist",
 		"html",
 		"img",
 		"js",
-		"index.html"
+		"index.html",
+		"index-debug.html"
 	],
 	"scripts"         : {
 		"demo-http-server" : "http-server",
@@ -39,6 +41,7 @@
 	},
 	"devDependencies" : {
 		"clean-css"       : "^4.1.11",
+		"del"             : "^3.0.0",
 		"gulp"            : "^3.9.1",
 		"gulp-htmlmin"    : "^4.0.0",
 		"http-server"     : "^0.11.1",

@@ -4,6 +4,7 @@
  * @license 0BSD
  */
 clean-css	= require('clean-css')
+del			= require('del')
 exec		= require('child_process').exec
 fs			= require('fs')
 gulp		= require('gulp')
@@ -27,34 +28,37 @@ minify-js	= (text) ->
 		console.log(result.error)
 	result.code
 
-const SOURCE_FILE	= 'html/index.html'
-const MINIFIED_FILE	= 'html/index.min.html'
-const MINIFIED_DIR	= 'html'
+const SOURCE_HTML	= 'html/index.html'
+const DESTINATION	= 'dist'
+const MINIFIED_HTML	= 'index.min.html'
 
 # TODO: Place everything into `dist`
 gulp
-	.task('dist', ['dist-css', 'dist-html', 'dist-js', 'dist-index'])
+	.task('dist', ['clean', 'dist-css', 'dist-html', 'dist-js', 'dist-index'])
+	.task('clean', ->
+		del("#DESTINATION/*")
+	)
 	.task('dist-css', !->
 		# TODO: Minify css/* files
 	)
 	.task('dist-html', ['bundle-webcomponents'], ->
-		gulp.src('html/index.min.html')
+		gulp.src("#DESTINATION/#MINIFIED_HTML")
 			.pipe(htmlmin(
 				decodeEntities				: true
 				minifyCSS					: minify-css
 				minifyJS					: minify-js
 				removeComments				: true
 			))
-			.pipe(gulp.dest('html'))
+			.pipe(gulp.dest(DESTINATION))
 	)
 	.task('bundle-webcomponents', (callback) !->
-		command		= "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html #MINIFIED_FILE #SOURCE_FILE"
+		command		= "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html #DESTINATION/#MINIFIED_HTML #SOURCE_HTML"
 		exec(command, (error, stdout, stderr) !->
 			if stdout
 				console.log(stdout)
 			if stderr
 				console.error(stderr)
-			code	= fs.readFileSync(MINIFIED_FILE, {encoding: 'utf8'})
+			code	= fs.readFileSync("#DESTINATION/#MINIFIED_HTML", {encoding: 'utf8'})
 			code	= code
 				# Useless (in our case) arguments
 				.replace(/assetpath=".+"/g, '')
@@ -63,7 +67,7 @@ gulp
 				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '')
 				# There is no need to have multiple <script> tags one after another, let's merge them into one
 				.replace(/<\/script>\n+<script>/g, '')
-			fs.writeFileSync(MINIFIED_FILE, code)
+			fs.writeFileSync("#DESTINATION/#MINIFIED_HTML", code)
 			callback(error)
 		)
 	)

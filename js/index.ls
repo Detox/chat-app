@@ -3,7 +3,7 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-const DEBUG	= 'debug' in location.search.substr(1).split('&') || localStorage['debug'] == '1'
+const DEBUG	= document.body.hasAttribute('debug')
 
 requirejs_config	=
 	'baseUrl'	: '/node_modules/'
@@ -60,5 +60,5 @@ ready = new Promise (resolve) !->
 		window.addEventListener('WebComponentsReady', resolve)
 <-! ready.then
 
-suffix	= if DEBUG then '' else '.min'
-document.head.insertAdjacentHTML('beforeend', '<link rel="import" href="html/index' + suffix + '.html">')
+html_file	= if DEBUG then 'html/index.html' else 'dist/index.min.html'
+document.head.insertAdjacentHTML('beforeend', '<link rel="import" href="' + html_file + '">')

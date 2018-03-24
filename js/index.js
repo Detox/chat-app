@@ -6,7 +6,7 @@
  */
 (function(){
   var DEBUG, requirejs_config, ready;
-  DEBUG = in$('debug', location.search.substr(1).split('&')) || localStorage['debug'] === '1';
+  DEBUG = document.body.hasAttribute('debug');
   requirejs_config = {
     'baseUrl': '/node_modules/',
     'paths': {
@@ -71,13 +71,8 @@
     }
   });
   ready.then(function(){
-    var suffix;
-    suffix = DEBUG ? '' : '.min';
-    document.head.insertAdjacentHTML('beforeend', '<link rel="import" href="html/index' + suffix + '.html">');
+    var html_file;
+    html_file = DEBUG ? 'html/index.html' : 'dist/index.min.html';
+    document.head.insertAdjacentHTML('beforeend', '<link rel="import" href="' + html_file + '">');
   });
-  function in$(x, xs){
-    var i = -1, l = xs.length >>> 0;
-    while (++i < l) if (x === xs[i]) return true;
-    return false;
-  }
 }).call(this);
