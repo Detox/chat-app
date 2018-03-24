@@ -2,8 +2,6 @@ doctype html
 meta(charset="utf-8")
 title Detox Chat
 link(rel="stylesheet" href="css/style.css")
-script(src="node_modules/alameda/alameda.js" defer)
-script(src="node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js" defer)
-script(src="js/index.js" defer)
-link(rel="import" href="html/index.html" defer)
+script(async data-main="js/index" src="node_modules/alameda/alameda.js")
+script(async src="node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js")
 detox-chat-app

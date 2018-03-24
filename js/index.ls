@@ -49,4 +49,4 @@ ready = new Promise (resolve) !->
 		window.addEventListener('WebComponentsReady', resolve)
 <-! ready.then
 
-#TODO
+document.head.insertAdjacentHTML('beforeend', '<link rel="import" href="html/index.html">')

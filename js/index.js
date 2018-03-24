@@ -50,5 +50,7 @@
       window.addEventListener('WebComponentsReady', resolve);
     }
   });
-  ready.then(function(){});
+  ready.then(function(){
+    document.head.insertAdjacentHTML('beforeend', '<link rel="import" href="html/index.html">');
+  });
 }).call(this);
