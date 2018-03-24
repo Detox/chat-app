@@ -32,7 +32,6 @@ const SOURCE_HTML	= 'html/index.html'
 const DESTINATION	= 'dist'
 const MINIFIED_HTML	= 'index.min.html'
 
-# TODO: Place everything into `dist`
 gulp
 	.task('dist', ['clean', 'dist-css', 'dist-html', 'dist-js', 'dist-index'])
 	.task('clean', ->
@@ -44,10 +43,10 @@ gulp
 	.task('dist-html', ['bundle-webcomponents'], ->
 		gulp.src("#DESTINATION/#MINIFIED_HTML")
 			.pipe(htmlmin(
-				decodeEntities				: true
-				minifyCSS					: minify-css
-				minifyJS					: minify-js
-				removeComments				: true
+				decodeEntities	: true
+				minifyCSS		: minify-css
+				minifyJS		: minify-js
+				removeComments	: true
 			))
 			.pipe(gulp.dest(DESTINATION))
 	)
