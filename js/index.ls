@@ -3,7 +3,7 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-const DEBUG	= 'debug' in location.search.substr(1).split('&') || sessionStorage['debug']
+const DEBUG	= 'debug' in location.search.substr(1).split('&') || localStorage['debug'] == '1'
 
 requirejs_config	=
 	'baseUrl'	: '/node_modules/'
@@ -60,4 +60,5 @@ ready = new Promise (resolve) !->
 		window.addEventListener('WebComponentsReady', resolve)
 <-! ready.then
 
-document.head.insertAdjacentHTML('beforeend', '<link rel="import" href="html/index.html">')
+suffix	= if DEBUG then '' else '.min'
+document.head.insertAdjacentHTML('beforeend', '<link rel="import" href="html/index' + suffix + '.html">')
