@@ -5,27 +5,43 @@
  * @license 0BSD
  */
 (function(){
-  var exec, fs, gulp, htmlmin, minify, SOURCE_FILE, MINIFIED_FILE, MINIFIED_DIR;
+  var cleanCss, exec, fs, gulp, htmlmin, uglifyEs, minifyCss, instance, minifyJs, SOURCE_FILE, MINIFIED_FILE, MINIFIED_DIR;
+  cleanCss = require('clean-css');
   exec = require('child_process').exec;
   fs = require('fs');
   gulp = require('gulp');
   htmlmin = require('gulp-htmlmin');
-  minify = require('uglify-es').minify;
+  uglifyEs = require('uglify-es');
+  minifyCss = (instance = new cleanCss({
+    level: {
+      1: {
+        specialComments: 0
+      }
+    }
+  }), function(text){
+    var result;
+    result = instance.minify(text);
+    if (result.error) {
+      console.log(result.error);
+    }
+    return result.styles;
+  });
+  minifyJs = function(text){
+    var result;
+    result = uglifyEs.minify(text);
+    if (result.error) {
+      console.log(result.error);
+    }
+    return result.code;
+  };
   SOURCE_FILE = 'html/index.html';
   MINIFIED_FILE = 'html/index.min.html';
   MINIFIED_DIR = 'html';
   gulp.task('build', ['minify-html', 'minify-js', 'build-index']).task('minify-html', ['bundle-webcomponents'], function(){
     return gulp.src('html/index.min.html').pipe(htmlmin({
       decodeEntities: true,
-      minifyCSS: true,
-      minifyJS: function(text){
-        var result;
-        result = minify(text);
-        if (result.error) {
-          console.log(result.error);
-        }
-        return result.code;
-      },
+      minifyCSS: minifyCss,
+      minifyJS: minifyJs,
       removeComments: true
     })).pipe(gulp.dest('html'));
   }).task('bundle-webcomponents', function(callback){
@@ -42,7 +58,7 @@
       code = fs.readFileSync(MINIFIED_FILE, {
         encoding: 'utf8'
       });
-      code = code.replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(/<\/script>\n+<script>/g, '');
+      code = code.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(/<\/script>\n+<script>/g, '');
       fs.writeFileSync(MINIFIED_FILE, code);
       callback(error);
     });

@@ -38,6 +38,7 @@
 		"cleverstyle-widgets"            : "^0.7.2"
 	},
 	"devDependencies" : {
+		"clean-css"       : "^4.1.11",
 		"gulp"            : "^3.9.1",
 		"gulp-htmlmin"    : "^4.0.0",
 		"http-server"     : "^0.11.1",

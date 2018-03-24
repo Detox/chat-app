@@ -3,11 +3,29 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-exec	= require('child_process').exec
-fs		= require('fs')
-gulp	= require('gulp')
-htmlmin	= require('gulp-htmlmin')
-minify	= require('uglify-es').minify
+clean-css	= require('clean-css')
+exec		= require('child_process').exec
+fs			= require('fs')
+gulp		= require('gulp')
+htmlmin		= require('gulp-htmlmin')
+uglify-es	= require('uglify-es')
+
+minify-css	= do
+	instance	= new clean-css(
+		level	:
+			1	:
+				specialComments	: 0
+	)
+	(text) ->
+		result	= instance.minify(text)
+		if result.error
+			console.log(result.error)
+		result.styles
+minify-js	= (text) ->
+	result	= uglify-es.minify(text)
+	if result.error
+		console.log(result.error)
+	result.code
 
 const SOURCE_FILE	= 'html/index.html'
 const MINIFIED_FILE	= 'html/index.min.html'
@@ -19,12 +37,8 @@ gulp
 		gulp.src('html/index.min.html')
 			.pipe(htmlmin(
 				decodeEntities				: true
-				minifyCSS					: true
-				minifyJS					: (text) ->
-					result	= minify(text)
-					if result.error
-						console.log(result.error)
-					result.code
+				minifyCSS					: minify-css
+				minifyJS					: minify-js
 				removeComments				: true
 			))
 			.pipe(gulp.dest('html'))
@@ -38,6 +52,8 @@ gulp
 				console.error(stderr)
 			code	= fs.readFileSync(MINIFIED_FILE, {encoding: 'utf8'})
 			code	= code
+				# Useless (in our case) arguments
+				.replace(/assetpath=".+"/g, '')
 				# These 2 files are referenced, but do not actually exist (because Polymer uses crappy practices for its packages)
 				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '')
 				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '')
