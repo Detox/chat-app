@@ -9,7 +9,7 @@ script.
 		document.head.appendChild(document.head.querySelector('#scripts').content.cloneNode(true))
 	})
 template#scripts
-	script(defer data-main="dist/script.min" src="node_modules/alameda/alameda.js")
-	script(defer src="node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js")
+	script(defer data-main="dist/script.min" src="dist/alameda.min.js")
+	script(defer src="dist/webcomponents.min.js")
 	link(defer rel="import" href="dist/index.min.html")
 detox-chat-app

@@ -121,6 +121,7 @@ gulp
 				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '')
 				# Remove all <script> tags, we'll have them included separately
 				.replace(SCRIPTS_REGEXP, '')
+			# TODO: Fonts
 			fs.writeFileSync("#DESTINATION/#BUNDLED_HTML", html)
 			fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
 			callback(error)
@@ -143,11 +144,17 @@ gulp
 			if name.endsWith('.wasm')
 				fs.copyFileSync("#location/src/#name", "#DESTINATION/#name")
 	)
+	.task('copy-js', !->
+		alameda			= fs.readFileSync('node_modules/alameda/alameda.js', {encoding: 'utf8'})
+		webcomponents	= fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {encoding: 'utf8'})
+		fs.writeFileSync("#DESTINATION/alameda.min.js", minify_js(alameda))
+		fs.writeFileSync("#DESTINATION/webcomponents.min.js", minify_js(webcomponents))
+	)
 	.task('default', (callback) !->
 		run-sequence('dist', 'dist:clean', callback)
 	)
 	.task('dist', (callback) !->
-		run-sequence('clean', ['copy-wasm', 'minify-css', 'minify-html', 'minify-js', 'update-index'], callback)
+		run-sequence('clean', ['copy-js', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js', 'update-index'], callback)
 	)
 	.task('dist:clean', ->
 		del(["#DESTINATION/#BUNDLED_CSS", "#DESTINATION/#BUNDLED_HTML", "#DESTINATION/#BUNDLED_JS"])

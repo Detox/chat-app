@@ -147,10 +147,20 @@
         fs.copyFileSync(location + "/src/" + name, DESTINATION + "/" + name);
       }
     }
+  }).task('copy-js', function(){
+    var alameda, webcomponents;
+    alameda = fs.readFileSync('node_modules/alameda/alameda.js', {
+      encoding: 'utf8'
+    });
+    webcomponents = fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {
+      encoding: 'utf8'
+    });
+    fs.writeFileSync(DESTINATION + "/alameda.min.js", minify_js(alameda));
+    fs.writeFileSync(DESTINATION + "/webcomponents.min.js", minify_js(webcomponents));
   }).task('default', function(callback){
     runSequence('dist', 'dist:clean', callback);
   }).task('dist', function(callback){
-    runSequence('clean', ['copy-wasm', 'minify-css', 'minify-html', 'minify-js', 'update-index'], callback);
+    runSequence('clean', ['copy-js', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js', 'update-index'], callback);
   }).task('dist:clean', function(){
     return del([DESTINATION + "/" + BUNDLED_CSS, DESTINATION + "/" + BUNDLED_HTML, DESTINATION + "/" + BUNDLED_JS]);
   }).task('minify-css', ['bundle-css'], function(){
