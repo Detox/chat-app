@@ -90,10 +90,12 @@
 		flex-grow : 1;
 
 		textarea {
-			border : none;
-			height : auto;
-			margin : 0;
-			resize : none;
+			border     : none;
+			height     : auto;
+			margin     : 0;
+			resize     : none;
+			max-height : var(--dialog-send-textarea-max);
+			min-height : var(--dialog-send-textarea-min);
 		}
 	}
 

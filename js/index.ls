@@ -14,6 +14,7 @@ requirejs_config	=
 		'@detox/transport'			: 'node_modules/@detox/transport/src/index'
 		'@detox/utils'				: 'node_modules/@detox/utils/src/index'
 		'async-eventer'				: 'node_modules/async-eventer/src/index'
+		'autosize'					: 'node_modules/autosize/dist/autosize'
 		'fixed-size-multiplexer'	: 'node_modules/fixed-size-multiplexer/src/index'
 		'ronion'					: 'node_modules/ronion/dist/ronion.browser'
 		'pako'						: 'node_modules/pako/dist/pako'

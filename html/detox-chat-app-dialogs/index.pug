@@ -8,8 +8,7 @@ dom-module(id="detox-chat-app-dialogs")
 					.message-content [[item.text]]
 					.message-details Written: [[_format_date(item.date_written)]], delivered: [[_format_date(item.date_sent)]]
 		csw-form: form#send-form(hidden="[[!active_contact]]")
-			//- TODO: autosize instead of fixed rows number
-			csw-textarea: textarea(rows="7" value="{{text_message}}")
+			csw-textarea(autosize): textarea(value="{{text_message}}")
 			csw-button: button(type="button" on-click="_send") Send
 		#welcome(hidden="[[active_contact]]")
 			h4 Welcome to Detox Chat!
