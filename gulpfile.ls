@@ -14,7 +14,7 @@ gulp-requirejs-optimize	= require('gulp-requirejs-optimize')
 uglify-es				= require('uglify-es')
 uglify					= require('gulp-uglify/composer')(uglify-es, console)
 
-minify-css	= do
+minify_css	= do
 	instance	= new clean-css(
 		level	:
 			1	:
@@ -25,15 +25,19 @@ minify-css	= do
 		if result.error
 			console.log(result.error)
 		result.styles
-minify-js	= (text) ->
+minify_js	= (text) ->
 	result	= uglify-es.minify(text)
 	if result.error
 		console.log(result.error)
 	result.code
 
 const SCRIPTS_REGEXP	= /<script>[^]+?<\/script>\n*/g
+const IMAGES_REGEXP		= /url\(\.\.\/img\/.+?\)/g
+const SOURCE_CSS		= 'css/style.css'
 const SOURCE_HTML		= 'html/index.html'
 const DESTINATION		= 'dist'
+const BUNDLED_CSS		= 'style.css'
+const MINIFIED_CSS		= 'style.min.css'
 const BUNDLED_HTML		= 'index.html'
 const MINIFIED_HTML		= 'index.min.html'
 const BUNDLED_JS		= 'script.js'
@@ -84,9 +88,17 @@ requirejs_config	=
 	]
 
 gulp
-	.task('dist', [/*'dist-css', */'dist-html', 'dist-js', /* 'dist-index',*/ 'dist-wasm'])
+	.task('dist', ['dist-css', 'dist-html', 'dist-js', /* 'dist-index',*/ 'dist-wasm'])
 	.task('dist-css', ['clean'], !->
-		# TODO: Minify css/* files, copy background images to dist directory too
+		css		= fs.readFileSync("#SOURCE_CSS", {encoding: 'utf8'})
+		images	= css.match(IMAGES_REGEXP)
+		for image in images
+			image_path		= image.substring(7, image.length - 1)
+			image_source	= fs.readFileSync(image_path, {encoding: 'utf8'})
+			image_base_uri	= 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')'
+			css.replace(image, image_base_uri)
+		fs.writeFileSync("#DESTINATION/#BUNDLED_CSS", css)
+		fs.writeFileSync("#DESTINATION/#MINIFIED_CSS", minify_css(css))
 	)
 	.task('dist-html', ['clean', 'minify-html'])
 	.task('dist-js', ['clean', 'minify-js'])
@@ -105,7 +117,7 @@ gulp
 		gulp.src("#DESTINATION/#BUNDLED_HTML")
 			.pipe(gulp-htmlmin(
 				decodeEntities	: true
-				minifyCSS		: minify-css
+				minifyCSS		: minify_css
 				removeComments	: true
 			))
 			.pipe(gulp-rename(MINIFIED_HTML))

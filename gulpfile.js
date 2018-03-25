@@ -5,7 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, uglifyEs, uglify, minifyCss, instance, minifyJs, SCRIPTS_REGEXP, SOURCE_HTML, DESTINATION, BUNDLED_HTML, MINIFIED_HTML, BUNDLED_JS, MINIFIED_JS, requirejs_config;
+  var cleanCss, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, uglifyEs, uglify, minify_css, instance, minify_js, SCRIPTS_REGEXP, IMAGES_REGEXP, SOURCE_CSS, SOURCE_HTML, DESTINATION, BUNDLED_CSS, MINIFIED_CSS, BUNDLED_HTML, MINIFIED_HTML, BUNDLED_JS, MINIFIED_JS, requirejs_config;
   cleanCss = require('clean-css');
   del = require('del');
   exec = require('child_process').exec;
@@ -16,7 +16,7 @@
   gulpRequirejsOptimize = require('gulp-requirejs-optimize');
   uglifyEs = require('uglify-es');
   uglify = require('gulp-uglify/composer')(uglifyEs, console);
-  minifyCss = (instance = new cleanCss({
+  minify_css = (instance = new cleanCss({
     level: {
       1: {
         specialComments: 0
@@ -30,7 +30,7 @@
     }
     return result.styles;
   });
-  minifyJs = function(text){
+  minify_js = function(text){
     var result;
     result = uglifyEs.minify(text);
     if (result.error) {
@@ -39,8 +39,12 @@
     return result.code;
   };
   SCRIPTS_REGEXP = /<script>[^]+?<\/script>\n*/g;
+  IMAGES_REGEXP = /url\(\.\.\/img\/.+?\)/g;
+  SOURCE_CSS = 'css/style.css';
   SOURCE_HTML = 'html/index.html';
   DESTINATION = 'dist';
+  BUNDLED_CSS = 'style.css';
+  MINIFIED_CSS = 'style.min.css';
   BUNDLED_HTML = 'index.html';
   MINIFIED_HTML = 'index.min.html';
   BUNDLED_JS = 'script.js';
@@ -86,7 +90,24 @@
       }
     ]
   };
-  gulp.task('dist', ['dist-html', 'dist-js', 'dist-wasm']).task('dist-css', ['clean'], function(){}).task('dist-html', ['clean', 'minify-html']).task('dist-js', ['clean', 'minify-js']).task('dist-index', ['clean'], function(){}).task('dist-wasm', ['clean'], function(){
+  gulp.task('dist', ['dist-css', 'dist-html', 'dist-js', 'dist-wasm']).task('dist-css', ['clean'], function(){
+    var css, images, i$, len$, image, image_path, image_source, image_base_uri;
+    css = fs.readFileSync(SOURCE_CSS + "", {
+      encoding: 'utf8'
+    });
+    images = css.match(IMAGES_REGEXP);
+    for (i$ = 0, len$ = images.length; i$ < len$; ++i$) {
+      image = images[i$];
+      image_path = image.substring(7, image.length - 1);
+      image_source = fs.readFileSync(image_path, {
+        encoding: 'utf8'
+      });
+      image_base_uri = 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')';
+      css.replace(image, image_base_uri);
+    }
+    fs.writeFileSync(DESTINATION + "/" + BUNDLED_CSS, css);
+    fs.writeFileSync(DESTINATION + "/" + MINIFIED_CSS, minify_css(css));
+  }).task('dist-html', ['clean', 'minify-html']).task('dist-js', ['clean', 'minify-js']).task('dist-index', ['clean'], function(){}).task('dist-wasm', ['clean'], function(){
     var i$, ref$, len$, ref1$, name, location, main;
     for (i$ = 0, len$ = (ref$ = requirejs_config.packages).length; i$ < len$; ++i$) {
       ref1$ = ref$[i$], name = ref1$.name, location = ref1$.location, main = ref1$.main;
@@ -99,7 +120,7 @@
   }).task('minify-html', ['bundle-html'], function(){
     return gulp.src(DESTINATION + "/" + BUNDLED_HTML).pipe(gulpHtmlmin({
       decodeEntities: true,
-      minifyCSS: minifyCss,
+      minifyCSS: minify_css,
       removeComments: true
     })).pipe(gulpRename(MINIFIED_HTML)).pipe(gulp.dest(DESTINATION));
   }).task('bundle-html', function(callback){
