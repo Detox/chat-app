@@ -164,7 +164,7 @@ gulp
 		run-sequence('dist', 'dist:clean', callback)
 	)
 	.task('dist', (callback) !->
-		run-sequence('clean', ['copy-js', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js', 'update-index'], callback)
+		run-sequence('clean', ['copy-js', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback)
 	)
 	.task('dist:clean', ->
 		del(["#DESTINATION/#BUNDLED_CSS", "#DESTINATION/#BUNDLED_HTML", "#DESTINATION/#BUNDLED_JS"])
@@ -190,5 +190,17 @@ gulp
 			.pipe(gulp.dest(DESTINATION))
 	)
 	.task('update-index', !->
-		# TODO: Build production index.html that will consume minified versions of everything
+		alameda_hash		= file_hash("#DESTINATION/alameda.min.js").substr(0, 5)
+		index_hash			= file_hash("#DESTINATION/index.min.html").substr(0, 5)
+		script_hash			= file_hash("#DESTINATION/script.min.js").substr(0, 5)
+		style_hash			= file_hash("#DESTINATION/style.min.css").substr(0, 5)
+		webcomponents_hash	= file_hash("#DESTINATION/webcomponents.min.js").substr(0, 5)
+		index				= fs.readFileSync('index.html', {encoding: 'utf8'})
+		index				= index
+			.replace(/dist\/alameda\.min\.js[^"]*/, "dist/alameda.min.js?#alameda_hash")
+			.replace(/dist\/index\.min\.html[^"]*/, "dist/index.min.html?#index_hash")
+			.replace(/dist\/script\.min\.js[^"]*/, "dist/script.min.js?#script_hash")
+			.replace(/dist\/style\.min\.css[^"]*/, "dist/style.min.css?#style_hash")
+			.replace(/dist\/webcomponents\.min\.js[^"]*/, "dist/webcomponents.min.js?#webcomponents_hash")
+		fs.writeFileSync('index.html', index)
 	)

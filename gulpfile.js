@@ -175,7 +175,7 @@
   }).task('default', function(callback){
     runSequence('dist', 'dist:clean', callback);
   }).task('dist', function(callback){
-    runSequence('clean', ['copy-js', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js', 'update-index'], callback);
+    runSequence('clean', ['copy-js', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback);
   }).task('dist:clean', function(){
     return del([DESTINATION + "/" + BUNDLED_CSS, DESTINATION + "/" + BUNDLED_HTML, DESTINATION + "/" + BUNDLED_JS]);
   }).task('minify-css', ['bundle-css'], function(){
@@ -192,5 +192,17 @@
     })).pipe(gulpRename(MINIFIED_HTML)).pipe(gulp.dest(DESTINATION));
   }).task('minify-js', ['bundle-js'], function(){
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(uglify()).pipe(gulpRename(MINIFIED_JS)).pipe(gulp.dest(DESTINATION));
-  }).task('update-index', function(){});
+  }).task('update-index', function(){
+    var alameda_hash, index_hash, script_hash, style_hash, webcomponents_hash, index;
+    alameda_hash = file_hash(DESTINATION + "/alameda.min.js").substr(0, 5);
+    index_hash = file_hash(DESTINATION + "/index.min.html").substr(0, 5);
+    script_hash = file_hash(DESTINATION + "/script.min.js").substr(0, 5);
+    style_hash = file_hash(DESTINATION + "/style.min.css").substr(0, 5);
+    webcomponents_hash = file_hash(DESTINATION + "/webcomponents.min.js").substr(0, 5);
+    index = fs.readFileSync('index.html', {
+      encoding: 'utf8'
+    });
+    index = index.replace(/dist\/alameda\.min\.js[^"]*/, "dist/alameda.min.js?" + alameda_hash).replace(/dist\/index\.min\.html[^"]*/, "dist/index.min.html?" + index_hash).replace(/dist\/script\.min\.js[^"]*/, "dist/script.min.js?" + script_hash).replace(/dist\/style\.min\.css[^"]*/, "dist/style.min.css?" + style_hash).replace(/dist\/webcomponents\.min\.js[^"]*/, "dist/webcomponents.min.js?" + webcomponents_hash);
+    fs.writeFileSync('index.html', index);
+  });
 }).call(this);
