@@ -10,6 +10,7 @@ html {
 	font-family                                : var(--font-family-base);
 	font-size                                  : var(--font-size-base);
 	line-height                                : 1.2;
+	overflow                                   : hidden;
 
 	&::before {
 		animation                 : pulsate 1s ease-out;
