@@ -154,14 +154,20 @@
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(gulpRequirejsOptimize(config)).pipe(gulp.dest(DESTINATION));
   }).task('clean', function(){
     return del(DESTINATION + "/*");
-  }).task('copy-wasm', function(){
-    var i$, ref$, len$, ref1$, name, location, main;
+  }).task('copy-wasm', ['bundle-js'], function(){
+    var js, i$, ref$, len$, ref1$, name, location, main, new_file_name;
+    js = fs.readFileSync(DESTINATION + "/" + BUNDLED_JS, {
+      encoding: 'utf8'
+    });
     for (i$ = 0, len$ = (ref$ = requirejs_config.packages).length; i$ < len$; ++i$) {
       ref1$ = ref$[i$], name = ref1$.name, location = ref1$.location, main = ref1$.main;
       if (name.endsWith('.wasm')) {
-        fs.copyFileSync(location + "/src/" + name, DESTINATION + "/" + name);
+        new_file_name = file_hash(location + "/src/" + name) + '.wasm';
+        fs.copyFileSync(location + "/src/" + name, DESTINATION + "/" + new_file_name);
+        js = js.replace('="' + name + '"', '="' + new_file_name + '"');
       }
     }
+    fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
   }).task('copy-js', function(){
     var alameda, webcomponents;
     alameda = fs.readFileSync('node_modules/alameda/alameda.js', {
@@ -190,7 +196,7 @@
       minifyCSS: minify_css,
       removeComments: true
     })).pipe(gulpRename(MINIFIED_HTML)).pipe(gulp.dest(DESTINATION));
-  }).task('minify-js', ['bundle-js'], function(){
+  }).task('minify-js', ['bundle-js', 'copy-wasm'], function(){
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(uglify()).pipe(gulpRename(MINIFIED_JS)).pipe(gulp.dest(DESTINATION));
   }).task('update-index', function(){
     var alameda_hash, index_hash, script_hash, style_hash, webcomponents_hash, index;

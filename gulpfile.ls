@@ -149,10 +149,15 @@ gulp
 	.task('clean', ->
 		del("#DESTINATION/*")
 	)
-	.task('copy-wasm', !->
+	.task('copy-wasm', ['bundle-js'], !->
+		js	= fs.readFileSync("#DESTINATION/#BUNDLED_JS", {encoding: 'utf8'})
 		for {name, location, main} in requirejs_config.packages
 			if name.endsWith('.wasm')
-				fs.copyFileSync("#location/src/#name", "#DESTINATION/#name")
+				new_file_name	= file_hash("#location/src/#name") + '.wasm'
+				fs.copyFileSync("#location/src/#name", "#DESTINATION/#new_file_name")
+				# This is a hack, but it works for now
+				js	= js.replace('="' + name + '"', '="' + new_file_name + '"')
+		fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
 	)
 	.task('copy-js', !->
 		alameda			= fs.readFileSync('node_modules/alameda/alameda.js', {encoding: 'utf8'})
@@ -183,7 +188,7 @@ gulp
 			.pipe(gulp-rename(MINIFIED_HTML))
 			.pipe(gulp.dest(DESTINATION))
 	)
-	.task('minify-js', ['bundle-js'], ->
+	.task('minify-js', ['bundle-js', 'copy-wasm'], ->
 		gulp.src("#DESTINATION/#BUNDLED_JS")
 			.pipe(uglify())
 			.pipe(gulp-rename(MINIFIED_JS))
