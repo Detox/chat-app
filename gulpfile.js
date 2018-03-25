@@ -104,7 +104,7 @@
         encoding: 'utf8'
       });
       image_base_uri = 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')';
-      css.replace(image, image_base_uri);
+      css = css.replace(image, image_base_uri);
     }
     fs.writeFileSync(DESTINATION + "/" + BUNDLED_CSS, css);
   }).task('bundle-html', function(callback){

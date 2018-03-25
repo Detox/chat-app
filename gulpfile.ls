@@ -97,7 +97,7 @@ gulp
 			image_path		= image.substring(7, image.length - 1)
 			image_source	= fs.readFileSync(image_path, {encoding: 'utf8'})
 			image_base_uri	= 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')'
-			css.replace(image, image_base_uri)
+			css				= css.replace(image, image_base_uri)
 		fs.writeFileSync("#DESTINATION/#BUNDLED_CSS", css)
 	)
 	.task('bundle-html', (callback) !->
