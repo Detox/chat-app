@@ -36,8 +36,8 @@
 			};
 
 			--csw-input-text-focus: {
-				color      : var(--form-element-focus-color);
-				box-shadow : var(--form-element-box-shadow), var(--form-element-inner-box-shadow);
+				border : var(--form-element-focus-border);
+				color  : var(--form-element-focus-color);
 			};
 
 			--csw-input-text-disabled: {
@@ -98,10 +98,8 @@
 			};
 
 			--csw-button-disabled: {
-				background-color : var(--background-color-element-disabled);
-				background-image : none;
-				box-shadow       : none;
-				color            : var(--text-color-base-disabled);
+				background : var(--background-color-element-disabled);
+				color      : var(--text-color-base-disabled) !important;
 			};
 
 			--csw-button-compact: {
@@ -112,16 +110,15 @@
 
 			--csw-button-primary: {
 				background-color : var(--button-background-color-primary);
-				color            : var(--button-text-color-primary);
 			};
 
 			--csw-button-primary-hover: {
-				color : var(--button-text-color-primary);
+				background-color : var(--button-background-color-primary-hover);
 			};
 
 			--csw-button-primary-disabled: {
 				background-color : var(--button-background-color-primary-disabled);
-				color            : var(--button-text-color-primary-disabled);
+				color            : var(--button-color) !important;
 			};
 
 			/* Link button */
@@ -140,25 +137,12 @@
 			--csw-label-button: {
 				background-color : var(--background-color-element-disabled);
 				color            : var(--text-color-base-disabled);
+				padding          : var(--form-element-padding);
 			};
 
 			--csw-label-button-active: {
-				color      : var(--button-active-color) !important;
-				background : var(--button-active-background) !important;
-			};
-
-			--csw-label-button-primary: {
-				background-color : var(--button-background-color-primary-disabled);
-				color            : var(--button-text-color-primary-disabled);
-			};
-
-			--csw-label-button-primary-active: {
-				color      : var(--button-text-color-primary) !important;
-				background : var(--button-background-color-primary) !important;
-			};
-
-			--csw-label-button: {
-				padding : var(--form-element-padding);
+				color      : var(--button-active-color);
+				background : var(--button-active-background);
 			};
 
 			/* Modal */

@@ -61,7 +61,9 @@
 
 		.message-content {
 			background    : var(--background-color-highlight);
+			border        : var(--border-base);
 			border-radius : var(--block-padding) var(--block-padding) var(--block-padding) 0;
+			box-sizing    : border-box;
 			max-width     : var(--dialog-message-content-width-max);
 			padding       : var(--block-padding);
 			word-break    : break-word;
