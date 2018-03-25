@@ -5,8 +5,9 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, minify_css, instance, minify_js, SCRIPTS_REGEXP, IMAGES_REGEXP, SOURCE_CSS, SOURCE_HTML, DESTINATION, BUNDLED_CSS, MINIFIED_CSS, BUNDLED_HTML, MINIFIED_HTML, BUNDLED_JS, MINIFIED_JS, requirejs_config;
+  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, minify_css, instance, minify_js, file_hash, SCRIPTS_REGEXP, FONTS_REGEXP, IMAGES_REGEXP, SOURCE_CSS, SOURCE_HTML, DESTINATION, BUNDLED_CSS, MINIFIED_CSS, BUNDLED_HTML, MINIFIED_HTML, BUNDLED_JS, MINIFIED_JS, requirejs_config;
   cleanCss = require('clean-css');
+  crypto = require('crypto');
   del = require('del');
   exec = require('child_process').exec;
   fs = require('fs');
@@ -39,7 +40,13 @@
     }
     return result.code;
   };
+  file_hash = function(file){
+    var file_contents;
+    file_contents = fs.readFileSync(file);
+    return crypto.createHash('md5').update(file_contents).digest('hex');
+  };
   SCRIPTS_REGEXP = /<script>[^]+?<\/script>\n*/g;
+  FONTS_REGEXP = /url\(.+?\.woff2.+?\)/g;
   IMAGES_REGEXP = /url\(\.\.\/img\/.+?\)/g;
   SOURCE_CSS = 'css/style.css';
   SOURCE_HTML = 'html/index.html';
@@ -92,7 +99,7 @@
     ]
   };
   gulp.task('bundle-css', function(){
-    var css, images, i$, len$, image, image_path, image_source, image_base_uri;
+    var css, images, i$, len$, image, image_path, image_source, image_data_uri;
     css = fs.readFileSync(SOURCE_CSS + "", {
       encoding: 'utf8'
     });
@@ -103,15 +110,15 @@
       image_source = fs.readFileSync(image_path, {
         encoding: 'utf8'
       });
-      image_base_uri = 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')';
-      css = css.replace(image, image_base_uri);
+      image_data_uri = 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')';
+      css = css.replace(image, image_data_uri);
     }
     fs.writeFileSync(DESTINATION + "/" + BUNDLED_CSS, css);
   }).task('bundle-html', function(callback){
     var command;
     command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + DESTINATION + "/" + BUNDLED_HTML + " " + SOURCE_HTML;
     exec(command, function(error, stdout, stderr){
-      var html, js;
+      var html, fonts, i$, len$, font, font_path, new_file_name, js;
       if (stdout) {
         console.log(stdout);
       }
@@ -121,6 +128,14 @@
       html = fs.readFileSync(DESTINATION + "/" + BUNDLED_HTML, {
         encoding: 'utf8'
       });
+      fonts = html.match(FONTS_REGEXP);
+      for (i$ = 0, len$ = fonts.length; i$ < len$; ++i$) {
+        font = fonts[i$];
+        font_path = font.substring(8, font.length - 2).split('?')[0];
+        new_file_name = file_hash(font_path) + '.woff2';
+        html = html.replace(font, "url(" + new_file_name + ")");
+        fs.copyFileSync(font_path, DESTINATION + "/" + new_file_name);
+      }
       js = html.match(SCRIPTS_REGEXP).map(function(string){
         string = string.trim();
         return string.substring(8, string.length - 9);

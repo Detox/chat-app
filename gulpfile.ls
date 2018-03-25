@@ -4,6 +4,7 @@
  * @license 0BSD
  */
 clean-css				= require('clean-css')
+crypto					= require('crypto')
 del						= require('del')
 exec					= require('child_process').exec
 fs						= require('fs')
@@ -31,8 +32,12 @@ minify_js	= (text) ->
 	if result.error
 		console.log(result.error)
 	result.code
+file_hash	= (file) ->
+	file_contents	= fs.readFileSync(file)
+	crypto.createHash('md5').update(file_contents).digest('hex')
 
 const SCRIPTS_REGEXP	= /<script>[^]+?<\/script>\n*/g
+const FONTS_REGEXP		= /url\(.+?\.woff2.+?\)/g
 const IMAGES_REGEXP		= /url\(\.\.\/img\/.+?\)/g
 const SOURCE_CSS		= 'css/style.css'
 const SOURCE_HTML		= 'html/index.html'
@@ -96,8 +101,8 @@ gulp
 		for image in images
 			image_path		= image.substring(7, image.length - 1)
 			image_source	= fs.readFileSync(image_path, {encoding: 'utf8'})
-			image_base_uri	= 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')'
-			css				= css.replace(image, image_base_uri)
+			image_data_uri	= 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')'
+			css				= css.replace(image, image_data_uri)
 		fs.writeFileSync("#DESTINATION/#BUNDLED_CSS", css)
 	)
 	.task('bundle-html', (callback) !->
@@ -108,6 +113,12 @@ gulp
 			if stderr
 				console.error(stderr)
 			html	= fs.readFileSync("#DESTINATION/#BUNDLED_HTML", {encoding: 'utf8'})
+			fonts	= html.match(FONTS_REGEXP)
+			for font in fonts
+				font_path		= font.substring(8, font.length - 2).split('?')[0]
+				new_file_name	= file_hash(font_path) + '.woff2'
+				html			= html.replace(font, "url(#new_file_name)")
+				fs.copyFileSync(font_path, "#DESTINATION/#new_file_name")
 			js		= html.match(SCRIPTS_REGEXP)
 				.map (string) ->
 					string	= string.trim()
@@ -121,7 +132,6 @@ gulp
 				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '')
 				# Remove all <script> tags, we'll have them included separately
 				.replace(SCRIPTS_REGEXP, '')
-			# TODO: Fonts
 			fs.writeFileSync("#DESTINATION/#BUNDLED_HTML", html)
 			fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
 			callback(error)
