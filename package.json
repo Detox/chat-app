@@ -26,8 +26,7 @@
 		"index-debug.html"
 	],
 	"scripts"         : {
-		"demo-http-server" : "http-server",
-		"dist"             : "gulp dist"
+		"demo-http-server" : "http-server"
 	},
 	"dependencies"    : {
 		"@detox/chat"                    : "^0.8.0",
@@ -50,6 +49,7 @@
 		"gulp-uglify"             : "^3.0.0",
 		"http-server"             : "^0.11.1",
 		"polymer-bundler"         : "^3.1.1",
+		"run-sequence"            : "^2.2.1",
 		"uglify-es"               : "^3.3.9"
 	}
 }

@@ -11,6 +11,7 @@ gulp					= require('gulp')
 gulp-htmlmin			= require('gulp-htmlmin')
 gulp-rename				= require('gulp-rename')
 gulp-requirejs-optimize	= require('gulp-requirejs-optimize')
+run-sequence			= require('run-sequence')
 uglify-es				= require('uglify-es')
 uglify					= require('gulp-uglify/composer')(uglify-es, console)
 
@@ -46,29 +47,30 @@ const MINIFIED_JS		= 'script.min.js'
 requirejs_config	=
 	'baseUrl'	: '.'
 	'paths'		:
-		'@detox/base-x'				: 'node_modules/@detox/base-x/index'
-		'@detox/chat'				: 'node_modules/@detox/chat/src/index'
-		'@detox/core'				: 'node_modules/@detox/core/src/index'
-		'@detox/crypto'				: 'node_modules/@detox/crypto/src/index'
-		'@detox/dht'				: 'node_modules/@detox/dht/dist/detox-dht.browser'
+		'@detox/base-x'				: 'node_modules/@detox/base-x/index.min'
+		'@detox/chat'				: 'node_modules/@detox/chat/src/index.min'
+		'@detox/core'				: 'node_modules/@detox/core/src/index.min'
+		'@detox/crypto'				: 'node_modules/@detox/crypto/src/index.min'
+		'@detox/dht'				: 'node_modules/@detox/dht/dist/detox-dht.browser.min'
+		# TODO: Closure Compiler replaces array of dependencies with '...'.split(' ') and causes build to fail when using minified version of @detox/transport
 		'@detox/transport'			: 'node_modules/@detox/transport/src/index'
-		'@detox/utils'				: 'node_modules/@detox/utils/src/index'
-		'async-eventer'				: 'node_modules/async-eventer/src/index'
-		'autosize'					: 'node_modules/autosize/dist/autosize'
-		'fixed-size-multiplexer'	: 'node_modules/fixed-size-multiplexer/src/index'
-		'ronion'					: 'node_modules/ronion/dist/ronion.browser'
-		'pako'						: 'node_modules/pako/dist/pako'
+		'@detox/utils'				: 'node_modules/@detox/utils/src/index.min'
+		'async-eventer'				: 'node_modules/async-eventer/src/index.min'
+		'autosize'					: 'node_modules/autosize/dist/autosize.min'
+		'fixed-size-multiplexer'	: 'node_modules/fixed-size-multiplexer/src/index.min'
+		'ronion'					: 'node_modules/ronion/dist/ronion.browser.min'
+		'pako'						: 'node_modules/pako/dist/pako.min'
 		'state'						: 'js/state'
 	'packages'	: [
 		{
 			'name'		: 'aez.wasm',
 			'location'	: 'node_modules/aez.wasm',
-			'main'		: 'src/index'
+			'main'		: 'src/index.min'
 		}
 		{
 			'name'		: 'ed25519-to-x25519.wasm',
 			'location'	: 'node_modules/ed25519-to-x25519.wasm',
-			'main'		: 'src/index'
+			'main'		: 'src/index.min'
 		}
 		{
 			'name'		: 'jssha',
@@ -78,18 +80,17 @@ requirejs_config	=
 		{
 			'name'		: 'noise-c.wasm',
 			'location'	: 'node_modules/noise-c.wasm',
-			'main'		: 'src/index'
+			'main'		: 'src/index.min'
 		}
 		{
 			'name'		: 'supercop.wasm',
 			'location'	: 'node_modules/supercop.wasm',
-			'main'		: 'src/index'
+			'main'		: 'src/index.min'
 		}
 	]
 
 gulp
-	.task('dist', ['dist-css', 'dist-html', 'dist-js', /* 'dist-index',*/ 'dist-wasm'])
-	.task('dist-css', ['clean'], !->
+	.task('bundle-css', !->
 		css		= fs.readFileSync("#SOURCE_CSS", {encoding: 'utf8'})
 		images	= css.match(IMAGES_REGEXP)
 		for image in images
@@ -98,30 +99,6 @@ gulp
 			image_base_uri	= 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')'
 			css.replace(image, image_base_uri)
 		fs.writeFileSync("#DESTINATION/#BUNDLED_CSS", css)
-		fs.writeFileSync("#DESTINATION/#MINIFIED_CSS", minify_css(css))
-	)
-	.task('dist-html', ['clean', 'minify-html'])
-	.task('dist-js', ['clean', 'minify-js'])
-	.task('dist-index', ['clean'], !->
-		# TODO: Build production index.html that will consume minified versions of everything
-	)
-	.task('dist-wasm', ['clean'], !->
-		for {name, location, main} in requirejs_config.packages
-			if name.endsWith('.wasm')
-				fs.copyFileSync("#location/src/#name", "#DESTINATION/#name")
-	)
-	.task('clean', ->
-		del("#DESTINATION/*")
-	)
-	.task('minify-html', ['bundle-html'], ->
-		gulp.src("#DESTINATION/#BUNDLED_HTML")
-			.pipe(gulp-htmlmin(
-				decodeEntities	: true
-				minifyCSS		: minify_css
-				removeComments	: true
-			))
-			.pipe(gulp-rename(MINIFIED_HTML))
-			.pipe(gulp.dest(DESTINATION))
 	)
 	.task('bundle-html', (callback) !->
 		command		= "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html #DESTINATION/#BUNDLED_HTML #SOURCE_HTML"
@@ -149,12 +126,6 @@ gulp
 			callback(error)
 		)
 	)
-	.task('minify-js', ['bundle-js'], ->
-		gulp.src("#DESTINATION/#BUNDLED_JS")
-			.pipe(uglify())
-			.pipe(gulp-rename(MINIFIED_JS))
-			.pipe(gulp.dest(DESTINATION))
-	)
 	.task('bundle-js', ['bundle-html'], ->
 		config	= Object.assign({
 			name		: "#DESTINATION/#BUNDLED_JS"
@@ -163,4 +134,44 @@ gulp
 		gulp.src("#DESTINATION/#BUNDLED_JS")
 			.pipe(gulp-requirejs-optimize(config))
 			.pipe(gulp.dest(DESTINATION))
+	)
+	.task('clean', ->
+		del("#DESTINATION/*")
+	)
+	.task('copy-wasm', !->
+		for {name, location, main} in requirejs_config.packages
+			if name.endsWith('.wasm')
+				fs.copyFileSync("#location/src/#name", "#DESTINATION/#name")
+	)
+	.task('default', (callback) !->
+		run-sequence('dist', 'dist:clean', callback)
+	)
+	.task('dist', (callback) !->
+		run-sequence('clean', ['copy-wasm', 'minify-css', 'minify-html', 'minify-js', 'update-index'], callback)
+	)
+	.task('dist:clean', ->
+		del(["#DESTINATION/#BUNDLED_CSS", "#DESTINATION/#BUNDLED_HTML", "#DESTINATION/#BUNDLED_JS"])
+	)
+	.task('minify-css', ['bundle-css'], !->
+		css	= fs.readFileSync("#DESTINATION/#BUNDLED_CSS", {encoding: 'utf8'})
+		fs.writeFileSync("#DESTINATION/#MINIFIED_CSS", minify_css(css))
+	)
+	.task('minify-html', ['bundle-html'], ->
+		gulp.src("#DESTINATION/#BUNDLED_HTML")
+			.pipe(gulp-htmlmin(
+				decodeEntities	: true
+				minifyCSS		: minify_css
+				removeComments	: true
+			))
+			.pipe(gulp-rename(MINIFIED_HTML))
+			.pipe(gulp.dest(DESTINATION))
+	)
+	.task('minify-js', ['bundle-js'], ->
+		gulp.src("#DESTINATION/#BUNDLED_JS")
+			.pipe(uglify())
+			.pipe(gulp-rename(MINIFIED_JS))
+			.pipe(gulp.dest(DESTINATION))
+	)
+	.task('update-index', !->
+		# TODO: Build production index.html that will consume minified versions of everything
 	)
