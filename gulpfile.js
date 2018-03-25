@@ -5,7 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, del, exec, fs, gulp, htmlmin, uglifyEs, minifyCss, instance, minifyJs, SOURCE_HTML, DESTINATION, MINIFIED_HTML;
+  var cleanCss, del, exec, fs, gulp, htmlmin, uglifyEs, minifyCss, instance, minifyJs, SCRIPTS_REGEXP, SOURCE_HTML, DESTINATION, MINIFIED_HTML;
   cleanCss = require('clean-css');
   del = require('del');
   exec = require('child_process').exec;
@@ -35,6 +35,7 @@
     }
     return result.code;
   };
+  SCRIPTS_REGEXP = /<script>[^]+?<\/script>\n*/g;
   SOURCE_HTML = 'html/index.html';
   DESTINATION = 'dist';
   MINIFIED_HTML = 'index.min.html';
@@ -51,7 +52,7 @@
     var command;
     command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + DESTINATION + "/" + MINIFIED_HTML + " " + SOURCE_HTML;
     exec(command, function(error, stdout, stderr){
-      var code;
+      var code, scripts;
       if (stdout) {
         console.log(stdout);
       }
@@ -61,7 +62,12 @@
       code = fs.readFileSync(DESTINATION + "/" + MINIFIED_HTML, {
         encoding: 'utf8'
       });
-      code = code.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(/<\/script>\n+<script>/g, '');
+      scripts = code.match(SCRIPTS_REGEXP).map(function(string){
+        string = string.trim();
+        return string.substring(8, string.length - 9);
+      }).join('');
+      code = code.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
+      code += "<script>" + scripts + "</script>";
       fs.writeFileSync(DESTINATION + "/" + MINIFIED_HTML, code);
       callback(error);
     });

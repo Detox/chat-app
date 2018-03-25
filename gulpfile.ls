@@ -28,9 +28,10 @@ minify-js	= (text) ->
 		console.log(result.error)
 	result.code
 
-const SOURCE_HTML	= 'html/index.html'
-const DESTINATION	= 'dist'
-const MINIFIED_HTML	= 'index.min.html'
+const SCRIPTS_REGEXP	= /<script>[^]+?<\/script>\n*/g
+const SOURCE_HTML		= 'html/index.html'
+const DESTINATION		= 'dist'
+const MINIFIED_HTML		= 'index.min.html'
 
 gulp
 	.task('dist', ['clean', 'dist-css', 'dist-html', 'dist-js', 'dist-index'])
@@ -58,14 +59,20 @@ gulp
 			if stderr
 				console.error(stderr)
 			code	= fs.readFileSync("#DESTINATION/#MINIFIED_HTML", {encoding: 'utf8'})
+			scripts	= code.match(SCRIPTS_REGEXP)
+				.map (string) ->
+					string	= string.trim()
+					string.substring(8, string.length - 9) # Remove script tag
+				.join('')
 			code	= code
 				# Useless (in our case) arguments
 				.replace(/assetpath=".+"/g, '')
 				# These 2 files are referenced, but do not actually exist (because Polymer uses crappy practices for its packages)
 				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '')
 				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '')
-				# There is no need to have multiple <script> tags one after another, let's merge them into one
-				.replace(/<\/script>\n+<script>/g, '')
+				# Remove all <script> tags, we'll add them in one place later
+				.replace(SCRIPTS_REGEXP, '')
+			code	+= "<script>#scripts</script>"
 			fs.writeFileSync("#DESTINATION/#MINIFIED_HTML", code)
 			callback(error)
 		)
