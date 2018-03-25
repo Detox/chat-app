@@ -3,62 +3,46 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-const DEBUG	= document.body.hasAttribute('debug')
-
 requirejs_config	=
-	'baseUrl'	: '/node_modules/'
+	'baseUrl'	: '.'
 	'paths'		:
-		'@detox/base-x'				: '@detox/base-x/index'
-		'@detox/chat'				: '@detox/chat/src/index'
-		'@detox/core'				: '@detox/core/src/index'
-		'@detox/crypto'				: '@detox/crypto/src/index'
-		'@detox/dht'				: '@detox/dht/dist/detox-dht.browser'
-		'@detox/transport'			: '@detox/transport/src/index'
-		'@detox/utils'				: '@detox/utils/src/index'
-		'async-eventer'				: 'async-eventer/src/index'
-		'fixed-size-multiplexer'	: 'fixed-size-multiplexer/src/index'
-		'ronion'					: 'ronion/dist/ronion.browser'
-		'pako'						: 'pako/dist/pako'
-		'state'						: '/js/state'
+		'@detox/base-x'				: 'node_modules/@detox/base-x/index'
+		'@detox/chat'				: 'node_modules/@detox/chat/src/index'
+		'@detox/core'				: 'node_modules/@detox/core/src/index'
+		'@detox/crypto'				: 'node_modules/@detox/crypto/src/index'
+		'@detox/dht'				: 'node_modules/@detox/dht/dist/detox-dht.browser'
+		'@detox/transport'			: 'node_modules/@detox/transport/src/index'
+		'@detox/utils'				: 'node_modules/@detox/utils/src/index'
+		'async-eventer'				: 'node_modules/async-eventer/src/index'
+		'fixed-size-multiplexer'	: 'node_modules/fixed-size-multiplexer/src/index'
+		'ronion'					: 'node_modules/ronion/dist/ronion.browser'
+		'pako'						: 'node_modules/pako/dist/pako'
+		'state'						: 'js/state'
 	'packages'	: [
 		{
 			'name'		: 'aez.wasm',
-			'location'	: 'aez.wasm',
+			'location'	: 'node_modules/aez.wasm',
 			'main'		: 'src/index'
 		}
 		{
 			'name'		: 'ed25519-to-x25519.wasm',
-			'location'	: 'ed25519-to-x25519.wasm',
+			'location'	: 'node_modules/ed25519-to-x25519.wasm',
 			'main'		: 'src/index'
 		}
 		{
+			'name'		: 'jssha',
+			'location'	: 'node_modules/jssha',
+			'main'		: 'src/sha'
+		}
+		{
 			'name'		: 'noise-c.wasm',
-			'location'	: 'noise-c.wasm',
+			'location'	: 'node_modules/noise-c.wasm',
 			'main'		: 'src/index'
 		}
 		{
 			'name'		: 'supercop.wasm',
-			'location'	: 'supercop.wasm',
+			'location'	: 'node_modules/supercop.wasm',
 			'main'		: 'src/index'
 		}
 	]
-if !DEBUG
-	let paths = requirejs_config['paths']
-		for pkg, main of paths
-			if main.substr(0, 1) != '/'
-				paths[pkg]	+= '.min'
-	let packages = requirejs_config['packages']
-		for pkg in packages
-			pkg['main']	+= '.min'
-
 requirejs['config'](requirejs_config)
-
-ready = new Promise (resolve) !->
-	if window['WebComponents']?['ready']
-		resolve()
-	else
-		window.addEventListener('WebComponentsReady', resolve)
-<-! ready.then
-
-html_file	= if DEBUG then 'html/index.html' else 'dist/index.min.html'
-document.head.insertAdjacentHTML('beforeend', '<link rel="import" href="' + html_file + '">')

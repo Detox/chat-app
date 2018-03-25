@@ -4,7 +4,12 @@ title Detox Chat (debug)
 link(rel="shortcut icon" href="favicon.ico")
 //- TODO: Some mechanism for appending versions to URLs here and in js/index
 link(rel="stylesheet" href="css/style.css")
-script(async data-main="js/index" src="node_modules/alameda/alameda.js")
-script(async src="node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js")
-body(debug)
-	detox-chat-app
+script.
+	addEventListener('load', function () {
+		document.head.appendChild(document.head.querySelector('#scripts').content.cloneNode(true))
+	})
+template#scripts
+	script(defer data-main="js/index" src="node_modules/alameda/alameda.js")
+	script(defer src="node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js")
+	link(defer rel="import" href="html/index.html")
+detox-chat-app

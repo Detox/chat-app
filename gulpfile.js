@@ -5,14 +5,17 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, del, exec, fs, gulp, htmlmin, uglifyEs, minifyCss, instance, minifyJs, SCRIPTS_REGEXP, SOURCE_HTML, DESTINATION, MINIFIED_HTML;
+  var cleanCss, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, uglifyEs, uglify, minifyCss, instance, minifyJs, SCRIPTS_REGEXP, SOURCE_HTML, DESTINATION, BUNDLED_HTML, MINIFIED_HTML, BUNDLED_JS, MINIFIED_JS, requirejs_config;
   cleanCss = require('clean-css');
   del = require('del');
   exec = require('child_process').exec;
   fs = require('fs');
   gulp = require('gulp');
-  htmlmin = require('gulp-htmlmin');
+  gulpHtmlmin = require('gulp-htmlmin');
+  gulpRename = require('gulp-rename');
+  gulpRequirejsOptimize = require('gulp-requirejs-optimize');
   uglifyEs = require('uglify-es');
+  uglify = require('gulp-uglify/composer')(uglifyEs, console);
   minifyCss = (instance = new cleanCss({
     level: {
       1: {
@@ -38,38 +41,98 @@
   SCRIPTS_REGEXP = /<script>[^]+?<\/script>\n*/g;
   SOURCE_HTML = 'html/index.html';
   DESTINATION = 'dist';
+  BUNDLED_HTML = 'index.html';
   MINIFIED_HTML = 'index.min.html';
-  gulp.task('dist', ['clean', 'dist-css', 'dist-html', 'dist-js', 'dist-index']).task('clean', function(){
+  BUNDLED_JS = 'script.js';
+  MINIFIED_JS = 'script.min.js';
+  requirejs_config = {
+    'baseUrl': '.',
+    'paths': {
+      '@detox/base-x': 'node_modules/@detox/base-x/index',
+      '@detox/chat': 'node_modules/@detox/chat/src/index',
+      '@detox/core': 'node_modules/@detox/core/src/index',
+      '@detox/crypto': 'node_modules/@detox/crypto/src/index',
+      '@detox/dht': 'node_modules/@detox/dht/dist/detox-dht.browser',
+      '@detox/transport': 'node_modules/@detox/transport/src/index',
+      '@detox/utils': 'node_modules/@detox/utils/src/index',
+      'async-eventer': 'node_modules/async-eventer/src/index',
+      'autosize': 'node_modules/autosize/dist/autosize',
+      'fixed-size-multiplexer': 'node_modules/fixed-size-multiplexer/src/index',
+      'ronion': 'node_modules/ronion/dist/ronion.browser',
+      'pako': 'node_modules/pako/dist/pako',
+      'state': 'js/state'
+    },
+    'packages': [
+      {
+        'name': 'aez.wasm',
+        'location': 'node_modules/aez.wasm',
+        'main': 'src/index'
+      }, {
+        'name': 'ed25519-to-x25519.wasm',
+        'location': 'node_modules/ed25519-to-x25519.wasm',
+        'main': 'src/index'
+      }, {
+        'name': 'jssha',
+        'location': 'node_modules/jssha',
+        'main': 'src/sha'
+      }, {
+        'name': 'noise-c.wasm',
+        'location': 'node_modules/noise-c.wasm',
+        'main': 'src/index'
+      }, {
+        'name': 'supercop.wasm',
+        'location': 'node_modules/supercop.wasm',
+        'main': 'src/index'
+      }
+    ]
+  };
+  gulp.task('dist', ['dist-html', 'dist-js', 'dist-wasm']).task('dist-css', ['clean'], function(){}).task('dist-html', ['clean', 'minify-html']).task('dist-js', ['clean', 'minify-js']).task('dist-index', ['clean'], function(){}).task('dist-wasm', ['clean'], function(){
+    var i$, ref$, len$, ref1$, name, location, main;
+    for (i$ = 0, len$ = (ref$ = requirejs_config.packages).length; i$ < len$; ++i$) {
+      ref1$ = ref$[i$], name = ref1$.name, location = ref1$.location, main = ref1$.main;
+      if (name.endsWith('.wasm')) {
+        fs.copyFileSync(location + "/src/" + name, DESTINATION + "/" + name);
+      }
+    }
+  }).task('clean', function(){
     return del(DESTINATION + "/*");
-  }).task('dist-css', function(){}).task('dist-html', ['bundle-webcomponents'], function(){
-    return gulp.src(DESTINATION + "/" + MINIFIED_HTML).pipe(htmlmin({
+  }).task('minify-html', ['bundle-html'], function(){
+    return gulp.src(DESTINATION + "/" + BUNDLED_HTML).pipe(gulpHtmlmin({
       decodeEntities: true,
       minifyCSS: minifyCss,
-      minifyJS: minifyJs,
       removeComments: true
-    })).pipe(gulp.dest(DESTINATION));
-  }).task('bundle-webcomponents', function(callback){
+    })).pipe(gulpRename(MINIFIED_HTML)).pipe(gulp.dest(DESTINATION));
+  }).task('bundle-html', function(callback){
     var command;
-    command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + DESTINATION + "/" + MINIFIED_HTML + " " + SOURCE_HTML;
+    command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + DESTINATION + "/" + BUNDLED_HTML + " " + SOURCE_HTML;
     exec(command, function(error, stdout, stderr){
-      var code, scripts;
+      var html, js;
       if (stdout) {
         console.log(stdout);
       }
       if (stderr) {
         console.error(stderr);
       }
-      code = fs.readFileSync(DESTINATION + "/" + MINIFIED_HTML, {
+      html = fs.readFileSync(DESTINATION + "/" + BUNDLED_HTML, {
         encoding: 'utf8'
       });
-      scripts = code.match(SCRIPTS_REGEXP).map(function(string){
+      js = html.match(SCRIPTS_REGEXP).map(function(string){
         string = string.trim();
         return string.substring(8, string.length - 9);
       }).join('');
-      code = code.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
-      code += "<script>" + scripts + "</script>";
-      fs.writeFileSync(DESTINATION + "/" + MINIFIED_HTML, code);
+      html = html.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
+      fs.writeFileSync(DESTINATION + "/" + BUNDLED_HTML, html);
+      fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
       callback(error);
     });
-  }).task('dist-js', function(){}).task('dist-index', function(){});
+  }).task('minify-js', ['bundle-js'], function(){
+    return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(uglify()).pipe(gulpRename(MINIFIED_JS)).pipe(gulp.dest(DESTINATION));
+  }).task('bundle-js', ['bundle-html'], function(){
+    var config;
+    config = Object.assign({
+      name: DESTINATION + "/" + BUNDLED_JS,
+      optimize: 'none'
+    }, requirejs_config);
+    return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(gulpRequirejsOptimize(config)).pipe(gulp.dest(DESTINATION));
+  });
 }).call(this);
