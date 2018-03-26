@@ -37,7 +37,7 @@
 		"@webcomponents/webcomponentsjs" : "^1.1.1",
 		"alameda"                        : "^1.2.1",
 		"autosize"                       : "^4.0.1",
-		"cleverstyle-widgets"            : "^0.7.3"
+		"cleverstyle-widgets"            : "^0.7.4"
 	},
 	"devDependencies" : {
 		"clean-css"               : "^4.1.11",
