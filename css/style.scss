@@ -104,7 +104,6 @@ html {
 
 	/* Modal-specific styles */
 
-	--modal-blur-radius                        : 1em;
 	--modal-content-background                 : var(--background-color-sidebar);
 	--modal-content-padding                    : 2em;
 	--modal-content-translate                  : 10vh;
@@ -147,7 +146,10 @@ html {
 	--sidebar-contact-unconfirmed-color        : var(--text-color-base-disabled);
 	--sidebar-contact-unconfirmed-corner       : linear-gradient(var(--sidebar-contact-corner-bottom-left), var(--sidebar-contact-unconfirmed-color) var(--sidebar-contact-corner-start), transparent var(--sidebar-contact-corner-end));
 
+	--dialog-message-corner-end                : var(--block-padding);
+	--dialog-message-corner-start              : 0%;
 	--dialog-message-content-width-max         : 80%;
+	--dialog-message-pending-corner            : linear-gradient(var(--sidebar-contact-corner-bottom-right), var(--sidebar-contact-pending-color) var(--dialog-message-corner-start), transparent var(--dialog-message-corner-end));
 	--dialog-send-textarea-max                 : 40vh;
 	--dialog-send-textarea-min                 : 20vh;
 }

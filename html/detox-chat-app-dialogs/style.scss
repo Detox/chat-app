@@ -55,6 +55,12 @@
 			}
 		}
 
+		&[pending] {
+			.message-content {
+				background-image : var(--dialog-message-pending-corner);
+			}
+		}
+
 		&:hover .message-details {
 			opacity : 1;
 		}
