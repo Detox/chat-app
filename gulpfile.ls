@@ -124,6 +124,22 @@ gulp
 					string	= string.trim()
 					string.substring(8, string.length - 9) # Remove script tag
 				.join('')
+			# Wrapper ensures that code is only running when HTML imports were loaded
+			# We also force async stylesheet loading and actually apply it by setting `media` property to empty string
+			js		= """
+(function (callback) {
+	document.head.querySelector('[media=async]').removeAttribute('media');
+	if (window.WebComponents && window.WebComponents.ready) {
+		callback();
+	} else {
+		function ready () {
+			callback();
+			document.removeEventListener('WebComponentsReady', ready);
+		}
+		document.addEventListener('WebComponentsReady', ready);
+	}
+})(function () {#js})
+			"""
 			html	= html
 				# Useless (in our case) arguments
 				.replace(/assetpath=".+"/g, '')
@@ -201,11 +217,13 @@ gulp
 		style_hash			= file_hash("#DESTINATION/style.min.css").substr(0, 5)
 		webcomponents_hash	= file_hash("#DESTINATION/webcomponents.min.js").substr(0, 5)
 		index				= fs.readFileSync('index.html', {encoding: 'utf8'})
+		critical_css		= fs.readFileSync('css/critical.css', {encoding: 'utf8'}).trim()
 		index				= index
-			.replace(/dist\/alameda\.min\.js[^"]*/, "dist/alameda.min.js?#alameda_hash")
-			.replace(/dist\/index\.min\.html[^"]*/, "dist/index.min.html?#index_hash")
-			.replace(/dist\/script\.min\.js[^"]*/, "dist/script.min.js?#script_hash")
-			.replace(/dist\/style\.min\.css[^"]*/, "dist/style.min.css?#style_hash")
-			.replace(/dist\/webcomponents\.min\.js[^"]*/, "dist/webcomponents.min.js?#webcomponents_hash")
+			.replace(/dist\/alameda\.min\.js[^"]*/g, "dist/alameda.min.js?#alameda_hash")
+			.replace(/dist\/index\.min\.html[^"]*/g, "dist/index.min.html?#index_hash")
+			.replace(/dist\/script\.min\.js[^"]*/g, "dist/script.min.js?#script_hash")
+			.replace(/dist\/style\.min\.css[^"]*/g, "dist/style.min.css?#style_hash")
+			.replace(/dist\/webcomponents\.min\.js[^"]*/g, "dist/webcomponents.min.js?#webcomponents_hash")
+			.replace(/<style>.*?<\/style>/g, "<style>#critical_css</style>")
 		fs.writeFileSync('index.html', index)
 	)

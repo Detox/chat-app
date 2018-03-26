@@ -140,6 +140,7 @@
         string = string.trim();
         return string.substring(8, string.length - 9);
       }).join('');
+      js = "(function (callback) {\n	document.head.querySelector('[media=async]').removeAttribute('media');\n	if (window.WebComponents && window.WebComponents.ready) {\n		callback();\n	} else {\n		function ready () {\n			callback();\n			document.removeEventListener('WebComponentsReady', ready);\n		}\n		document.addEventListener('WebComponentsReady', ready);\n	}\n})(function () {" + js + "})";
       html = html.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
       fs.writeFileSync(DESTINATION + "/" + BUNDLED_HTML, html);
       fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
@@ -199,7 +200,7 @@
   }).task('minify-js', ['bundle-js', 'copy-wasm'], function(){
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(uglify()).pipe(gulpRename(MINIFIED_JS)).pipe(gulp.dest(DESTINATION));
   }).task('update-index', function(){
-    var alameda_hash, index_hash, script_hash, style_hash, webcomponents_hash, index;
+    var alameda_hash, index_hash, script_hash, style_hash, webcomponents_hash, index, critical_css;
     alameda_hash = file_hash(DESTINATION + "/alameda.min.js").substr(0, 5);
     index_hash = file_hash(DESTINATION + "/index.min.html").substr(0, 5);
     script_hash = file_hash(DESTINATION + "/script.min.js").substr(0, 5);
@@ -208,7 +209,10 @@
     index = fs.readFileSync('index.html', {
       encoding: 'utf8'
     });
-    index = index.replace(/dist\/alameda\.min\.js[^"]*/, "dist/alameda.min.js?" + alameda_hash).replace(/dist\/index\.min\.html[^"]*/, "dist/index.min.html?" + index_hash).replace(/dist\/script\.min\.js[^"]*/, "dist/script.min.js?" + script_hash).replace(/dist\/style\.min\.css[^"]*/, "dist/style.min.css?" + style_hash).replace(/dist\/webcomponents\.min\.js[^"]*/, "dist/webcomponents.min.js?" + webcomponents_hash);
+    critical_css = fs.readFileSync('css/critical.css', {
+      encoding: 'utf8'
+    }).trim();
+    index = index.replace(/dist\/alameda\.min\.js[^"]*/g, "dist/alameda.min.js?" + alameda_hash).replace(/dist\/index\.min\.html[^"]*/g, "dist/index.min.html?" + index_hash).replace(/dist\/script\.min\.js[^"]*/g, "dist/script.min.js?" + script_hash).replace(/dist\/style\.min\.css[^"]*/g, "dist/style.min.css?" + style_hash).replace(/dist\/webcomponents\.min\.js[^"]*/g, "dist/webcomponents.min.js?" + webcomponents_hash).replace(/<style>.*?<\/style>/g, "<style>" + critical_css + "</style>");
     fs.writeFileSync('index.html', index);
   });
 }).call(this);
