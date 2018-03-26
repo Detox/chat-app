@@ -299,8 +299,9 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		'set_ui_active_contact' : (new_active_contact) !->
 			old_active_contact				= @_local_state.ui.active_contact
 			@_local_state.ui.active_contact = new_active_contact
-			@_update_contact_with_unread_messages(new_active_contact)
 			@'fire'('ui_active_contact_changed', new_active_contact, old_active_contact)
+			if new_active_contact
+				@_update_contact_with_unread_messages(new_active_contact)
 			if old_active_contact
 				@_update_contact_last_read_message(old_active_contact)
 				@_update_contact_with_unread_messages(old_active_contact)

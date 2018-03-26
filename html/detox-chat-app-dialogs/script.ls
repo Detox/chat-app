@@ -64,11 +64,11 @@ Polymer(
 							messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
 				)
 				.on('contact_changed', (new_contact) !~>
-					if @contact && are_arrays_equal(@contact.id, new_contact.id)
+					if @contact?id && are_arrays_equal(@contact.id, new_contact.id)
 						@contact	= new_contact
 				)
 				.on('contact_deleted', (old_contact) !~>
-					text_messages.delete(old_contact)
+					text_messages.delete(old_contact.id)
 				)
 	_send : !->
 		text_message	= @text_message.trim()

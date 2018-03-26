@@ -67,11 +67,12 @@
             }
           }
         }).on('contact_changed', function(new_contact){
-          if (this$.contact && are_arrays_equal(this$.contact.id, new_contact.id)) {
+          var ref$;
+          if (((ref$ = this$.contact) != null && ref$.id) && are_arrays_equal(this$.contact.id, new_contact.id)) {
             this$.contact = new_contact;
           }
         }).on('contact_deleted', function(old_contact){
-          text_messages['delete'](old_contact);
+          text_messages['delete'](old_contact.id);
         });
       });
     },
