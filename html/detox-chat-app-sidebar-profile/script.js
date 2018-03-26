@@ -19,10 +19,7 @@
         type: Number,
         value: 4
       },
-      nickname: {
-        observer: '_nickname_changed',
-        type: String
-      }
+      nickname: String
     },
     ready: function(){
       var this$ = this;
@@ -60,9 +57,10 @@
         });
       });
     },
-    _nickname_changed: function(){
+    _nickname_blur: function(){
       if (this.nickname !== this._state_instance.get_nickname()) {
         this._state_instance.set_nickname(this.nickname);
+        csw.functions.notify('Nickname updated', 'success', 'right', 3);
       }
     },
     _id_click: function(e){

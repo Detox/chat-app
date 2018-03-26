@@ -18,9 +18,7 @@ Polymer(
 		new_secret_length	:
 			type	: Number
 			value	: 4
-		nickname			:
-			observer	: '_nickname_changed'
-			type		: String
+		nickname			: String
 	ready : !->
 		Promise.all([
 			require(['@detox/chat', '@detox/crypto'])
@@ -50,9 +48,10 @@ Polymer(
 						@nickname	= new_nickname
 				)
 				.on('secrets_changed', update_secrets)
-	_nickname_changed : !->
+	_nickname_blur : !->
 		if @nickname != @_state_instance.get_nickname()
 			@_state_instance.set_nickname(@nickname)
+			csw.functions.notify('Nickname updated', 'success', 'right', 3)
 	_id_click : (e) !->
 		e.target.select()
 		document.execCommand('copy')
