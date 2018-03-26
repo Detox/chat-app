@@ -34,7 +34,7 @@ minify_js	= (text) ->
 	result.code
 file_hash	= (file) ->
 	file_contents	= fs.readFileSync(file)
-	crypto.createHash('md5').update(file_contents).digest('hex')
+	crypto.createHash('md5').update(file_contents).digest('hex').substr(0, 5)
 
 const SCRIPTS_REGEXP	= /<script>[^]+?<\/script>\n*/g
 const FONTS_REGEXP		= /url\(.+?\.woff2.+?\)/g
@@ -115,10 +115,11 @@ gulp
 			html	= fs.readFileSync("#DESTINATION/#BUNDLED_HTML", {encoding: 'utf8'})
 			fonts	= html.match(FONTS_REGEXP)
 			for font in fonts
-				font_path		= font.substring(8, font.length - 2).split('?')[0]
-				new_file_name	= file_hash(font_path) + '.woff2'
-				html			= html.replace(font, "url(#new_file_name)")
-				fs.copyFileSync(font_path, "#DESTINATION/#new_file_name")
+				font_path	= font.substring(8, font.length - 2).split('?')[0]
+				base_name	= font_path.split('/').pop()
+				hash		= file_hash(font_path)
+				html		= html.replace(font, "url(#base_name?#hash)")
+				fs.copyFileSync(font_path, "#DESTINATION/#base_name")
 			js		= html.match(SCRIPTS_REGEXP)
 				.map (string) ->
 					string	= string.trim()
@@ -169,10 +170,10 @@ gulp
 		js	= fs.readFileSync("#DESTINATION/#BUNDLED_JS", {encoding: 'utf8'})
 		for {name, location, main} in requirejs_config.packages
 			if name.endsWith('.wasm')
-				new_file_name	= file_hash("#location/src/#name") + '.wasm'
-				fs.copyFileSync("#location/src/#name", "#DESTINATION/#new_file_name")
+				hash	= file_hash("#location/src/#name")
 				# This is a hack, but it works for now
-				js	= js.replace('="' + name + '"', '="' + new_file_name + '"')
+				js		= js.replace("=\"#name\"", "=\"#name?#hash\"")
+				fs.copyFileSync("#location/src/#name", "#DESTINATION/#name")
 		fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
 	)
 	.task('copy-js', !->
@@ -211,11 +212,11 @@ gulp
 			.pipe(gulp.dest(DESTINATION))
 	)
 	.task('update-index', !->
-		alameda_hash		= file_hash("#DESTINATION/alameda.min.js").substr(0, 5)
-		index_hash			= file_hash("#DESTINATION/index.min.html").substr(0, 5)
-		script_hash			= file_hash("#DESTINATION/script.min.js").substr(0, 5)
-		style_hash			= file_hash("#DESTINATION/style.min.css").substr(0, 5)
-		webcomponents_hash	= file_hash("#DESTINATION/webcomponents.min.js").substr(0, 5)
+		alameda_hash		= file_hash("#DESTINATION/alameda.min.js")
+		index_hash			= file_hash("#DESTINATION/index.min.html")
+		script_hash			= file_hash("#DESTINATION/script.min.js")
+		style_hash			= file_hash("#DESTINATION/style.min.css")
+		webcomponents_hash	= file_hash("#DESTINATION/webcomponents.min.js")
 		index				= fs.readFileSync('index.html', {encoding: 'utf8'})
 		critical_css		= fs.readFileSync('css/critical.css', {encoding: 'utf8'}).trim()
 		index				= index

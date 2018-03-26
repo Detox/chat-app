@@ -43,7 +43,7 @@
   file_hash = function(file){
     var file_contents;
     file_contents = fs.readFileSync(file);
-    return crypto.createHash('md5').update(file_contents).digest('hex');
+    return crypto.createHash('md5').update(file_contents).digest('hex').substr(0, 5);
   };
   SCRIPTS_REGEXP = /<script>[^]+?<\/script>\n*/g;
   FONTS_REGEXP = /url\(.+?\.woff2.+?\)/g;
@@ -118,7 +118,7 @@
     var command;
     command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + DESTINATION + "/" + BUNDLED_HTML + " " + SOURCE_HTML;
     exec(command, function(error, stdout, stderr){
-      var html, fonts, i$, len$, font, font_path, new_file_name, js;
+      var html, fonts, i$, len$, font, font_path, base_name, hash, js;
       if (stdout) {
         console.log(stdout);
       }
@@ -132,9 +132,10 @@
       for (i$ = 0, len$ = fonts.length; i$ < len$; ++i$) {
         font = fonts[i$];
         font_path = font.substring(8, font.length - 2).split('?')[0];
-        new_file_name = file_hash(font_path) + '.woff2';
-        html = html.replace(font, "url(" + new_file_name + ")");
-        fs.copyFileSync(font_path, DESTINATION + "/" + new_file_name);
+        base_name = font_path.split('/').pop();
+        hash = file_hash(font_path);
+        html = html.replace(font, "url(" + base_name + "?" + hash + ")");
+        fs.copyFileSync(font_path, DESTINATION + "/" + base_name);
       }
       js = html.match(SCRIPTS_REGEXP).map(function(string){
         string = string.trim();
@@ -156,16 +157,16 @@
   }).task('clean', function(){
     return del(DESTINATION + "/*");
   }).task('copy-wasm', ['bundle-js'], function(){
-    var js, i$, ref$, len$, ref1$, name, location, main, new_file_name;
+    var js, i$, ref$, len$, ref1$, name, location, main, hash;
     js = fs.readFileSync(DESTINATION + "/" + BUNDLED_JS, {
       encoding: 'utf8'
     });
     for (i$ = 0, len$ = (ref$ = requirejs_config.packages).length; i$ < len$; ++i$) {
       ref1$ = ref$[i$], name = ref1$.name, location = ref1$.location, main = ref1$.main;
       if (name.endsWith('.wasm')) {
-        new_file_name = file_hash(location + "/src/" + name) + '.wasm';
-        fs.copyFileSync(location + "/src/" + name, DESTINATION + "/" + new_file_name);
-        js = js.replace('="' + name + '"', '="' + new_file_name + '"');
+        hash = file_hash(location + "/src/" + name);
+        js = js.replace("=\"" + name + "\"", "=\"" + name + "?" + hash + "\"");
+        fs.copyFileSync(location + "/src/" + name, DESTINATION + "/" + name);
       }
     }
     fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
@@ -201,11 +202,11 @@
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(uglify()).pipe(gulpRename(MINIFIED_JS)).pipe(gulp.dest(DESTINATION));
   }).task('update-index', function(){
     var alameda_hash, index_hash, script_hash, style_hash, webcomponents_hash, index, critical_css;
-    alameda_hash = file_hash(DESTINATION + "/alameda.min.js").substr(0, 5);
-    index_hash = file_hash(DESTINATION + "/index.min.html").substr(0, 5);
-    script_hash = file_hash(DESTINATION + "/script.min.js").substr(0, 5);
-    style_hash = file_hash(DESTINATION + "/style.min.css").substr(0, 5);
-    webcomponents_hash = file_hash(DESTINATION + "/webcomponents.min.js").substr(0, 5);
+    alameda_hash = file_hash(DESTINATION + "/alameda.min.js");
+    index_hash = file_hash(DESTINATION + "/index.min.html");
+    script_hash = file_hash(DESTINATION + "/script.min.js");
+    style_hash = file_hash(DESTINATION + "/style.min.css");
+    webcomponents_hash = file_hash(DESTINATION + "/webcomponents.min.js");
     index = fs.readFileSync('index.html', {
       encoding: 'utf8'
     });
