@@ -2,8 +2,6 @@ dom-module(id="detox-chat-app-sidebar-profile")
 	link(rel="import" href="style.css" type="css")
 	template
 		csw-form: form
-			label ID (no secret):
-			csw-textarea: textarea(readonly on-click="_id_click" rows="3" value="[[id_base58]]")
 			label Nickname:
 			csw-textarea: textarea(rows="3" value="{{nickname}}" on-blur="_nickname_blur")
 			div(hidden="[[add_secret]]")
@@ -25,4 +23,6 @@ dom-module(id="detox-chat-app-sidebar-profile")
 					csw-icon(mono icon="edit" on-click="_rename_secret" tooltip="Rename secret")
 					csw-icon(mono icon="trash" on-click="_del_secret" tooltip="Delete secret")
 				csw-textarea: textarea(readonly on-click="_id_click" rows="4" value="[[item.id]]")
+			label Plain ID (no secret):
+			csw-textarea: textarea(readonly on-click="_id_click" rows="3" value="[[id_base58]]")
 	script(src="script.js")
