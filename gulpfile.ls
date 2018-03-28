@@ -166,6 +166,12 @@ gulp
 	.task('clean', ->
 		del("#DESTINATION/*")
 	)
+	.task('copy-js', !->
+		alameda			= fs.readFileSync('node_modules/alameda/alameda.js', {encoding: 'utf8'})
+		webcomponents	= fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {encoding: 'utf8'})
+		fs.writeFileSync("#DESTINATION/alameda.min.js", minify_js(alameda))
+		fs.writeFileSync("#DESTINATION/webcomponents.min.js", minify_js(webcomponents))
+	)
 	.task('copy-wasm', ['bundle-js'], !->
 		js	= fs.readFileSync("#DESTINATION/#BUNDLED_JS", {encoding: 'utf8'})
 		for {name, location, main} in requirejs_config.packages
@@ -175,12 +181,6 @@ gulp
 				js		= js.replace("=\"#name\"", "=\"#name?#hash\"")
 				fs.copyFileSync("#location/src/#name", "#DESTINATION/#name")
 		fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
-	)
-	.task('copy-js', !->
-		alameda			= fs.readFileSync('node_modules/alameda/alameda.js', {encoding: 'utf8'})
-		webcomponents	= fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {encoding: 'utf8'})
-		fs.writeFileSync("#DESTINATION/alameda.min.js", minify_js(alameda))
-		fs.writeFileSync("#DESTINATION/webcomponents.min.js", minify_js(webcomponents))
 	)
 	.task('default', (callback) !->
 		run-sequence('dist', 'dist:clean', callback)

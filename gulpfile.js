@@ -156,6 +156,16 @@
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(gulpRequirejsOptimize(config)).pipe(gulp.dest(DESTINATION));
   }).task('clean', function(){
     return del(DESTINATION + "/*");
+  }).task('copy-js', function(){
+    var alameda, webcomponents;
+    alameda = fs.readFileSync('node_modules/alameda/alameda.js', {
+      encoding: 'utf8'
+    });
+    webcomponents = fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {
+      encoding: 'utf8'
+    });
+    fs.writeFileSync(DESTINATION + "/alameda.min.js", minify_js(alameda));
+    fs.writeFileSync(DESTINATION + "/webcomponents.min.js", minify_js(webcomponents));
   }).task('copy-wasm', ['bundle-js'], function(){
     var js, i$, ref$, len$, ref1$, name, location, main, hash;
     js = fs.readFileSync(DESTINATION + "/" + BUNDLED_JS, {
@@ -170,16 +180,6 @@
       }
     }
     fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
-  }).task('copy-js', function(){
-    var alameda, webcomponents;
-    alameda = fs.readFileSync('node_modules/alameda/alameda.js', {
-      encoding: 'utf8'
-    });
-    webcomponents = fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {
-      encoding: 'utf8'
-    });
-    fs.writeFileSync(DESTINATION + "/alameda.min.js", minify_js(alameda));
-    fs.writeFileSync(DESTINATION + "/webcomponents.min.js", minify_js(webcomponents));
   }).task('default', function(callback){
     runSequence('dist', 'dist:clean', callback);
   }).task('dist', function(callback){
