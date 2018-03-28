@@ -1,6 +1,8 @@
 # Detox chat app
 Reference implementation of Chat application on top of Detox network using Detox Chat protocol.
 
+WARNING: INSECURE UNTIL PROVEN THE OPPOSITE!!!
+
 ## Alpha testing
 Currently application is at alpha quality, but if you feel adventurous and want to take a look, here is how you do it.
 
