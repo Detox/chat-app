@@ -127,9 +127,13 @@ html {
 	--notify-translate                         : 50vh;
 	--notify-content-padding                   : var(--block-padding) 2.5em var(--block-padding) var(--block-padding);
 
+	/* Sidebar styles */
+
 	--sidebar-width-min                        : 300px;
 	--sidebar-width-max                        : 420px;
 	--sidebar-width-base                       : 20%;
+
+	/* Contacts tab in sidebar */
 
 	--sidebar-contact-corner-bottom-left       : 45deg;
 	--sidebar-contact-corner-bottom-right      : 315deg;
@@ -145,6 +149,8 @@ html {
 	--sidebar-contact-pending-corner           : linear-gradient(var(--sidebar-contact-corner-bottom-right), var(--sidebar-contact-pending-color) var(--sidebar-contact-corner-start), transparent var(--sidebar-contact-corner-end));
 	--sidebar-contact-unconfirmed-color        : var(--text-color-base-disabled);
 	--sidebar-contact-unconfirmed-corner       : linear-gradient(var(--sidebar-contact-corner-bottom-left), var(--sidebar-contact-unconfirmed-color) var(--sidebar-contact-corner-start), transparent var(--sidebar-contact-corner-end));
+
+	/* Main dialog panel */
 
 	--dialog-message-corner-end                : var(--block-padding);
 	--dialog-message-corner-start              : 0%;
