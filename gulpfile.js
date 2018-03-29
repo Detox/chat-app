@@ -157,6 +157,8 @@
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(gulpRequirejsOptimize(config)).pipe(gulp.dest(DESTINATION));
   }).task('clean', function(){
     return del(DESTINATION + "/*");
+  }).task('copy-favicon', function(){
+    fs.copyFileSync('favicon.ico', DESTINATION + "/favicon.ico");
   }).task('copy-js', function(){
     var alameda, webcomponents;
     alameda = fs.readFileSync('node_modules/alameda/alameda.js', {
@@ -197,7 +199,7 @@
   }).task('default', function(callback){
     runSequence('dist', 'dist:clean', callback);
   }).task('dist', function(callback){
-    runSequence('clean', ['copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback);
+    runSequence('clean', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback);
   }).task('dist:clean', function(){
     return del([DESTINATION + "/" + BUNDLED_CSS, DESTINATION + "/" + BUNDLED_HTML, DESTINATION + "/" + BUNDLED_JS]);
   }).task('minify-css', ['bundle-css'], function(){
@@ -215,20 +217,20 @@
   }).task('minify-js', ['bundle-js', 'copy-wasm'], function(){
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(uglify()).pipe(gulpRename(MINIFIED_JS)).pipe(gulp.dest(DESTINATION));
   }).task('update-index', function(){
-    var alameda_hash, css_hash, html_hash, js_hash, manifest_hash, webcomponents_hash, index, critical_css;
-    alameda_hash = file_hash(DESTINATION + "/alameda.min.js");
-    css_hash = file_hash(DESTINATION + "/" + MINIFIED_CSS);
-    html_hash = file_hash(DESTINATION + "/" + MINIFIED_HTML);
-    js_hash = file_hash(DESTINATION + "/" + MINIFIED_JS);
-    manifest_hash = file_hash(DESTINATION + "/" + BUNDLED_MANIFEST);
-    webcomponents_hash = file_hash(DESTINATION + "/webcomponents.min.js");
+    var index, critical_css, files_for_hash_update, i$, len$, file, hash;
     index = fs.readFileSync('index.html', {
       encoding: 'utf8'
     });
     critical_css = fs.readFileSync('css/critical.css', {
       encoding: 'utf8'
     }).trim();
-    index = index.replace(new RegExp(DESTINATION + "/alameda.min.js[^\"]*", 'g'), DESTINATION + "/alameda.min.js?" + alameda_hash).replace(new RegExp(DESTINATION + "/" + MINIFIED_CSS + "[^\"]*", 'g'), DESTINATION + "/" + MINIFIED_CSS + "?" + css_hash).replace(new RegExp(DESTINATION + "/" + MINIFIED_HTML + "[^\"]*", 'g'), DESTINATION + "/" + MINIFIED_HTML + "?" + html_hash).replace(new RegExp(DESTINATION + "/" + MINIFIED_JS + "[^\"]*", 'g'), DESTINATION + "/" + MINIFIED_JS + "?" + js_hash).replace(new RegExp(DESTINATION + "/" + BUNDLED_MANIFEST + "[^\"]*", 'g'), DESTINATION + "/" + BUNDLED_MANIFEST + "?" + manifest_hash).replace(new RegExp(DESTINATION + "/webcomponents.min.js[^\"]*", 'g'), DESTINATION + "/webcomponents.min.js?" + webcomponents_hash).replace(/<style>.*?<\/style>/g, "<style>" + critical_css + "</style>");
+    index = index.replace(/<style>.*?<\/style>/g, "<style>" + critical_css + "</style>");
+    files_for_hash_update = [DESTINATION + "/alameda.min.js", DESTINATION + "/" + MINIFIED_CSS, DESTINATION + "/favicon.ico", DESTINATION + "/" + MINIFIED_HTML, DESTINATION + "/" + MINIFIED_JS, DESTINATION + "/" + BUNDLED_MANIFEST, DESTINATION + "/webcomponents.min.js"];
+    for (i$ = 0, len$ = files_for_hash_update.length; i$ < len$; ++i$) {
+      file = files_for_hash_update[i$];
+      hash = file_hash(file);
+      index = index.replace(new RegExp(file + "[^\"]*", 'g'), file + "?" + hash);
+    }
     fs.writeFileSync('index.html', index);
   });
 }).call(this);

@@ -170,6 +170,9 @@ gulp
 	.task('clean', ->
 		del("#DESTINATION/*")
 	)
+	.task('copy-favicon', !->
+		fs.copyFileSync('favicon.ico', "#DESTINATION/favicon.ico")
+	)
 	.task('copy-js', !->
 		alameda			= fs.readFileSync('node_modules/alameda/alameda.js', {encoding: 'utf8'})
 		webcomponents	= fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {encoding: 'utf8'})
@@ -199,7 +202,7 @@ gulp
 		run-sequence('dist', 'dist:clean', callback)
 	)
 	.task('dist', (callback) !->
-		run-sequence('clean', ['copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback)
+		run-sequence('clean', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback)
 	)
 	.task('dist:clean', ->
 		del(["#DESTINATION/#BUNDLED_CSS", "#DESTINATION/#BUNDLED_HTML", "#DESTINATION/#BUNDLED_JS"])
@@ -225,21 +228,20 @@ gulp
 			.pipe(gulp.dest(DESTINATION))
 	)
 	.task('update-index', !->
-		alameda_hash		= file_hash("#DESTINATION/alameda.min.js")
-		css_hash			= file_hash("#DESTINATION/#MINIFIED_CSS")
-		html_hash			= file_hash("#DESTINATION/#MINIFIED_HTML")
-		js_hash				= file_hash("#DESTINATION/#MINIFIED_JS")
-		manifest_hash		= file_hash("#DESTINATION/#BUNDLED_MANIFEST")
-		webcomponents_hash	= file_hash("#DESTINATION/webcomponents.min.js")
-		index				= fs.readFileSync('index.html', {encoding: 'utf8'})
-		critical_css		= fs.readFileSync('css/critical.css', {encoding: 'utf8'}).trim()
-		index				= index
-			.replace(new RegExp("#DESTINATION/alameda.min.js[^\"]*", 'g'), "#DESTINATION/alameda.min.js?#alameda_hash")
-			.replace(new RegExp("#DESTINATION/#MINIFIED_CSS[^\"]*", 'g'), "#DESTINATION/#MINIFIED_CSS?#css_hash")
-			.replace(new RegExp("#DESTINATION/#MINIFIED_HTML[^\"]*", 'g'), "#DESTINATION/#MINIFIED_HTML?#html_hash")
-			.replace(new RegExp("#DESTINATION/#MINIFIED_JS[^\"]*", 'g'), "#DESTINATION/#MINIFIED_JS?#js_hash")
-			.replace(new RegExp("#DESTINATION/#BUNDLED_MANIFEST[^\"]*", 'g'), "#DESTINATION/#BUNDLED_MANIFEST?#manifest_hash")
-			.replace(new RegExp("#DESTINATION/webcomponents.min.js[^\"]*", 'g'), "#DESTINATION/webcomponents.min.js?#webcomponents_hash")
-			.replace(/<style>.*?<\/style>/g, "<style>#critical_css</style>")
+		index					= fs.readFileSync('index.html', {encoding: 'utf8'})
+		critical_css			= fs.readFileSync('css/critical.css', {encoding: 'utf8'}).trim()
+		index					= index.replace(/<style>.*?<\/style>/g, "<style>#critical_css</style>")
+		files_for_hash_update	= [
+			"#DESTINATION/alameda.min.js"
+			"#DESTINATION/#MINIFIED_CSS"
+			"#DESTINATION/favicon.ico"
+			"#DESTINATION/#MINIFIED_HTML"
+			"#DESTINATION/#MINIFIED_JS"
+			"#DESTINATION/#BUNDLED_MANIFEST"
+			"#DESTINATION/webcomponents.min.js"
+		]
+		for file in files_for_hash_update
+			hash	= file_hash(file)
+			index	= index.replace(new RegExp("#file[^\"]*", 'g'), "#file?#hash")
 		fs.writeFileSync('index.html', index)
 	)
