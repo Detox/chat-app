@@ -1,1 +1,1 @@
-{"background_color":"#181818","display":"standalone","icons":[{"src":"logo.svg?7c632","type":"image/svg+xml","sizes":"any"}],"name":"Detox Chat","short_name":"Detox","start_url":"index.html?home","theme_color":"#181818"}
+{"background_color":"#181818","display":"standalone","icons":[{"src":"logo.svg?7c632","type":"image/svg+xml","sizes":"any"},{"src":"logo-128.png?d1699","type":"image/png","sizes":"128x128"},{"src":"logo-256.png?0487f","type":"image/png","sizes":"256x256"}],"name":"Detox Chat","short_name":"Detox","start_url":"index.html?home","theme_color":"#181818"}
