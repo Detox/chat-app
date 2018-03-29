@@ -174,6 +174,7 @@
     manifest = JSON.parse(fs.readFileSync(SOURCE_MANIFEST + "", {
       encoding: 'utf8'
     }));
+    manifest.start_url = '../' + manifest.start_url;
     for (i$ = 0, len$ = (ref$ = manifest.icons).length; i$ < len$; ++i$) {
       icon = ref$[i$];
       base_name = icon.src.split('/').pop();

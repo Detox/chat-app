@@ -180,7 +180,8 @@ gulp
 		fs.writeFileSync("#DESTINATION/webcomponents.min.js", minify_js(webcomponents))
 	)
 	.task('copy-manifest', !->
-		manifest	= JSON.parse(fs.readFileSync("#SOURCE_MANIFEST", {encoding: 'utf8'}))
+		manifest			= JSON.parse(fs.readFileSync("#SOURCE_MANIFEST", {encoding: 'utf8'}))
+		manifest.start_url	= '../' + manifest.start_url
 		for icon in manifest.icons
 			base_name	= icon.src.split('/').pop()
 			hash		= file_hash(icon.src)
