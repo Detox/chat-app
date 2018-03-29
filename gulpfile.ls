@@ -99,10 +99,11 @@ gulp
 		css		= fs.readFileSync("#SOURCE_CSS", {encoding: 'utf8'})
 		images	= css.match(IMAGES_REGEXP)
 		for image in images
-			image_path		= image.substring(7, image.length - 1)
-			image_source	= fs.readFileSync(image_path, {encoding: 'utf8'})
-			image_data_uri	= 'url(data:image/svg+xml;utf8,' + image_source.replace(/#/g, '%23') + ')'
-			css				= css.replace(image, image_data_uri)
+			image_path	= image.substring(7, image.length - 1)
+			base_name	= image_path.split('/').pop()
+			hash		= file_hash(image_path)
+			css			= css.replace(image, "url(#DESTINATION/#base_name?#hash)")
+			fs.copyFileSync(image_path, "#DESTINATION/#base_name")
 		fs.writeFileSync("#DESTINATION/#BUNDLED_CSS", css)
 	)
 	.task('bundle-html', (callback) !->
