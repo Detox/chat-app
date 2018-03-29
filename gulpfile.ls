@@ -36,18 +36,21 @@ file_hash	= (file) ->
 	file_contents	= fs.readFileSync(file)
 	crypto.createHash('md5').update(file_contents).digest('hex').substr(0, 5)
 
-const SCRIPTS_REGEXP	= /<script>[^]+?<\/script>\n*/g
 const FONTS_REGEXP		= /url\(.+?\.woff2.+?\)/g
 const IMAGES_REGEXP		= /url\(\.\.\/img\/.+?\)/g
+const SCRIPTS_REGEXP	= /<script>[^]+?<\/script>\n*/g
+
+const BUNDLED_CSS		= 'style.css'
+const BUNDLED_HTML		= 'index.html'
+const BUNDLED_JS		= 'script.js'
+const BUNDLED_MANIFEST	= 'manifest.json'
+const DESTINATION		= 'dist'
+const MINIFIED_CSS		= 'style.min.css'
+const MINIFIED_HTML		= 'index.min.html'
+const MINIFIED_JS		= 'script.min.js'
 const SOURCE_CSS		= 'css/style.css'
 const SOURCE_HTML		= 'html/index.html'
-const DESTINATION		= 'dist'
-const BUNDLED_CSS		= 'style.css'
-const MINIFIED_CSS		= 'style.min.css'
-const BUNDLED_HTML		= 'index.html'
-const MINIFIED_HTML		= 'index.min.html'
-const BUNDLED_JS		= 'script.js'
-const MINIFIED_JS		= 'script.min.js'
+const SOURCE_MANIFEST	= 'manifest.json'
 
 requirejs_config	=
 	'baseUrl'	: '.'
@@ -173,6 +176,15 @@ gulp
 		fs.writeFileSync("#DESTINATION/alameda.min.js", minify_js(alameda))
 		fs.writeFileSync("#DESTINATION/webcomponents.min.js", minify_js(webcomponents))
 	)
+	.task('copy-manifest', !->
+		manifest	= JSON.parse(fs.readFileSync("#SOURCE_MANIFEST", {encoding: 'utf8'}))
+		for icon in manifest.icons
+			base_name	= icon.src.split('/').pop()
+			hash		= file_hash(icon.src)
+			fs.copyFileSync(icon.src, "#DESTINATION/#base_name")
+			icon.src	= "#base_name?#hash"
+		fs.writeFileSync("#DESTINATION/#BUNDLED_MANIFEST", JSON.stringify(manifest))
+	)
 	.task('copy-wasm', ['bundle-js'], !->
 		js	= fs.readFileSync("#DESTINATION/#BUNDLED_JS", {encoding: 'utf8'})
 		for {name, location, main} in requirejs_config.packages
@@ -187,7 +199,7 @@ gulp
 		run-sequence('dist', 'dist:clean', callback)
 	)
 	.task('dist', (callback) !->
-		run-sequence('clean', ['copy-js', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback)
+		run-sequence('clean', ['copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback)
 	)
 	.task('dist:clean', ->
 		del(["#DESTINATION/#BUNDLED_CSS", "#DESTINATION/#BUNDLED_HTML", "#DESTINATION/#BUNDLED_JS"])
@@ -214,18 +226,20 @@ gulp
 	)
 	.task('update-index', !->
 		alameda_hash		= file_hash("#DESTINATION/alameda.min.js")
-		index_hash			= file_hash("#DESTINATION/index.min.html")
-		script_hash			= file_hash("#DESTINATION/script.min.js")
-		style_hash			= file_hash("#DESTINATION/style.min.css")
+		css_hash			= file_hash("#DESTINATION/#MINIFIED_CSS")
+		html_hash			= file_hash("#DESTINATION/#MINIFIED_HTML")
+		js_hash				= file_hash("#DESTINATION/#MINIFIED_JS")
+		manifest_hash		= file_hash("#DESTINATION/#BUNDLED_MANIFEST")
 		webcomponents_hash	= file_hash("#DESTINATION/webcomponents.min.js")
 		index				= fs.readFileSync('index.html', {encoding: 'utf8'})
 		critical_css		= fs.readFileSync('css/critical.css', {encoding: 'utf8'}).trim()
 		index				= index
-			.replace(/dist\/alameda\.min\.js[^"]*/g, "dist/alameda.min.js?#alameda_hash")
-			.replace(/dist\/index\.min\.html[^"]*/g, "dist/index.min.html?#index_hash")
-			.replace(/dist\/script\.min\.js[^"]*/g, "dist/script.min.js?#script_hash")
-			.replace(/dist\/style\.min\.css[^"]*/g, "dist/style.min.css?#style_hash")
-			.replace(/dist\/webcomponents\.min\.js[^"]*/g, "dist/webcomponents.min.js?#webcomponents_hash")
+			.replace(new RegExp("#DESTINATION/alameda.min.js[^\"]*", 'g'), "#DESTINATION/alameda.min.js?#alameda_hash")
+			.replace(new RegExp("#DESTINATION/#MINIFIED_CSS[^\"]*", 'g'), "#DESTINATION/#MINIFIED_CSS?#css_hash")
+			.replace(new RegExp("#DESTINATION/#MINIFIED_HTML[^\"]*", 'g'), "#DESTINATION/#MINIFIED_HTML?#html_hash")
+			.replace(new RegExp("#DESTINATION/#MINIFIED_JS[^\"]*", 'g'), "#DESTINATION/#MINIFIED_JS?#js_hash")
+			.replace(new RegExp("#DESTINATION/#BUNDLED_MANIFEST[^\"]*", 'g'), "#DESTINATION/#BUNDLED_MANIFEST?#manifest_hash")
+			.replace(new RegExp("#DESTINATION/webcomponents.min.js[^\"]*", 'g'), "#DESTINATION/webcomponents.min.js?#webcomponents_hash")
 			.replace(/<style>.*?<\/style>/g, "<style>#critical_css</style>")
 		fs.writeFileSync('index.html', index)
 	)

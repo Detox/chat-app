@@ -1,0 +1,15 @@
+{
+	"background_color" : "#181818",
+	"display"          : "standalone",
+	"icons"            : [
+		{
+			"src"   : "img/logo.svg",
+			"type"  : "image/svg+xml",
+			"sizes" : "600x600"
+		}
+	],
+	"name"             : "Detox Chat",
+	"short_name"       : "Detox",
+	"start_url"        : "index.html?home",
+	"theme_color"      : "#181818"
+}
