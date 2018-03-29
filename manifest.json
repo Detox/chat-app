@@ -5,7 +5,7 @@
 		{
 			"src"   : "img/logo.svg",
 			"type"  : "image/svg+xml",
-			"sizes" : "600x600"
+			"sizes" : "any"
 		}
 	],
 	"name"             : "Detox Chat",
