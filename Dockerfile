@@ -19,5 +19,10 @@ LABEL maintainer="Nazar Mokrynskyi <nazar@mokrynskyi.com>"
 COPY --from=builder /code/dist /usr/share/nginx/html/dist
 COPY --from=builder /code/index.html /usr/share/nginx/html/
 
+RUN \
+	apk update && \
+	apk upgrade && \
+	rm -rf /var/cache/apk/*
+
 RUN sed -i 's/}/    application\/wasm                                 wasm;\n}/g' /etc/nginx/mime.types
 RUN sed -i 's/access_log.\+;/access_log off;/g' /etc/nginx/nginx.conf
