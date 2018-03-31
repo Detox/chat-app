@@ -3,6 +3,16 @@ Reference implementation of Chat application on top of Detox network using Detox
 
 WARNING: INSECURE UNTIL PROVEN THE OPPOSITE!!!
 
+## Browser support
+First of all, only 2 latest stable versions of any browser are supported! Don't ever ask to support older ones.
+
+| Browser  | Support level                                         |
+|----------|-------------------------------------------------------|
+| Chromium | Flaky, bugs reported, should be better soon           |
+| Firefox  | Fully supported                                       |
+| Safari   | WebRTC support is not good enough yet, hopefully soon |
+| Edge     | Unknown, tell me                                      |
+
 ## Alpha testing
 Currently application is at alpha quality, but if you feel adventurous and want to take a look, here is how you do it.
 
