@@ -85,7 +85,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 							'port'		: 16882
 						}
 					]
-					'bucket_size'					: 5
+					'bucket_size'					: 2
 					'help'							: true
 					'ice_servers'					: [
 						{urls: 'stun:stun.l.google.com:19302'}

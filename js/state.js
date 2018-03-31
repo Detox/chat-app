@@ -85,7 +85,7 @@
             'host': '127.0.0.1',
             'port': 16882
           }],
-          'bucket_size': 5,
+          'bucket_size': 2,
           'help': true,
           'ice_servers': [
             {
