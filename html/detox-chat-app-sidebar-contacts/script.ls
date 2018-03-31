@@ -13,6 +13,9 @@ Polymer(
 		add_contact						:
 			type	: Boolean
 			value	: false
+		advanced_user		:
+			type	: Boolean
+			value	: false
 		contacts						:
 			type	: Array
 			value	: []
@@ -39,6 +42,7 @@ Polymer(
 			ArraySet	= detox-utils.ArraySet
 
 			state							= @_state_instance
+			@advanced_user					= state.get_settings_experience() >= 1
 			@contacts						= state.get_contacts()
 			@online_contacts				= ArraySet(state.get_online_contacts())
 			@contacts_requests				= state.get_contacts_requests()
@@ -67,6 +71,9 @@ Polymer(
 				.on('ui_active_contact_changed', !~>
 					@ui_active_contact	= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
 				)
+				.on('settings_experience_changed', (experience) !~>
+					@advanced_user	= experience >= 1
+				)
 	_hide_header : (list, add_contact) ->
 		!list.length || add_contact
 	_add_contact : !->
@@ -84,7 +91,7 @@ Polymer(
 				csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>#{existing_contact.nickname}</i>", 'warning', 'right', 3)
 				return
 			@_state_instance.add_contact(public_key, @new_contact_name, remote_secret)
-			csw.functions.notify('Contact added', 'success', 'right', 3)
+			csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 3)
 			@add_contact		= false
 			@new_contact_id		= ''
 			@new_contact_name	= ''
@@ -93,15 +100,26 @@ Polymer(
 	_add_contact_cancel : !->
 		@add_contact	= false
 	_help : !->
-		content	= """
-			<p>You need to add contact in order to communicate, addition is make using IDs.</p>
-			<p>There are 2 kinds of IDs: without secrets and with secrets. Look at <i>Profile</i> tab for more details on those.</p>
-			<p>Each contact in the list might have some of the corners highlighted, which indicates some information about its state.</p>
-			<p>Top left corner is highlighted when there is an active connection to contact right now.<br>
-			Bottom left corner is highlighted means that there was never an active connection, for instance you've added someone to contacts, but they didn't accept request (yet).<br>
-			Top right corner is highlighted when there are unread messages from that contact.<br>
-			Bottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>
-		"""
+		if @advanced_user
+			content	= """
+				<p>You need to add contact using their ID in order to communicate.</p>
+				<p>There are 2 kinds of IDs: without secrets and with secrets. Look at <i>Profile</i> tab for more details on those.</p>
+				<p>Each contact in the list might have some of the corners highlighted, which indicates some information about its state.</p>
+				<p>Top left corner is highlighted when there is an active connection to contact right now.<br>
+				Bottom left corner is highlighted means that there was never an active connection, for instance you've added someone to contacts, but they didn't accept request (yet).<br>
+				Top right corner is highlighted when there are unread messages from that contact.<br>
+				Bottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>
+			"""
+		else
+			content	= """
+				<p>You need to add contact using their ID in order to communicate.</p>
+				<p>Your ID can be found in <i>Profile</i> tab.</p>
+				<p>Each contact in the list might have some of the corners highlighted, which indicates some information about its state.</p>
+				<p>Top left corner is highlighted when there is an active connection to contact right now.<br>
+				Bottom left corner is highlighted means that there was never an active connection, for instance you've added someone to contacts, but they didn't accept request (yet).<br>
+				Top right corner is highlighted when there are unread messages from that contact.<br>
+				Bottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>
+			"""
 		csw.functions.simple_modal(content)
 	_set_active_contact : (e) !->
 		@_state_instance.set_ui_active_contact(e.model.item.id)
@@ -121,19 +139,30 @@ Polymer(
 		state	= @_state_instance
 
 		item	= e.model.item
-		content	= """
-			<h3>What do you want to do with contact request?</h3>
-			<p>ID: <i>#{item.name}</i></p>
-			<p>Secret used: <i>#{item.secret_name}</i></p>
-			<csw-group>
-				<csw-button primary><button id="accept">Accept</button></csw-button>
-				<csw-button><button id="reject">Reject</button></csw-button>
-				<csw-button><button id="cancel">Cancel</button></csw-button>
-			</csw-group>
-		"""
+		if @advanced_user
+			content	= """
+				<h3>What do you want to do with contact request?</h3>
+				<p>ID: <i>#{item.name}</i></p>
+				<p>Secret used: <i>#{item.secret_name}</i></p>
+				<csw-group>
+					<csw-button primary><button id="accept">Accept</button></csw-button>
+					<csw-button><button id="reject">Reject</button></csw-button>
+					<csw-button><button id="cancel">Cancel</button></csw-button>
+				</csw-group>
+			"""
+		else
+			content	= """
+				<h3>What do you want to do with contact request?</h3>
+				<p>ID: <i>#{item.name}</i></p>
+				<csw-group>
+					<csw-button primary><button id="accept">Accept</button></csw-button>
+					<csw-button><button id="reject">Reject</button></csw-button>
+					<csw-button><button id="cancel">Cancel</button></csw-button>
+				</csw-group>
+			"""
 		modal	= csw.functions.simple_modal(content)
 		modal.querySelector('#accept').addEventListener('click', !->
-			state.add_contact(item.id, '', new Uint8Array(0))
+			state.add_contact(item.id, item.name, new Uint8Array(0))
 			state.del_contact_request(item.id)
 			modal.close()
 			csw.functions.notify('Contact added', 'success', 'right', 3)

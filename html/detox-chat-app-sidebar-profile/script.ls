@@ -13,7 +13,11 @@ Polymer(
 		add_secret			:
 			type	: Boolean
 			value	: false
+		advanced_user		:
+			type	: Boolean
+			value	: false
 		id_base58			: String
+		id_default_secret	: String
 		new_secret_name		: String
 		new_secret_length	:
 			type	: Number
@@ -31,7 +35,9 @@ Polymer(
 			state		= @_state_instance
 
 			!~function update_secrets
-				@secrets	= for secret in state.get_secrets()
+				secrets				= state.get_secrets()
+				@id_default_secret	= id_encode(public_key, secrets[0].secret)
+				@secrets			= for secret in secrets
 					{
 						secret	: secret.secret
 						id		: id_encode(public_key, secret.secret)
@@ -42,12 +48,18 @@ Polymer(
 			@id_base58	= id_encode(public_key, new Uint8Array(0))
 			@nickname	= state.get_nickname()
 			update_secrets()
+
+			@advanced_user	= state.get_settings_experience() >= 1
+
 			state
 				.on('nickname_changed', (new_nickname) !~>
 					if @nickname != new_nickname
 						@nickname	= new_nickname
 				)
 				.on('secrets_changed', update_secrets)
+				.on('settings_experience_changed', (experience) !~>
+					@advanced_user	= experience >= 1
+				)
 	_nickname_blur : !->
 		if @nickname != @_state_instance.get_nickname()
 			@_state_instance.set_nickname(@nickname)
@@ -72,7 +84,13 @@ Polymer(
 		@new_secret_length	= 4
 	_add_secret_cancel : !->
 		@add_secret	= false
-	_help : !->
+	_help_id : !->
+		content	= """
+			<p>ID is an identifier that represents you in the network.<br>
+			If you share this ID with someone, they'll be able to send contact request to you.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_help_secrets : !->
 		content	= """
 			<p>Secrets are used as anti-spam system. You can create different secrets for different purposes.<br>
 			Each time you have incoming contact request, you'll see which secret was used.<br>

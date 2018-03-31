@@ -86,6 +86,7 @@
             'port': 16882
           }],
           'bucket_size': 2,
+          'experience': 0,
           'help': true,
           'ice_servers': [
             {
@@ -331,7 +332,7 @@
       'set_settings_announce': function(announce){
         var old_announce, new_announce;
         old_announce = this._state['settings']['announce'];
-        new_announce = announce;
+        new_announce = !!announce;
         this._state['settings']['announce'] = new_announce;
         this['fire']('settings_announce_changed', new_announce, old_announce);
       }
@@ -347,7 +348,7 @@
       'set_settings_block_contact_requests_for': function(block_contact_requests_for){
         var old_block_contact_requests_for;
         old_block_contact_requests_for = this._state['settings']['block_contact_requests_for'];
-        this._state['settings']['block_contact_requests_for'] = block_contact_requests_for;
+        this._state['settings']['block_contact_requests_for'] = parseInt(block_contact_requests_for);
         return this['fire']('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for);
       }
       /**
@@ -377,8 +378,23 @@
       'set_settings_bucket_size': function(bucket_size){
         var old_bucket_size;
         old_bucket_size = this._state['bucket_size'];
-        this._state['settings']['bucket_size'] = bucket_size;
+        this._state['settings']['bucket_size'] = parseInt(bucket_size);
         this['fire']('settings_bucket_size_changed', bucket_size, old_bucket_size);
+      }
+      /**
+       * @return {number}
+       */,
+      'get_settings_experience': function(){
+        return this._state['settings']['experience'];
+      }
+      /**
+       * @param {number} experience
+       */,
+      'set_settings_experience': function(experience){
+        var old_experience;
+        old_experience = this._state['experience'];
+        this._state['settings']['experience'] = parseInt(experience);
+        this['fire']('settings_experience_changed', experience, old_experience);
       }
       /**
        * @return {boolean}
@@ -392,7 +408,7 @@
       'set_settings_help': function(help){
         var old_help, new_help;
         old_help = this._state['settings']['help'];
-        new_help = help;
+        new_help = !!help;
         this._state['settings']['help'] = new_help;
         this['fire']('settings_help_changed', new_help, old_help);
       }
@@ -423,7 +439,7 @@
       'set_settings_max_pending_segments': function(max_pending_segments){
         var old_max_pending_segments;
         old_max_pending_segments = this._state['max_pending_segments'];
-        this._state['settings']['max_pending_segments'] = max_pending_segments;
+        this._state['settings']['max_pending_segments'] = parseInt(max_pending_segments);
         this['fire']('settings_max_pending_segments_changed', max_pending_segments, old_max_pending_segments);
       }
       /**
@@ -438,7 +454,7 @@
       'set_settings_number_of_intermediate_nodes': function(number_of_intermediate_nodes){
         var old_number_of_intermediate_nodes;
         old_number_of_intermediate_nodes = this._state['number_of_intermediate_nodes'];
-        this._state['settings']['number_of_intermediate_nodes'] = number_of_intermediate_nodes;
+        this._state['settings']['number_of_intermediate_nodes'] = parseInt(number_of_intermediate_nodes);
         this['fire']('settings_number_of_intermediate_nodes_changed', number_of_intermediate_nodes, old_number_of_intermediate_nodes);
       }
       /**
@@ -453,7 +469,7 @@
       'set_settings_number_of_introduction_nodes': function(number_of_introduction_nodes){
         var old_number_of_introduction_nodes;
         old_number_of_introduction_nodes = this._state['number_of_introduction_nodes'];
-        this._state['settings']['number_of_introduction_nodes'] = number_of_introduction_nodes;
+        this._state['settings']['number_of_introduction_nodes'] = parseInt(number_of_introduction_nodes);
         this['fire']('settings_number_of_introduction_nodes_changed', number_of_introduction_nodes, old_number_of_introduction_nodes);
       }
       /**
@@ -466,10 +482,11 @@
        * @param {boolean} online
        */,
       'set_settings_online': function(online){
-        var old_online;
+        var old_online, new_online;
         old_online = this._state['online'];
-        this._state['settings']['online'] = online;
-        this['fire']('settings_online_changed', online, old_online);
+        new_online = !!online;
+        this._state['settings']['online'] = new_online;
+        this['fire']('settings_online_changed', new_online, old_online);
       }
       /**
        * @return {number}
@@ -483,7 +500,7 @@
       'set_settings_packets_per_second': function(packets_per_second){
         var old_packets_per_second;
         old_packets_per_second = this._state['packets_per_second'];
-        this._state['settings']['packets_per_second'] = packets_per_second;
+        this._state['settings']['packets_per_second'] = parseInt(packets_per_second);
         this['fire']('settings_packets_per_second_changed', packets_per_second, old_packets_per_second);
       }
       /**
@@ -655,15 +672,21 @@
         return Array.from(this._state['contacts_requests'].values());
       }
       /**
-       * @param {!Uint8Array}	contact_id
-       * @param {string}		secret_name
+       * @param {!Uint8Array} contact_id
+       * @param {!Uint8Array} secret
        */,
-      'add_contact_request': function(contact_id, secret_name){
-        var new_contact_request;
+      'add_contact_request': function(contact_id, secret){
+        var secret_name, name, new_contact_request;
         if (this['has_contact_request'](contact_id)) {
           return;
         }
-        new_contact_request = ContactRequest([contact_id, id_encode(contact_id, new Uint8Array(0)), secret_name]);
+        secret_name = this._state['secrets'].get(secret).name;
+        if (this['get_settings_experience'] >= 1) {
+          name = id_encode(contact_id, new Uint8Array(0));
+        } else {
+          name = id_encode(contact_id, secret);
+        }
+        new_contact_request = ContactRequest([contact_id, name, secret_name]);
         this._state['contacts_requests'].set(contact_id, new_contact_request);
         this['fire']('contact_request_added', new_contact_request);
         this['fire']('contacts_requests_changed');

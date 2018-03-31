@@ -10,6 +10,12 @@ Polymer(
 		detox-chat-app.behaviors.help
 	]
 	properties	:
+		advanced_user							:
+			computed	: '_advanced_user(settings_experience)'
+			type		: Boolean
+		developer								:
+			computed	: '_developer(settings_experience)'
+			type		: Boolean
 		settings_announce						:
 			observer	: '_settings_announce_changed'
 			type		: String
@@ -22,6 +28,9 @@ Polymer(
 		settings_bootstrap_nodes_string			: String
 		settings_bucket_size					:
 			observer	: '_settings_bucket_size_changed'
+			type		: Number
+		settings_experience						:
+			observer	: '_settings_experience_changed'
 			type		: Number
 		settings_help							:
 			observer	: '_settings_help_changed'
@@ -56,6 +65,7 @@ Polymer(
 		@settings_block_contact_requests_for	= state.get_settings_block_contact_requests_for() / 60 / 60 / 24 # In days
 		@settings_bootstrap_nodes				= state.get_settings_bootstrap_nodes()
 		@settings_bucket_size					= state.get_settings_bucket_size()
+		@settings_experience					= state.get_settings_experience()
 		@settings_help							= @_bool_to_string(state.get_settings_help())
 		@settings_ice_servers					= state.get_settings_ice_servers()
 		@settings_max_pending_segments			= state.get_settings_max_pending_segments()
@@ -73,6 +83,7 @@ Polymer(
 			)
 			.on('settings_bootstrap_nodes_changed', (@settings_bootstrap_nodes) !~>)
 			.on('settings_bucket_size_changed', (@settings_bucket_size) !~>)
+			.on('settings_experience_changed', (@settings_experience) !~>)
 			.on('settings_help_changed', (new_settings_help) !~>
 				new_settings_help	= @_bool_to_string(new_settings_help)
 			)
@@ -85,6 +96,10 @@ Polymer(
 			)
 			.on('settings_packets_per_second_changed', (@settings_packets_per_second) !~>)
 			.on('settings_reconnects_intervals_changed', (@settings_reconnects_intervals) !~>)
+	_advanced_user : (settings_experience) ->
+		parseInt(settings_experience) >= 1
+	_developer : (settings_experience) ->
+		parseInt(settings_experience) == 2
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
 	_settings_announce_changed : !->
@@ -140,6 +155,15 @@ Polymer(
 			<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>
 			<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>
 			Do not change this setting unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_experience_changed : !->
+		if @settings_experience != @_state_instance.get_settings_experience()
+			@_state_instance.set_settings_experience(@settings_experience)
+			csw.functions.notify('Saved changes to user experience level setting', 'success', 'right', 3)
+	_help_settings_experience : !->
+		content	= """
+			<p>Casual makes UI as simple as possible. Advanced enables more features and settings. Developer mode gives most control.</p>
 		"""
 		csw.functions.simple_modal(content)
 	_settings_help_changed : !->

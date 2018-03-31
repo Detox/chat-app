@@ -2,13 +2,19 @@ dom-module(id="detox-chat-app-sidebar-profile")
 	link(rel="import" href="style.css" type="css")
 	template
 		csw-form: form
+			label(hidden="[[!advanced_user]]") Plain ID (no secret):
+			csw-textarea(hidden="[[!advanced_user]]"): textarea(readonly on-click="_id_click" rows="3" value="[[id_base58]]")
+			label(hidden="[[advanced_user]]")
+				div ID:
+				csw-icon(mono icon="question" on-click="_help_id" tooltip="What is ID?" hidden="[[!help]]")
+			csw-textarea(hidden="[[advanced_user]]"): textarea(readonly on-click="_id_click" rows="3" value="[[id_default_secret]]")
 			label Nickname:
 			csw-textarea: textarea(rows="3" value="{{nickname}}" on-blur="_nickname_blur")
 			div(hidden="[[add_secret]]")
-				h3
+				h3(hidden="[[!advanced_user]]")
 					div Secrets
 					csw-icon(mono icon="plus" on-click="_add_secret" tooltip="Add secret")
-					csw-icon(mono icon="question" on-click="_help" tooltip="What are secrets?" hidden="[[!help]]")
+					csw-icon(mono icon="question" on-click="_help_secrets" tooltip="What are secrets?" hidden="[[!help]]")
 		csw-form.add-secret(hidden="[[!add_secret]]"): form
 			label Secret name:
 			csw-input-text: input(type="text" value="{{new_secret_name}}")
@@ -16,13 +22,11 @@ dom-module(id="detox-chat-app-sidebar-profile")
 			csw-input-text: input(type="number" min="1" max="32" value="{{new_secret_length}}")
 			csw-button(primary): button(type="button" on-click="_add_secret_confirm") Save secret
 			csw-button: button(type="button" on-click="_add_secret_cancel") Cancel
-		csw-form: form
+		csw-form(hidden="[[!advanced_user]]"): form
 			template(is="dom-repeat" items="{{secrets}}")
-				label.secret-name
+				label
 					div ID for secret <i>[[item.name]]</i>:
 					csw-icon(mono icon="edit" on-click="_rename_secret" tooltip="Rename secret")
 					csw-icon(mono icon="trash" on-click="_del_secret" tooltip="Delete secret")
 				csw-textarea: textarea(readonly on-click="_id_click" rows="4" value="[[item.id]]")
-			label Plain ID (no secret):
-			csw-textarea: textarea(readonly on-click="_id_click" rows="3" value="[[id_base58]]")
 	script(src="script.js")

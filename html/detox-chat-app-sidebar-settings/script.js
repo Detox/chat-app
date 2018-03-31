@@ -9,6 +9,14 @@
     is: 'detox-chat-app-sidebar-settings',
     behaviors: [detoxChatApp.behaviors.state, detoxChatApp.behaviors.help],
     properties: {
+      advanced_user: {
+        computed: '_advanced_user(settings_experience)',
+        type: Boolean
+      },
+      developer: {
+        computed: '_developer(settings_experience)',
+        type: Boolean
+      },
       settings_announce: {
         observer: '_settings_announce_changed',
         type: String
@@ -24,6 +32,10 @@
       settings_bootstrap_nodes_string: String,
       settings_bucket_size: {
         observer: '_settings_bucket_size_changed',
+        type: Number
+      },
+      settings_experience: {
+        observer: '_settings_experience_changed',
         type: Number
       },
       settings_help: {
@@ -70,6 +82,7 @@
         this$.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
         this$.settings_bootstrap_nodes = state.get_settings_bootstrap_nodes();
         this$.settings_bucket_size = state.get_settings_bucket_size();
+        this$.settings_experience = state.get_settings_experience();
         this$.settings_help = this$._bool_to_string(state.get_settings_help());
         this$.settings_ice_servers = state.get_settings_ice_servers();
         this$.settings_max_pending_segments = state.get_settings_max_pending_segments();
@@ -86,6 +99,8 @@
           this$.settings_bootstrap_nodes = settings_bootstrap_nodes;
         }).on('settings_bucket_size_changed', function(settings_bucket_size){
           this$.settings_bucket_size = settings_bucket_size;
+        }).on('settings_experience_changed', function(settings_experience){
+          this$.settings_experience = settings_experience;
         }).on('settings_help_changed', function(new_settings_help){
           new_settings_help = this$._bool_to_string(new_settings_help);
         }).on('settings_ice_servers_changed', function(settings_ice_servers){
@@ -104,6 +119,12 @@
           this$.settings_reconnects_intervals = settings_reconnects_intervals;
         });
       });
+    },
+    _advanced_user: function(settings_experience){
+      return parseInt(settings_experience) >= 1;
+    },
+    _developer: function(settings_experience){
+      return parseInt(settings_experience) === 2;
     },
     _bool_to_string: function(value){
       if (value) {
@@ -167,6 +188,17 @@
     _help_settings_bucket_size: function(){
       var content;
       content = "<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>\n<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>\nDo not change this setting unless you know what you're doing.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _settings_experience_changed: function(){
+      if (this.settings_experience !== this._state_instance.get_settings_experience()) {
+        this._state_instance.set_settings_experience(this.settings_experience);
+        csw.functions.notify('Saved changes to user experience level setting', 'success', 'right', 3);
+      }
+    },
+    _help_settings_experience: function(){
+      var content;
+      content = "<p>Casual makes UI as simple as possible. Advanced enables more features and settings. Developer mode gives most control.</p>";
       csw.functions.simple_modal(content);
     },
     _settings_help_changed: function(){

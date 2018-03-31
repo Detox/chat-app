@@ -13,6 +13,10 @@
         type: Boolean,
         value: false
       },
+      advanced_user: {
+        type: Boolean,
+        value: false
+      },
       contacts: {
         type: Array,
         value: []
@@ -45,6 +49,7 @@
         detoxUtils = arg$[0][0];
         ArraySet = detoxUtils.ArraySet;
         state = this$._state_instance;
+        this$.advanced_user = state.get_settings_experience() >= 1;
         this$.contacts = state.get_contacts();
         this$.online_contacts = ArraySet(state.get_online_contacts());
         this$.contacts_requests = state.get_contacts_requests();
@@ -65,6 +70,8 @@
           this$.contacts_with_unread_messages = ArraySet(state.get_contacts_with_unread_messages());
         }).on('ui_active_contact_changed', function(){
           this$.ui_active_contact = ArraySet([state.get_ui_active_contact() || new Uint8Array(0)]);
+        }).on('settings_experience_changed', function(experience){
+          this$.advanced_user = experience >= 1;
         });
       });
     },
@@ -92,7 +99,7 @@
             return;
           }
           this$._state_instance.add_contact(public_key, this$.new_contact_name, remote_secret);
-          csw.functions.notify('Contact added', 'success', 'right', 3);
+          csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 3);
           this$.add_contact = false;
           this$.new_contact_id = '';
           this$.new_contact_name = '';
@@ -107,7 +114,11 @@
     },
     _help: function(){
       var content;
-      content = "<p>You need to add contact in order to communicate, addition is make using IDs.</p>\n<p>There are 2 kinds of IDs: without secrets and with secrets. Look at <i>Profile</i> tab for more details on those.</p>\n<p>Each contact in the list might have some of the corners highlighted, which indicates some information about its state.</p>\n<p>Top left corner is highlighted when there is an active connection to contact right now.<br>\nBottom left corner is highlighted means that there was never an active connection, for instance you've added someone to contacts, but they didn't accept request (yet).<br>\nTop right corner is highlighted when there are unread messages from that contact.<br>\nBottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>";
+      if (this.advanced_user) {
+        content = "<p>You need to add contact using their ID in order to communicate.</p>\n<p>There are 2 kinds of IDs: without secrets and with secrets. Look at <i>Profile</i> tab for more details on those.</p>\n<p>Each contact in the list might have some of the corners highlighted, which indicates some information about its state.</p>\n<p>Top left corner is highlighted when there is an active connection to contact right now.<br>\nBottom left corner is highlighted means that there was never an active connection, for instance you've added someone to contacts, but they didn't accept request (yet).<br>\nTop right corner is highlighted when there are unread messages from that contact.<br>\nBottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>";
+      } else {
+        content = "<p>You need to add contact using their ID in order to communicate.</p>\n<p>Your ID can be found in <i>Profile</i> tab.</p>\n<p>Each contact in the list might have some of the corners highlighted, which indicates some information about its state.</p>\n<p>Top left corner is highlighted when there is an active connection to contact right now.<br>\nBottom left corner is highlighted means that there was never an active connection, for instance you've added someone to contacts, but they didn't accept request (yet).<br>\nTop right corner is highlighted when there are unread messages from that contact.<br>\nBottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>";
+      }
       csw.functions.simple_modal(content);
     },
     _set_active_contact: function(e){
@@ -133,10 +144,14 @@
       var state, item, content, modal;
       state = this._state_instance;
       item = e.model.item;
-      content = "<h3>What do you want to do with contact request?</h3>\n<p>ID: <i>" + item.name + "</i></p>\n<p>Secret used: <i>" + item.secret_name + "</i></p>\n<csw-group>\n	<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n	<csw-button><button id=\"reject\">Reject</button></csw-button>\n	<csw-button><button id=\"cancel\">Cancel</button></csw-button>\n</csw-group>";
+      if (this.advanced_user) {
+        content = "<h3>What do you want to do with contact request?</h3>\n<p>ID: <i>" + item.name + "</i></p>\n<p>Secret used: <i>" + item.secret_name + "</i></p>\n<csw-group>\n	<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n	<csw-button><button id=\"reject\">Reject</button></csw-button>\n	<csw-button><button id=\"cancel\">Cancel</button></csw-button>\n</csw-group>";
+      } else {
+        content = "<h3>What do you want to do with contact request?</h3>\n<p>ID: <i>" + item.name + "</i></p>\n<csw-group>\n	<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n	<csw-button><button id=\"reject\">Reject</button></csw-button>\n	<csw-button><button id=\"cancel\">Cancel</button></csw-button>\n</csw-group>";
+      }
       modal = csw.functions.simple_modal(content);
       modal.querySelector('#accept').addEventListener('click', function(){
-        state.add_contact(item.id, '', new Uint8Array(0));
+        state.add_contact(item.id, item.name, new Uint8Array(0));
         state.del_contact_request(item.id);
         modal.close();
         csw.functions.notify('Contact added', 'success', 'right', 3);

@@ -13,7 +13,12 @@
         type: Boolean,
         value: false
       },
+      advanced_user: {
+        type: Boolean,
+        value: false
+      },
       id_base58: String,
+      id_default_secret: String,
       new_secret_name: String,
       new_secret_length: {
         type: Number,
@@ -32,10 +37,12 @@
             id_encode = detoxChat.id_encode;
             state = this$._state_instance;
             function update_secrets(){
-              var res$, i$, ref$, len$, secret;
+              var secrets, res$, i$, len$, secret;
+              secrets = state.get_secrets();
+              this$.id_default_secret = id_encode(public_key, secrets[0].secret);
               res$ = [];
-              for (i$ = 0, len$ = (ref$ = state.get_secrets()).length; i$ < len$; ++i$) {
-                secret = ref$[i$];
+              for (i$ = 0, len$ = secrets.length; i$ < len$; ++i$) {
+                secret = secrets[i$];
                 res$.push({
                   secret: secret.secret,
                   id: id_encode(public_key, secret.secret),
@@ -48,11 +55,14 @@
             this$.id_base58 = id_encode(public_key, new Uint8Array(0));
             this$.nickname = state.get_nickname();
             update_secrets();
+            this$.advanced_user = state.get_settings_experience() >= 1;
             state.on('nickname_changed', function(new_nickname){
               if (this$.nickname !== new_nickname) {
                 this$.nickname = new_nickname;
               }
-            }).on('secrets_changed', update_secrets);
+            }).on('secrets_changed', update_secrets).on('settings_experience_changed', function(experience){
+              this$.advanced_user = experience >= 1;
+            });
           });
         });
       });
@@ -92,7 +102,12 @@
     _add_secret_cancel: function(){
       this.add_secret = false;
     },
-    _help: function(){
+    _help_id: function(){
+      var content;
+      content = "<p>ID is an identifier that represents you in the network.<br>\nIf you share this ID with someone, they'll be able to send contact request to you.</p>";
+      csw.functions.simple_modal(content);
+    },
+    _help_secrets: function(){
       var content;
       content = "<p>Secrets are used as anti-spam system. You can create different secrets for different purposes.<br>\nEach time you have incoming contact request, you'll see which secret was used.<br>\nFor instance, you can create a secret for conference and know who is connecting to you before you accept contact request.</p>\n\n<p>For contact requests you need to share ID with secret.<br>\nPlain ID without secret will not result in visible contact request, but if you and your interlocutor add each other to contacts list explicitly, you'll be connected and able to communicate.</p>";
       csw.functions.simple_modal(content);

@@ -86,6 +86,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 						}
 					]
 					'bucket_size'					: 2
+					# 0 - casual, 1 - advanced, 2 - developer
+					'experience'					: 0
 					'help'							: true
 					'ice_servers'					: [
 						{urls: 'stun:stun.l.google.com:19302'}
@@ -315,7 +317,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_settings_announce' : (announce) !->
 			old_announce					= @_state['settings']['announce']
-			new_announce					= announce
+			new_announce					= !!announce
 			@_state['settings']['announce']	= new_announce
 			@'fire'('settings_announce_changed', new_announce, old_announce)
 		/**
@@ -328,7 +330,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_settings_block_contact_requests_for' : (block_contact_requests_for) ->
 			old_block_contact_requests_for						= @_state['settings']['block_contact_requests_for']
-			@_state['settings']['block_contact_requests_for']	= block_contact_requests_for
+			@_state['settings']['block_contact_requests_for']	= parseInt(block_contact_requests_for)
 			@'fire'('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for)
 		/**
 		 * @return {!Array<!Object>}
@@ -352,8 +354,20 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_settings_bucket_size' : (bucket_size) !->
 			old_bucket_size						= @_state['bucket_size']
-			@_state['settings']['bucket_size']	= bucket_size
+			@_state['settings']['bucket_size']	= parseInt(bucket_size)
 			@'fire'('settings_bucket_size_changed', bucket_size, old_bucket_size)
+		/**
+		 * @return {number}
+		 */
+		'get_settings_experience' : ->
+			@_state['settings']['experience']
+		/**
+		 * @param {number} experience
+		 */
+		'set_settings_experience' : (experience) !->
+			old_experience						= @_state['experience']
+			@_state['settings']['experience']	= parseInt(experience)
+			@'fire'('settings_experience_changed', experience, old_experience)
 		/**
 		 * @return {boolean}
 		 */
@@ -364,7 +378,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_settings_help' : (help) !->
 			old_help					= @_state['settings']['help']
-			new_help					= help
+			new_help					= !!help
 			@_state['settings']['help']	= new_help
 			@'fire'('settings_help_changed', new_help, old_help)
 		/**
@@ -389,7 +403,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_settings_max_pending_segments' : (max_pending_segments) !->
 			old_max_pending_segments					= @_state['max_pending_segments']
-			@_state['settings']['max_pending_segments']	= max_pending_segments
+			@_state['settings']['max_pending_segments']	= parseInt(max_pending_segments)
 			@'fire'('settings_max_pending_segments_changed', max_pending_segments, old_max_pending_segments)
 		/**
 		 * @return {number}
@@ -401,7 +415,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_settings_number_of_intermediate_nodes' : (number_of_intermediate_nodes) !->
 			old_number_of_intermediate_nodes					= @_state['number_of_intermediate_nodes']
-			@_state['settings']['number_of_intermediate_nodes']	= number_of_intermediate_nodes
+			@_state['settings']['number_of_intermediate_nodes']	= parseInt(number_of_intermediate_nodes)
 			@'fire'('settings_number_of_intermediate_nodes_changed', number_of_intermediate_nodes, old_number_of_intermediate_nodes)
 		/**
 		 * @return {number}
@@ -413,7 +427,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_settings_number_of_introduction_nodes' : (number_of_introduction_nodes) !->
 			old_number_of_introduction_nodes					= @_state['number_of_introduction_nodes']
-			@_state['settings']['number_of_introduction_nodes']	= number_of_introduction_nodes
+			@_state['settings']['number_of_introduction_nodes']	= parseInt(number_of_introduction_nodes)
 			@'fire'('settings_number_of_introduction_nodes_changed', number_of_introduction_nodes, old_number_of_introduction_nodes)
 		/**
 		 * @return {boolean} `false` if application works completely offline
@@ -425,8 +439,9 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_settings_online' : (online) !->
 			old_online						= @_state['online']
-			@_state['settings']['online']	= online
-			@'fire'('settings_online_changed', online, old_online)
+			new_online						= !!online
+			@_state['settings']['online']	= new_online
+			@'fire'('settings_online_changed', new_online, old_online)
 		/**
 		 * @return {number}
 		 */
@@ -437,7 +452,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		'set_settings_packets_per_second' : (packets_per_second) !->
 			old_packets_per_second						= @_state['packets_per_second']
-			@_state['settings']['packets_per_second']	= packets_per_second
+			@_state['settings']['packets_per_second']	= parseInt(packets_per_second)
 			@'fire'('settings_packets_per_second_changed', packets_per_second, old_packets_per_second)
 		/**
 		 * @return {!Array<!Array<number>>}
@@ -577,13 +592,18 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		'get_contacts_requests' : ->
 			Array.from(@_state['contacts_requests'].values())
 		/**
-		 * @param {!Uint8Array}	contact_id
-		 * @param {string}		secret_name
+		 * @param {!Uint8Array} contact_id
+		 * @param {!Uint8Array} secret
 		 */
-		'add_contact_request' : (contact_id, secret_name) !->
+		'add_contact_request' : (contact_id, secret) !->
 			if @'has_contact_request'(contact_id)
 				return
-			new_contact_request	= ContactRequest([contact_id, id_encode(contact_id, new Uint8Array(0)), secret_name])
+			secret_name	= @_state['secrets'].get(secret).name
+			if @'get_settings_experience' >= 1
+				name	= id_encode(contact_id, new Uint8Array(0))
+			else
+				name	= id_encode(contact_id, secret)
+			new_contact_request	= ContactRequest([contact_id, name, secret_name])
 			@_state['contacts_requests'].set(contact_id, new_contact_request)
 			@'fire'('contact_request_added', new_contact_request)
 			@'fire'('contacts_requests_changed')

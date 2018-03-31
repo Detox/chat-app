@@ -8,7 +8,9 @@
 }
 
 label {
-	display : flex !important;
+	&:not([hidden]) {
+		display : flex !important;
+	}
 
 	div {
 		flex-grow : 1;
@@ -27,7 +29,9 @@ label {
 }
 
 csw-textarea {
-	display : block;
+	&:not([hidden]) {
+		display : block;
+	}
 
 	textarea {
 		height : auto;
