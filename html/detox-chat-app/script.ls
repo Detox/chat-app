@@ -28,7 +28,6 @@ Polymer(
 		sent_messages_map			= ArrayMap()
 		reconnects_pending			= ArrayMap()
 
-
 		state	= @_state_instance
 		core	= detox-core.Core(
 			detox-core.generate_seed()
@@ -215,7 +214,8 @@ Polymer(
 					message.date_received || # Message was received by a friend
 					!state.has_online_contact(contact_id) # Friend is not currently connected
 				)
-					do_reconnect_if_needed(contact_id)
+					contact	= state.get_contact(contact_id)
+					chat.connect_to(contact_id, contact.remote_secret)
 					return
 				send_message(contact_id, message)
 			)

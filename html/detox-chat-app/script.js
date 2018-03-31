@@ -217,8 +217,10 @@
       state.on('contact_added', function(new_contact){
         chat.connect_to(new_contact.id, new_contact.remote_secret);
       }).on('contact_message_added', function(contact_id, message){
+        var contact;
         if (message.from || message.date_received || !state.has_online_contact(contact_id)) {
-          do_reconnect_if_needed(contact_id);
+          contact = state.get_contact(contact_id);
+          chat.connect_to(contact_id, contact.remote_secret);
           return;
         }
         send_message(contact_id, message);
