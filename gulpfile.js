@@ -74,8 +74,7 @@
       'fixed-size-multiplexer': 'node_modules/fixed-size-multiplexer/src/index.min',
       'ronion': 'node_modules/ronion/dist/ronion.browser.min',
       'pako': 'node_modules/pako/dist/pako.min',
-      'simple-peer': 'node_modules/simple-peer/simplepeer.min',
-      'state': 'js/state'
+      'simple-peer': 'node_modules/simple-peer/simplepeer.min'
     },
     'packages': [
       {

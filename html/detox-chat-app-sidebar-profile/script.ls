@@ -3,12 +3,13 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
+([behaviors]) <-! require(['js/behaviors']).then
 Polymer(
 	is			: 'detox-chat-app-sidebar-profile'
 	behaviors	: [
-		detox-chat-app.behaviors.experience_level
-		detox-chat-app.behaviors.help
-		detox-chat-app.behaviors.state
+		behaviors.experience_level
+		behaviors.help
+		behaviors.state
 	]
 	properties	:
 		add_secret			:

@@ -19,31 +19,30 @@ requirejs_config	=
 		'ronion'					: 'node_modules/ronion/dist/ronion.browser'
 		'pako'						: 'node_modules/pako/dist/pako'
 		'simple-peer'				: 'node_modules/simple-peer/simplepeer.min'
-		'state'						: 'js/state'
 	'packages'	: [
 		{
-			'name'		: 'aez.wasm',
-			'location'	: 'node_modules/aez.wasm',
+			'name'		: 'aez.wasm'
+			'location'	: 'node_modules/aez.wasm'
 			'main'		: 'src/index'
 		}
 		{
-			'name'		: 'ed25519-to-x25519.wasm',
-			'location'	: 'node_modules/ed25519-to-x25519.wasm',
+			'name'		: 'ed25519-to-x25519.wasm'
+			'location'	: 'node_modules/ed25519-to-x25519.wasm'
 			'main'		: 'src/index'
 		}
 		{
-			'name'		: 'jssha',
-			'location'	: 'node_modules/jssha',
+			'name'		: 'jssha'
+			'location'	: 'node_modules/jssha'
 			'main'		: 'src/sha'
 		}
 		{
-			'name'		: 'noise-c.wasm',
-			'location'	: 'node_modules/noise-c.wasm',
+			'name'		: 'noise-c.wasm'
+			'location'	: 'node_modules/noise-c.wasm'
 			'main'		: 'src/index'
 		}
 		{
-			'name'		: 'supercop.wasm',
-			'location'	: 'node_modules/supercop.wasm',
+			'name'		: 'supercop.wasm'
+			'location'	: 'node_modules/supercop.wasm'
 			'main'		: 'src/index'
 		}
 	]

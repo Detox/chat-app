@@ -5,126 +5,130 @@
  * @license 0BSD
  */
 (function(){
-  Polymer({
-    is: 'detox-chat-app-sidebar-profile',
-    behaviors: [detoxChatApp.behaviors.experience_level, detoxChatApp.behaviors.help, detoxChatApp.behaviors.state],
-    properties: {
-      add_secret: {
-        type: Boolean,
-        value: false
+  require(['js/behaviors']).then(function(arg$){
+    var behaviors;
+    behaviors = arg$[0];
+    Polymer({
+      is: 'detox-chat-app-sidebar-profile',
+      behaviors: [behaviors.experience_level, behaviors.help, behaviors.state],
+      properties: {
+        add_secret: {
+          type: Boolean,
+          value: false
+        },
+        id_base58: String,
+        id_default_secret: String,
+        new_secret_name: String,
+        new_secret_length: {
+          type: Number,
+          value: 4
+        },
+        nickname: String
       },
-      id_base58: String,
-      id_default_secret: String,
-      new_secret_name: String,
-      new_secret_length: {
-        type: Number,
-        value: 4
-      },
-      nickname: String
-    },
-    ready: function(){
-      var this$ = this;
-      Promise.all([require(['@detox/chat', '@detox/crypto']), this._state_instance_ready]).then(function(arg$){
-        var ref$, detoxChat, detoxCrypto;
-        ref$ = arg$[0], detoxChat = ref$[0], detoxCrypto = ref$[1];
-        detoxCrypto.ready(function(){
-          detoxChat.ready(function(){
-            var id_encode, state, public_key;
-            id_encode = detoxChat.id_encode;
-            state = this$._state_instance;
-            function update_secrets(){
-              var secrets, res$, i$, len$, secret;
-              secrets = state.get_secrets();
-              this$.id_default_secret = id_encode(public_key, secrets[0].secret);
-              res$ = [];
-              for (i$ = 0, len$ = secrets.length; i$ < len$; ++i$) {
-                secret = secrets[i$];
-                res$.push({
-                  secret: secret.secret,
-                  id: id_encode(public_key, secret.secret),
-                  name: secret.name
-                });
+      ready: function(){
+        var this$ = this;
+        Promise.all([require(['@detox/chat', '@detox/crypto']), this._state_instance_ready]).then(function(arg$){
+          var ref$, detoxChat, detoxCrypto;
+          ref$ = arg$[0], detoxChat = ref$[0], detoxCrypto = ref$[1];
+          detoxCrypto.ready(function(){
+            detoxChat.ready(function(){
+              var id_encode, state, public_key;
+              id_encode = detoxChat.id_encode;
+              state = this$._state_instance;
+              function update_secrets(){
+                var secrets, res$, i$, len$, secret;
+                secrets = state.get_secrets();
+                this$.id_default_secret = id_encode(public_key, secrets[0].secret);
+                res$ = [];
+                for (i$ = 0, len$ = secrets.length; i$ < len$; ++i$) {
+                  secret = secrets[i$];
+                  res$.push({
+                    secret: secret.secret,
+                    id: id_encode(public_key, secret.secret),
+                    name: secret.name
+                  });
+                }
+                this$.secrets = res$;
               }
-              this$.secrets = res$;
-            }
-            public_key = detoxCrypto.create_keypair(state.get_seed()).ed25519['public'];
-            this$.id_base58 = id_encode(public_key, new Uint8Array(0));
-            this$.nickname = state.get_nickname();
-            update_secrets();
-            state.on('nickname_changed', function(new_nickname){
-              if (this$.nickname !== new_nickname) {
-                this$.nickname = new_nickname;
-              }
-            }).on('secrets_changed', update_secrets);
+              public_key = detoxCrypto.create_keypair(state.get_seed()).ed25519['public'];
+              this$.id_base58 = id_encode(public_key, new Uint8Array(0));
+              this$.nickname = state.get_nickname();
+              update_secrets();
+              state.on('nickname_changed', function(new_nickname){
+                if (this$.nickname !== new_nickname) {
+                  this$.nickname = new_nickname;
+                }
+              }).on('secrets_changed', update_secrets);
+            });
           });
         });
-      });
-    },
-    _nickname_blur: function(){
-      if (this.nickname !== this._state_instance.get_nickname()) {
-        this._state_instance.set_nickname(this.nickname);
-        csw.functions.notify('Nickname updated', 'success', 'right', 3);
-      }
-    },
-    _id_click: function(e){
-      e.target.select();
-      document.execCommand('copy');
-      csw.functions.notify('ID copied to clipboard', 'success', 'right', 3);
-    },
-    _add_secret: function(){
-      this.add_secret = true;
-    },
-    _add_secret_confirm: function(){
-      var new_secret_name, this$ = this;
-      new_secret_name = this.new_secret_name.trim();
-      if (!new_secret_name) {
-        csw.functions.notify('Secret name is required', 'error', 'right', 3);
-        return;
-      }
-      require(['@detox/chat']).then(function(arg$){
-        var detoxChat, secret;
-        detoxChat = arg$[0];
-        secret = detoxChat.generate_secret().slice(0, this$.new_secret_length);
-        this$._state_instance.add_secret(secret, new_secret_name);
-        csw.functions.notify('Secret added', 'success', 'right', 3);
-        this$.add_secret = false;
-        this$.new_secret_name = '';
-        this$.new_secret_length = 4;
-      });
-    },
-    _add_secret_cancel: function(){
-      this.add_secret = false;
-    },
-    _help_id: function(){
-      var content;
-      content = "<p>ID is an identifier that represents you in the network.<br>\nIf you share this ID with someone, they'll be able to send contact request to you.</p>";
-      csw.functions.simple_modal(content);
-    },
-    _help_secrets: function(){
-      var content;
-      content = "<p>Secrets are used as anti-spam system. You can create different secrets for different purposes.<br>\nEach time you have incoming contact request, you'll see which secret was used.<br>\nFor instance, you can create a secret for conference and know who is connecting to you before you accept contact request.</p>\n\n<p>For contact requests you need to share ID with secret.<br>\nPlain ID without secret will not result in visible contact request, but if you and your interlocutor add each other to contacts list explicitly, you'll be connected and able to communicate.</p>";
-      csw.functions.simple_modal(content);
-    },
-    _rename_secret: function(e){
-      var modal, this$ = this;
-      modal = csw.functions.prompt("New secret name:", function(new_secret_name){
-        new_secret_name = new_secret_name.trim();
+      },
+      _nickname_blur: function(){
+        if (this.nickname !== this._state_instance.get_nickname()) {
+          this._state_instance.set_nickname(this.nickname);
+          csw.functions.notify('Nickname updated', 'success', 'right', 3);
+        }
+      },
+      _id_click: function(e){
+        e.target.select();
+        document.execCommand('copy');
+        csw.functions.notify('ID copied to clipboard', 'success', 'right', 3);
+      },
+      _add_secret: function(){
+        this.add_secret = true;
+      },
+      _add_secret_confirm: function(){
+        var new_secret_name, this$ = this;
+        new_secret_name = this.new_secret_name.trim();
         if (!new_secret_name) {
           csw.functions.notify('Secret name is required', 'error', 'right', 3);
           return;
         }
-        this$._state_instance.set_secret_name(e.model.item.secret, new_secret_name);
-        csw.functions.notify('Secret name updated', 'success', 'right', 3);
-      });
-      modal.input.value = e.model.item.name;
-      e.preventDefault();
-    },
-    _del_secret: function(e){
-      var this$ = this;
-      csw.functions.confirm("<h3>Are you sure you want to delete secret <i>" + e.model.item.name + "</i>?</h3>", function(){
-        this$._state_instance.del_secret(e.model.item.secret);
-      });
-      e.preventDefault();
-    }
+        require(['@detox/chat']).then(function(arg$){
+          var detoxChat, secret;
+          detoxChat = arg$[0];
+          secret = detoxChat.generate_secret().slice(0, this$.new_secret_length);
+          this$._state_instance.add_secret(secret, new_secret_name);
+          csw.functions.notify('Secret added', 'success', 'right', 3);
+          this$.add_secret = false;
+          this$.new_secret_name = '';
+          this$.new_secret_length = 4;
+        });
+      },
+      _add_secret_cancel: function(){
+        this.add_secret = false;
+      },
+      _help_id: function(){
+        var content;
+        content = "<p>ID is an identifier that represents you in the network.<br>\nIf you share this ID with someone, they'll be able to send contact request to you.</p>";
+        csw.functions.simple_modal(content);
+      },
+      _help_secrets: function(){
+        var content;
+        content = "<p>Secrets are used as anti-spam system. You can create different secrets for different purposes.<br>\nEach time you have incoming contact request, you'll see which secret was used.<br>\nFor instance, you can create a secret for conference and know who is connecting to you before you accept contact request.</p>\n\n<p>For contact requests you need to share ID with secret.<br>\nPlain ID without secret will not result in visible contact request, but if you and your interlocutor add each other to contacts list explicitly, you'll be connected and able to communicate.</p>";
+        csw.functions.simple_modal(content);
+      },
+      _rename_secret: function(e){
+        var modal, this$ = this;
+        modal = csw.functions.prompt("New secret name:", function(new_secret_name){
+          new_secret_name = new_secret_name.trim();
+          if (!new_secret_name) {
+            csw.functions.notify('Secret name is required', 'error', 'right', 3);
+            return;
+          }
+          this$._state_instance.set_secret_name(e.model.item.secret, new_secret_name);
+          csw.functions.notify('Secret name updated', 'success', 'right', 3);
+        });
+        modal.input.value = e.model.item.name;
+        e.preventDefault();
+      },
+      _del_secret: function(e){
+        var this$ = this;
+        csw.functions.confirm("<h3>Are you sure you want to delete secret <i>" + e.model.item.name + "</i>?</h3>", function(){
+          this$._state_instance.del_secret(e.model.item.secret);
+        });
+        e.preventDefault();
+      }
+    });
   });
 }).call(this);

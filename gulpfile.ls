@@ -69,7 +69,6 @@ requirejs_config	=
 		'ronion'					: 'node_modules/ronion/dist/ronion.browser.min'
 		'pako'						: 'node_modules/pako/dist/pako.min'
 		'simple-peer'				: 'node_modules/simple-peer/simplepeer.min'
-		'state'						: 'js/state'
 	'packages'	: [
 		{
 			'name'		: 'aez.wasm',

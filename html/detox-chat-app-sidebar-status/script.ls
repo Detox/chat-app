@@ -3,10 +3,11 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
+([behaviors]) <-! require(['js/behaviors']).then
 Polymer(
 	is			: 'detox-chat-app-sidebar-status'
 	behaviors	: [
-		detox-chat-app.behaviors.state
+		behaviors.state
 	]
 	properties	:
 		online							:
