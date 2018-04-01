@@ -137,11 +137,7 @@ gulp
 	if (window.WebComponents && window.WebComponents.ready) {
 		callback();
 	} else {
-		function ready () {
-			callback();
-			document.removeEventListener('WebComponentsReady', ready);
-		}
-		document.addEventListener('WebComponentsReady', ready);
+		document.addEventListener('WebComponentsReady', callback, {once: true});
 	}
 })(function () {#js})
 			"""

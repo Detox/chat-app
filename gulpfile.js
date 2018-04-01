@@ -142,7 +142,7 @@
         string = string.trim();
         return string.substring(8, string.length - 9);
       }).join('');
-      js = "(function (callback) {\n	document.head.querySelector('[media=async]').removeAttribute('media');\n	if (window.WebComponents && window.WebComponents.ready) {\n		callback();\n	} else {\n		function ready () {\n			callback();\n			document.removeEventListener('WebComponentsReady', ready);\n		}\n		document.addEventListener('WebComponentsReady', ready);\n	}\n})(function () {" + js + "})";
+      js = "(function (callback) {\n	document.head.querySelector('[media=async]').removeAttribute('media');\n	if (window.WebComponents && window.WebComponents.ready) {\n		callback();\n	} else {\n		document.addEventListener('WebComponentsReady', callback, {once: true});\n	}\n})(function () {" + js + "})";
       html = html.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
       fs.writeFileSync(DESTINATION + "/" + BUNDLED_HTML, html);
       fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
