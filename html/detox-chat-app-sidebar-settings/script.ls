@@ -99,9 +99,8 @@ Polymer(
 			csw.functions.notify('Saved changes to announcement setting', 'success', 'right', 3)
 	_help_settings_announce : !->
 		content	= """
-			<p>Announcement is a process of publishing own contact information to the network, so that contacts can find and connect to this node.</p>
-			<p>It is possible to use Detox Chat without announcing itself to the network.<br>
-			In this case incoming connections from contacts will not be possible, but it will be possible to initiate connection to other contacts if needed.</p>
+			<p>Announcement is a process of publishing own contact information to the network, so that contacts can find and connect to you.</p>
+			<p>When turned off, you'll be in stealth mode, meaning that no one will be able to see if you're online, send messages or interact in any other way unless you initiate such interaction first.</p>
 		"""
 		csw.functions.simple_modal(content)
 	_settings_block_contact_requests_for_changed : !->

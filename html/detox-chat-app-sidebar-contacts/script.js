@@ -92,7 +92,7 @@
                 return;
               }
               this._state_instance.add_contact(public_key, this.new_contact_name, remote_secret);
-              csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 3);
+              csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 5);
               this.add_contact = false;
               this.new_contact_id = '';
               this.new_contact_name = '';

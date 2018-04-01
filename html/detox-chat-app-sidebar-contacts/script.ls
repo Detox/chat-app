@@ -86,7 +86,7 @@ Polymer(
 				csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>#{existing_contact.nickname}</i>", 'warning', 'right', 3)
 				return
 			@_state_instance.add_contact(public_key, @new_contact_name, remote_secret)
-			csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 3)
+			csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 5)
 			@add_contact		= false
 			@new_contact_id		= ''
 			@new_contact_name	= ''
