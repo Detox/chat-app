@@ -5,7 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, minify_css, instance, minify_js, file_hash, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BUNDLED_CSS, BUNDLED_HTML, BUNDLED_JS, BUNDLED_MANIFEST, DESTINATION, MINIFIED_CSS, MINIFIED_HTML, MINIFIED_JS, SOURCE_CSS, SOURCE_HTML, SOURCE_MANIFEST, requirejs_config;
+  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, minify_css, instance, minify_js, file_hash, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BLACKLISTED_FONTS, BUNDLED_CSS, BUNDLED_HTML, BUNDLED_JS, BUNDLED_MANIFEST, DESTINATION, MINIFIED_CSS, MINIFIED_HTML, MINIFIED_JS, SOURCE_CSS, SOURCE_HTML, SOURCE_MANIFEST, requirejs_config;
   cleanCss = require('clean-css');
   crypto = require('crypto');
   del = require('del');
@@ -48,6 +48,7 @@
   FONTS_REGEXP = /url\(.+?\.woff2.+?\)/g;
   IMAGES_REGEXP = /url\(\.\.\/img\/.+?\)/g;
   SCRIPTS_REGEXP = /<script>[^]+?<\/script>\n*/g;
+  BLACKLISTED_FONTS = ['fa-regular-400.woff2', 'fa-brands-400.woff2'];
   BUNDLED_CSS = 'style.css';
   BUNDLED_HTML = 'index.html';
   BUNDLED_JS = 'script.js';
@@ -136,6 +137,9 @@
         base_name = font_path.split('/').pop();
         hash = file_hash(font_path);
         html = html.replace(font, "url(" + base_name + "?" + hash + ")");
+        if (in$(base_name, BLACKLISTED_FONTS)) {
+          continue;
+        }
         fs.copyFileSync(font_path, DESTINATION + "/" + base_name);
       }
       js = html.match(SCRIPTS_REGEXP).map(function(string){
@@ -234,4 +238,9 @@
     }
     fs.writeFileSync('index.html', index);
   });
+  function in$(x, xs){
+    var i = -1, l = xs.length >>> 0;
+    while (++i < l) if (x === xs[i]) return true;
+    return false;
+  }
 }).call(this);

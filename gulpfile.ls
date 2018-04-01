@@ -40,6 +40,11 @@ const FONTS_REGEXP		= /url\(.+?\.woff2.+?\)/g
 const IMAGES_REGEXP		= /url\(\.\.\/img\/.+?\)/g
 const SCRIPTS_REGEXP	= /<script>[^]+?<\/script>\n*/g
 
+const BLACKLISTED_FONTS	= [
+	'fa-regular-400.woff2'
+	'fa-brands-400.woff2'
+]
+
 const BUNDLED_CSS		= 'style.css'
 const BUNDLED_HTML		= 'index.html'
 const BUNDLED_JS		= 'script.js'
@@ -123,6 +128,9 @@ gulp
 				base_name	= font_path.split('/').pop()
 				hash		= file_hash(font_path)
 				html		= html.replace(font, "url(#base_name?#hash)")
+				# Hack: we know for sure that these files fonts will not be used
+				if base_name in BLACKLISTED_FONTS
+					continue
 				fs.copyFileSync(font_path, "#DESTINATION/#base_name")
 			js		= html.match(SCRIPTS_REGEXP)
 				.map (string) ->
