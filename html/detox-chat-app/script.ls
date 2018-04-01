@@ -126,7 +126,6 @@ Polymer(
 							..set(local_secret.secret)
 						if are_arrays_equal(secret, padded_secret) && !state.has_contact_request(contact_id)
 							state.add_contact_request(contact_id, local_secret.secret)
-							csw.functions.notify('Incoming contact request received', 'warning', 'right', 3)
 							break
 					false
 				else if (

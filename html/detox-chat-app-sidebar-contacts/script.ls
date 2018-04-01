@@ -57,6 +57,9 @@ Polymer(
 				.on('online_contacts_changed', !~>
 					@online_contacts	= ArraySet(state.get_online_contacts())
 				)
+				.on('contact_request_added', !~>
+					csw.functions.notify('Incoming contact request received', 'warning', 'right', 3)
+				)
 				.on('contacts_requests_changed', !~>
 					# TODO: Sort contacts
 					contacts_requests	= state.get_contacts_requests()

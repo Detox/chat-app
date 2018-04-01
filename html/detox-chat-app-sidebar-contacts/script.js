@@ -60,6 +60,8 @@
           this$.contacts = state.get_contacts();
         }).on('online_contacts_changed', function(){
           this$.online_contacts = ArraySet(state.get_online_contacts());
+        }).on('contact_request_added', function(){
+          csw.functions.notify('Incoming contact request received', 'warning', 'right', 3);
         }).on('contacts_requests_changed', function(){
           var contacts_requests;
           contacts_requests = state.get_contacts_requests();
