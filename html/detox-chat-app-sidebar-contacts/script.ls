@@ -6,14 +6,12 @@
 Polymer(
 	is			: 'detox-chat-app-sidebar-contacts'
 	behaviors	: [
-		detox-chat-app.behaviors.state
+		detox-chat-app.behaviors.experience_level
 		detox-chat-app.behaviors.help
+		detox-chat-app.behaviors.state
 	]
 	properties	:
 		add_contact						:
-			type	: Boolean
-			value	: false
-		advanced_user		:
 			type	: Boolean
 			value	: false
 		contacts						:
@@ -42,7 +40,6 @@ Polymer(
 			ArraySet	= detox-utils.ArraySet
 
 			state							= @_state_instance
-			@advanced_user					= state.get_settings_experience() >= 1
 			@contacts						= state.get_contacts()
 			@online_contacts				= ArraySet(state.get_online_contacts())
 			@contacts_requests				= state.get_contacts_requests()
@@ -73,9 +70,6 @@ Polymer(
 				)
 				.on('ui_active_contact_changed', !~>
 					@ui_active_contact	= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
-				)
-				.on('settings_experience_changed', (experience) !~>
-					@advanced_user	= experience >= 1
 				)
 	_hide_header : (list, add_contact) ->
 		!list.length || add_contact

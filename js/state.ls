@@ -86,7 +86,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 						}
 					]
 					'bucket_size'					: 2
-					# 0 - casual, 1 - advanced, 2 - developer
+					# 0 - regular, 1 - advanced, 2 - developer
 					'experience'					: 0
 					'help'							: true
 					'ice_servers'					: [

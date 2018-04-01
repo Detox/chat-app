@@ -6,14 +6,12 @@
 Polymer(
 	is			: 'detox-chat-app-sidebar-profile'
 	behaviors	: [
-		detox-chat-app.behaviors.state
+		detox-chat-app.behaviors.experience_level
 		detox-chat-app.behaviors.help
+		detox-chat-app.behaviors.state
 	]
 	properties	:
 		add_secret			:
-			type	: Boolean
-			value	: false
-		advanced_user		:
 			type	: Boolean
 			value	: false
 		id_base58			: String
@@ -49,17 +47,12 @@ Polymer(
 			@nickname	= state.get_nickname()
 			update_secrets()
 
-			@advanced_user	= state.get_settings_experience() >= 1
-
 			state
 				.on('nickname_changed', (new_nickname) !~>
 					if @nickname != new_nickname
 						@nickname	= new_nickname
 				)
 				.on('secrets_changed', update_secrets)
-				.on('settings_experience_changed', (experience) !~>
-					@advanced_user	= experience >= 1
-				)
 	_nickname_blur : !->
 		if @nickname != @_state_instance.get_nickname()
 			@_state_instance.set_nickname(@nickname)

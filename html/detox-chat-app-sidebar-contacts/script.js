@@ -7,13 +7,9 @@
 (function(){
   Polymer({
     is: 'detox-chat-app-sidebar-contacts',
-    behaviors: [detoxChatApp.behaviors.state, detoxChatApp.behaviors.help],
+    behaviors: [detoxChatApp.behaviors.experience_level, detoxChatApp.behaviors.help, detoxChatApp.behaviors.state],
     properties: {
       add_contact: {
-        type: Boolean,
-        value: false
-      },
-      advanced_user: {
         type: Boolean,
         value: false
       },
@@ -49,7 +45,6 @@
         detoxUtils = arg$[0][0];
         ArraySet = detoxUtils.ArraySet;
         state = this$._state_instance;
-        this$.advanced_user = state.get_settings_experience() >= 1;
         this$.contacts = state.get_contacts();
         this$.online_contacts = ArraySet(state.get_online_contacts());
         this$.contacts_requests = state.get_contacts_requests();
@@ -72,8 +67,6 @@
           this$.contacts_with_unread_messages = ArraySet(state.get_contacts_with_unread_messages());
         }).on('ui_active_contact_changed', function(){
           this$.ui_active_contact = ArraySet([state.get_ui_active_contact() || new Uint8Array(0)]);
-        }).on('settings_experience_changed', function(experience){
-          this$.advanced_user = experience >= 1;
         });
       });
     },

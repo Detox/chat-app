@@ -6,16 +6,11 @@
 Polymer(
 	is			: 'detox-chat-app-sidebar-settings'
 	behaviors	: [
-		detox-chat-app.behaviors.state
+		detox-chat-app.behaviors.experience_level
 		detox-chat-app.behaviors.help
+		detox-chat-app.behaviors.state
 	]
 	properties	:
-		advanced_user							:
-			computed	: '_advanced_user(settings_experience)'
-			type		: Boolean
-		developer								:
-			computed	: '_developer(settings_experience)'
-			type		: Boolean
 		settings_announce						:
 			observer	: '_settings_announce_changed'
 			type		: String
@@ -96,10 +91,6 @@ Polymer(
 			)
 			.on('settings_packets_per_second_changed', (@settings_packets_per_second) !~>)
 			.on('settings_reconnects_intervals_changed', (@settings_reconnects_intervals) !~>)
-	_advanced_user : (settings_experience) ->
-		parseInt(settings_experience) >= 1
-	_developer : (settings_experience) ->
-		parseInt(settings_experience) == 2
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
 	_settings_announce_changed : !->
@@ -163,7 +154,7 @@ Polymer(
 			csw.functions.notify('Saved changes to user experience level setting', 'success', 'right', 3)
 	_help_settings_experience : !->
 		content	= """
-			<p>Casual makes UI as simple as possible. Advanced enables more features and settings. Developer mode gives most control.</p>
+			<p>Regular makes UI as simple as possible. Advanced enables more features and settings. Developer mode gives most control.</p>
 		"""
 		csw.functions.simple_modal(content)
 	_settings_help_changed : !->

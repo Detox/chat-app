@@ -7,13 +7,9 @@
 (function(){
   Polymer({
     is: 'detox-chat-app-sidebar-profile',
-    behaviors: [detoxChatApp.behaviors.state, detoxChatApp.behaviors.help],
+    behaviors: [detoxChatApp.behaviors.experience_level, detoxChatApp.behaviors.help, detoxChatApp.behaviors.state],
     properties: {
       add_secret: {
-        type: Boolean,
-        value: false
-      },
-      advanced_user: {
         type: Boolean,
         value: false
       },
@@ -55,14 +51,11 @@
             this$.id_base58 = id_encode(public_key, new Uint8Array(0));
             this$.nickname = state.get_nickname();
             update_secrets();
-            this$.advanced_user = state.get_settings_experience() >= 1;
             state.on('nickname_changed', function(new_nickname){
               if (this$.nickname !== new_nickname) {
                 this$.nickname = new_nickname;
               }
-            }).on('secrets_changed', update_secrets).on('settings_experience_changed', function(experience){
-              this$.advanced_user = experience >= 1;
-            });
+            }).on('secrets_changed', update_secrets);
           });
         });
       });

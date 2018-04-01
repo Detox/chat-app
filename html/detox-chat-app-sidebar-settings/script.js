@@ -7,16 +7,8 @@
 (function(){
   Polymer({
     is: 'detox-chat-app-sidebar-settings',
-    behaviors: [detoxChatApp.behaviors.state, detoxChatApp.behaviors.help],
+    behaviors: [detoxChatApp.behaviors.experience_level, detoxChatApp.behaviors.help, detoxChatApp.behaviors.state],
     properties: {
-      advanced_user: {
-        computed: '_advanced_user(settings_experience)',
-        type: Boolean
-      },
-      developer: {
-        computed: '_developer(settings_experience)',
-        type: Boolean
-      },
       settings_announce: {
         observer: '_settings_announce_changed',
         type: String
@@ -120,12 +112,6 @@
         });
       });
     },
-    _advanced_user: function(settings_experience){
-      return parseInt(settings_experience) >= 1;
-    },
-    _developer: function(settings_experience){
-      return parseInt(settings_experience) === 2;
-    },
     _bool_to_string: function(value){
       if (value) {
         return '1';
@@ -198,7 +184,7 @@
     },
     _help_settings_experience: function(){
       var content;
-      content = "<p>Casual makes UI as simple as possible. Advanced enables more features and settings. Developer mode gives most control.</p>";
+      content = "<p>Regular makes UI as simple as possible. Advanced enables more features and settings. Developer mode gives most control.</p>";
       csw.functions.simple_modal(content);
     },
     _settings_help_changed: function(){
