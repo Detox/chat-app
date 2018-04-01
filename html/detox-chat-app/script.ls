@@ -3,23 +3,19 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-([behaviors]) <-! require(['js/behaviors']).then
+([detox-chat, detox-core, detox-utils, behaviors]) <-! require(['@detox/chat', '@detox/core', '@detox/utils', 'js/behaviors']).then
+<~! detox-chat.ready
+<~! detox-core.ready
 Polymer(
 	is			: 'detox-chat-app'
 	behaviors	: [
-		behaviors.state
+		behaviors.state_instance
 	]
 	created : !->
-		Promise.all([
-			require(['@detox/chat', '@detox/core', '@detox/utils'])
-			@_state_instance_ready
-		]).then ([[detox-chat, detox-core, detox-utils]]) !~>
-			if !@_state_instance.get_settings_online()
-				# We're working offline
-				return
-			<~! detox-chat.ready
-			<~! detox-core.ready
-			@_connect_to_the_network(detox-chat, detox-core, detox-utils)
+		if !@_state_instance.get_settings_online()
+			# We're working offline
+			return
+		@_connect_to_the_network(detox-chat, detox-core, detox-utils)
 	_connect_to_the_network : (detox-chat, detox-core, detox-utils) !->
 		are_arrays_equal			= detox-utils.are_arrays_equal
 		timeoutSet					= detox-utils.timeoutSet

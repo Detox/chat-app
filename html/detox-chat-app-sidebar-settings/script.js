@@ -10,7 +10,7 @@
     behaviors = arg$[0];
     Polymer({
       is: 'detox-chat-app-sidebar-settings',
-      behaviors: [behaviors.experience_level, behaviors.help, behaviors.state],
+      behaviors: [behaviors.experience_level, behaviors.help, behaviors.state_instance],
       properties: {
         settings_announce: {
           observer: '_settings_announce_changed',
@@ -69,50 +69,47 @@
         settings_reconnects_intervals_string: String
       },
       ready: function(){
-        var this$ = this;
-        this._state_instance_ready.then(function(){
-          var state;
-          state = this$._state_instance;
-          this$.settings_announce = this$._bool_to_string(state.get_settings_announce());
-          this$.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
-          this$.settings_bootstrap_nodes = state.get_settings_bootstrap_nodes();
-          this$.settings_bucket_size = state.get_settings_bucket_size();
-          this$.settings_experience = state.get_settings_experience();
-          this$.settings_help = this$._bool_to_string(state.get_settings_help());
-          this$.settings_ice_servers = state.get_settings_ice_servers();
-          this$.settings_max_pending_segments = state.get_settings_max_pending_segments();
-          this$.settings_number_of_intermediate_nodes = state.get_settings_number_of_intermediate_nodes();
-          this$.settings_number_of_introduction_nodes = state.get_settings_number_of_introduction_nodes();
-          this$.settings_online = this$._bool_to_string(state.get_settings_online());
-          this$.settings_packets_per_second = state.get_settings_packets_per_second();
-          this$.settings_reconnects_intervals = state.get_settings_reconnects_intervals();
-          state.on('settings_announce_changed', function(new_settings_announce){
-            new_settings_announce = this$._bool_to_string(new_settings_announce);
-          }).on('settings_block_contact_requests_for_changed', function(block_contact_requests_for){
-            this$.block_contact_requests_for = block_contact_requests_for / 60 / 60 / 24;
-          }).on('settings_bootstrap_nodes_changed', function(settings_bootstrap_nodes){
-            this$.settings_bootstrap_nodes = settings_bootstrap_nodes;
-          }).on('settings_bucket_size_changed', function(settings_bucket_size){
-            this$.settings_bucket_size = settings_bucket_size;
-          }).on('settings_experience_changed', function(settings_experience){
-            this$.settings_experience = settings_experience;
-          }).on('settings_help_changed', function(new_settings_help){
-            new_settings_help = this$._bool_to_string(new_settings_help);
-          }).on('settings_ice_servers_changed', function(settings_ice_servers){
-            this$.settings_ice_servers = settings_ice_servers;
-          }).on('settings_max_pending_segments_changed', function(settings_max_pending_segments){
-            this$.settings_max_pending_segments = settings_max_pending_segments;
-          }).on('settings_number_of_intermediate_nodes_changed', function(settings_number_of_intermediate_nodes){
-            this$.settings_number_of_intermediate_nodes = settings_number_of_intermediate_nodes;
-          }).on('settings_number_of_introduction_nodes_changed', function(settings_number_of_introduction_nodes){
-            this$.settings_number_of_introduction_nodes = settings_number_of_introduction_nodes;
-          }).on('settings_online_changed', function(new_settings_online){
-            new_settings_online = this$._bool_to_string(new_settings_online);
-          }).on('settings_packets_per_second_changed', function(settings_packets_per_second){
-            this$.settings_packets_per_second = settings_packets_per_second;
-          }).on('settings_reconnects_intervals_changed', function(settings_reconnects_intervals){
-            this$.settings_reconnects_intervals = settings_reconnects_intervals;
-          });
+        var state, this$ = this;
+        state = this._state_instance;
+        this.settings_announce = this._bool_to_string(state.get_settings_announce());
+        this.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
+        this.settings_bootstrap_nodes = state.get_settings_bootstrap_nodes();
+        this.settings_bucket_size = state.get_settings_bucket_size();
+        this.settings_experience = state.get_settings_experience();
+        this.settings_help = this._bool_to_string(state.get_settings_help());
+        this.settings_ice_servers = state.get_settings_ice_servers();
+        this.settings_max_pending_segments = state.get_settings_max_pending_segments();
+        this.settings_number_of_intermediate_nodes = state.get_settings_number_of_intermediate_nodes();
+        this.settings_number_of_introduction_nodes = state.get_settings_number_of_introduction_nodes();
+        this.settings_online = this._bool_to_string(state.get_settings_online());
+        this.settings_packets_per_second = state.get_settings_packets_per_second();
+        this.settings_reconnects_intervals = state.get_settings_reconnects_intervals();
+        state.on('settings_announce_changed', function(new_settings_announce){
+          new_settings_announce = this$._bool_to_string(new_settings_announce);
+        }).on('settings_block_contact_requests_for_changed', function(block_contact_requests_for){
+          this$.block_contact_requests_for = block_contact_requests_for / 60 / 60 / 24;
+        }).on('settings_bootstrap_nodes_changed', function(settings_bootstrap_nodes){
+          this$.settings_bootstrap_nodes = settings_bootstrap_nodes;
+        }).on('settings_bucket_size_changed', function(settings_bucket_size){
+          this$.settings_bucket_size = settings_bucket_size;
+        }).on('settings_experience_changed', function(settings_experience){
+          this$.settings_experience = settings_experience;
+        }).on('settings_help_changed', function(new_settings_help){
+          new_settings_help = this$._bool_to_string(new_settings_help);
+        }).on('settings_ice_servers_changed', function(settings_ice_servers){
+          this$.settings_ice_servers = settings_ice_servers;
+        }).on('settings_max_pending_segments_changed', function(settings_max_pending_segments){
+          this$.settings_max_pending_segments = settings_max_pending_segments;
+        }).on('settings_number_of_intermediate_nodes_changed', function(settings_number_of_intermediate_nodes){
+          this$.settings_number_of_intermediate_nodes = settings_number_of_intermediate_nodes;
+        }).on('settings_number_of_introduction_nodes_changed', function(settings_number_of_introduction_nodes){
+          this$.settings_number_of_introduction_nodes = settings_number_of_introduction_nodes;
+        }).on('settings_online_changed', function(new_settings_online){
+          new_settings_online = this$._bool_to_string(new_settings_online);
+        }).on('settings_packets_per_second_changed', function(settings_packets_per_second){
+          this$.settings_packets_per_second = settings_packets_per_second;
+        }).on('settings_reconnects_intervals_changed', function(settings_reconnects_intervals){
+          this$.settings_reconnects_intervals = settings_reconnects_intervals;
         });
       },
       _bool_to_string: function(value){
@@ -168,9 +165,10 @@
         content = "<p>Bootstrap nodes are special kind of nodes used during application startup in order to get information about other nodes in the network and establish initial connections with them.<br>\nThese nodes are crucial for operation and should be selected carefully.<br>\nBootstrap nodes that return misleading information cause anything from drastic reduction of anonymity to being unable to communicate with other nodes in the network.<br>\nDo not change this setting unless you know what you're doing.</p>";
         csw.functions.simple_modal(content);
       },
-      _settings_bucket_size_changed: function(){
-        if (this.settings_bucket_size !== this._state_instance.get_settings_bucket_size()) {
-          this._state_instance.set_settings_bucket_size(this.settings_bucket_size);
+      _settings_bucket_size_changed: function(value){
+        value = parseInt(value);
+        if (value !== this._state_instance.get_settings_bucket_size()) {
+          this._state_instance.set_settings_bucket_size(value);
           csw.functions.notify('Saved changes to bucket size setting', 'success', 'right', 3);
         }
       },
@@ -179,9 +177,10 @@
         content = "<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>\n<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>\nDo not change this setting unless you know what you're doing.</p>";
         csw.functions.simple_modal(content);
       },
-      _settings_experience_changed: function(){
-        if (this.settings_experience !== this._state_instance.get_settings_experience()) {
-          this._state_instance.set_settings_experience(this.settings_experience);
+      _settings_experience_changed: function(value){
+        value = parseInt(value);
+        if (value !== this._state_instance.get_settings_experience()) {
+          this._state_instance.set_settings_experience(value);
           csw.functions.notify('Saved changes to user experience level setting', 'success', 'right', 3);
         }
       },
@@ -223,9 +222,10 @@
         content = "<p>ICE servers are used during connections to other nodes in the network.</p>\n<p>There are two kinds of ICE servers: STUN and TURN.<br>\nSTUN helps to figure out how to connect to this node from the outside if it is behind Network Address Translation (NAT) or firewall.<br>\nIf connection is not possible, TURN server can act as relay to enable communication even behind restricted NAT or firewall.</p>\n<p>Most of the time ICE servers are crucial for operation and should be selected carefully.<br>\nDo not change this setting unless you know what you're doing.</p>";
         csw.functions.simple_modal(content);
       },
-      _settings_max_pending_segments_changed: function(){
-        if (this.settings_max_pending_segments !== this._state_instance.get_settings_max_pending_segments()) {
-          this._state_instance.set_settings_max_pending_segments(this.settings_max_pending_segments);
+      _settings_max_pending_segments_changed: function(value){
+        value = parseInt(value);
+        if (value !== this._state_instance.get_settings_max_pending_segments()) {
+          this._state_instance.set_settings_max_pending_segments(value);
           csw.functions.notify('Saved changes to max pending segments setting', 'success', 'right', 3);
         }
       },
@@ -234,9 +234,10 @@
         content = "<p>Pending segments is a low-level state of segments from transport layer of Detox network implementation that appear during routing paths construction.</p>\n<p>Do not change this setting unless you know what you're doing.</p>";
         csw.functions.simple_modal(content);
       },
-      _settings_number_of_intermediate_nodes_changed: function(){
-        if (this.settings_number_of_intermediate_nodes !== this._state_instance.get_settings_number_of_intermediate_nodes()) {
-          this._state_instance.set_settings_number_of_intermediate_nodes(this.settings_number_of_intermediate_nodes);
+      _settings_number_of_intermediate_nodes_changed: function(value){
+        value = parseInt(value);
+        if (value !== this._state_instance.get_settings_number_of_intermediate_nodes()) {
+          this._state_instance.set_settings_number_of_intermediate_nodes(value);
           csw.functions.notify('Saved changes to number of intermediate nodes setting', 'success', 'right', 3);
         }
       },
@@ -245,9 +246,10 @@
         content = "<p>Intermediate nodes are nodes between this node and interested target node, used for routing paths creation in transport layer of Detox network implementation.</p>\n<p>More intermediate nodes means longer routing path and slower its creation. Lower numbers decrease anonymity, numbers higher than 3 are generally considered to be redundant.<br>\nDo not change this setting unless you know what you're doing.</p>";
         csw.functions.simple_modal(content);
       },
-      _settings_number_of_introduction_nodes_changed: function(){
-        if (this.settings_number_of_introduction_nodes !== this._state_instance.get_settings_number_of_introduction_nodes()) {
-          this._state_instance.set_settings_number_of_introduction_nodes(this.settings_number_of_introduction_nodes);
+      _settings_number_of_introduction_nodes_changed: function(value){
+        value = parseInt(value);
+        if (value !== this._state_instance.get_settings_number_of_introduction_nodes()) {
+          this._state_instance.set_settings_number_of_introduction_nodes(value);
           csw.functions.notify('Saved changes to number of introduction nodes setting', 'success', 'right', 3);
         }
       },
@@ -267,9 +269,10 @@
         content = "<p>If not online then on next start application will not try to connect to Detox network and related functionality will not work properly.</p>";
         csw.functions.simple_modal(content);
       },
-      _settings_packets_per_second_changed: function(){
-        if (this.settings_packets_per_second !== this._state_instance.get_settings_packets_per_second()) {
-          this._state_instance.set_settings_packets_per_second(this.settings_packets_per_second);
+      _settings_packets_per_second_changed: function(value){
+        value = parseInt(value);
+        if (value !== this._state_instance.get_settings_packets_per_second()) {
+          this._state_instance.set_settings_packets_per_second(value);
           csw.functions.notify('Saved changes to packets per second setting', 'success', 'right', 3);
         }
       },

@@ -3,13 +3,15 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-([behaviors]) <-! require(['js/behaviors']).then
+([detox-chat, detox-crypto, behaviors]) <-! require(['@detox/chat', '@detox/crypto', 'js/behaviors']).then
+<~! detox-chat.ready
+<~! detox-crypto.ready
 Polymer(
 	is			: 'detox-chat-app-sidebar-profile'
 	behaviors	: [
 		behaviors.experience_level
 		behaviors.help
-		behaviors.state
+		behaviors.state_instance
 	]
 	properties	:
 		add_secret			:
@@ -23,37 +25,31 @@ Polymer(
 			value	: 4
 		nickname			: String
 	ready : !->
-		Promise.all([
-			require(['@detox/chat', '@detox/crypto'])
-			@_state_instance_ready
-		]).then ([[detox-chat, detox-crypto]]) !~>
-			<~! detox-crypto.ready
-			<~! detox-chat.ready
-			id_encode	= detox-chat.id_encode
+		id_encode	= detox-chat.id_encode
 
-			state		= @_state_instance
+		state		= @_state_instance
 
-			!~function update_secrets
-				secrets				= state.get_secrets()
-				@id_default_secret	= id_encode(public_key, secrets[0].secret)
-				@secrets			= for secret in secrets
-					{
-						secret	: secret.secret
-						id		: id_encode(public_key, secret.secret)
-						name	: secret.name
-					}
+		!~function update_secrets
+			secrets				= state.get_secrets()
+			@id_default_secret	= id_encode(public_key, secrets[0].secret)
+			@secrets			= for secret in secrets
+				{
+					secret	: secret.secret
+					id		: id_encode(public_key, secret.secret)
+					name	: secret.name
+				}
 
-			public_key	= detox-crypto.create_keypair(state.get_seed()).ed25519.public
-			@id_base58	= id_encode(public_key, new Uint8Array(0))
-			@nickname	= state.get_nickname()
-			update_secrets()
+		public_key	= detox-crypto.create_keypair(state.get_seed()).ed25519.public
+		@id_base58	= id_encode(public_key, new Uint8Array(0))
+		@nickname	= state.get_nickname()
+		update_secrets()
 
-			state
-				.on('nickname_changed', (new_nickname) !~>
-					if @nickname != new_nickname
-						@nickname	= new_nickname
-				)
-				.on('secrets_changed', update_secrets)
+		state
+			.on('nickname_changed', (new_nickname) !~>
+				if @nickname != new_nickname
+					@nickname	= new_nickname
+			)
+			.on('secrets_changed', update_secrets)
 	_nickname_blur : !->
 		if @nickname != @_state_instance.get_nickname()
 			@_state_instance.set_nickname(@nickname)
@@ -69,7 +65,6 @@ Polymer(
 		if !new_secret_name
 			csw.functions.notify('Secret name is required', 'error', 'right', 3)
 			return
-		([detox-chat])	<~! require(['@detox/chat']).then
 		secret	= detox-chat.generate_secret().slice(0, @new_secret_length)
 		@_state_instance.add_secret(secret, new_secret_name)
 		csw.functions.notify('Secret added', 'success', 'right', 3)

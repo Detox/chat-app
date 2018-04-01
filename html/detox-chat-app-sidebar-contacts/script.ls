@@ -3,13 +3,15 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-([behaviors]) <-! require(['js/behaviors']).then
+([detox-chat, detox-crypto, detox-utils, behaviors]) <-! require(['@detox/chat', '@detox/crypto', '@detox/utils', 'js/behaviors']).then
+<~! detox-chat.ready
+<~! detox-crypto.ready
 Polymer(
 	is			: 'detox-chat-app-sidebar-contacts'
 	behaviors	: [
 		behaviors.experience_level
 		behaviors.help
-		behaviors.state
+		behaviors.state_instance
 	]
 	properties	:
 		add_contact						:
@@ -34,50 +36,45 @@ Polymer(
 		ui_active_contact				:
 			type	: Object
 	ready : !->
-		Promise.all([
-			require(['@detox/utils'])
-			@_state_instance_ready
-		]).then ([[detox-utils]]) !~>
-			ArraySet	= detox-utils.ArraySet
+		ArraySet	= detox-utils.ArraySet
 
-			state							= @_state_instance
-			@contacts						= state.get_contacts()
-			@online_contacts				= ArraySet(state.get_online_contacts())
-			@contacts_requests				= state.get_contacts_requests()
-			@contacts_with_pending_messages	= ArraySet(state.get_contacts_with_pending_messages())
-			@contacts_with_unread_messages	= ArraySet(state.get_contacts_with_unread_messages())
-			@ui_active_contact				= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
-			state
-				.on('contacts_changed', !~>
-					# TODO: Sort contacts
-					@contacts	= state.get_contacts()
-				)
-				.on('online_contacts_changed', !~>
-					@online_contacts	= ArraySet(state.get_online_contacts())
-				)
-				.on('contact_request_added', !~>
-					csw.functions.notify('Incoming contact request received', 'warning', 'right', 3)
-				)
-				.on('contacts_requests_changed', !~>
-					# TODO: Sort contacts
-					contacts_requests	= state.get_contacts_requests()
-					@contacts_requests	= contacts_requests
-				)
-				.on('contacts_with_pending_messages_changed', !~>
-					@contacts_with_pending_messages	= ArraySet(state.get_contacts_with_pending_messages())
-				)
-				.on('contacts_with_unread_messages_changed', !~>
-					@contacts_with_unread_messages	= ArraySet(state.get_contacts_with_unread_messages())
-				)
-				.on('ui_active_contact_changed', !~>
-					@ui_active_contact	= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
-				)
+		state							= @_state_instance
+		@contacts						= state.get_contacts()
+		@online_contacts				= ArraySet(state.get_online_contacts())
+		@contacts_requests				= state.get_contacts_requests()
+		@contacts_with_pending_messages	= ArraySet(state.get_contacts_with_pending_messages())
+		@contacts_with_unread_messages	= ArraySet(state.get_contacts_with_unread_messages())
+		@ui_active_contact				= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
+		state
+			.on('contacts_changed', !~>
+				# TODO: Sort contacts
+				@contacts	= state.get_contacts()
+			)
+			.on('online_contacts_changed', !~>
+				@online_contacts	= ArraySet(state.get_online_contacts())
+			)
+			.on('contact_request_added', !~>
+				csw.functions.notify('Incoming contact request received', 'warning', 'right', 3)
+			)
+			.on('contacts_requests_changed', !~>
+				# TODO: Sort contacts
+				contacts_requests	= state.get_contacts_requests()
+				@contacts_requests	= contacts_requests
+			)
+			.on('contacts_with_pending_messages_changed', !~>
+				@contacts_with_pending_messages	= ArraySet(state.get_contacts_with_pending_messages())
+			)
+			.on('contacts_with_unread_messages_changed', !~>
+				@contacts_with_unread_messages	= ArraySet(state.get_contacts_with_unread_messages())
+			)
+			.on('ui_active_contact_changed', !~>
+				@ui_active_contact	= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
+			)
 	_hide_header : (list, add_contact) ->
 		!list.length || add_contact
 	_add_contact : !->
 		@add_contact	= true
 	_add_contact_confirm : !->
-		([detox-chat, detox-crypto, detox-utils])	<~! require(['@detox/chat', '@detox/crypto', '@detox/utils']).then
 		try
 			[public_key, remote_secret]	= detox-chat.id_decode(@new_contact_id)
 			own_public_key				= detox-crypto.create_keypair(@_state_instance.get_seed()).ed25519.public

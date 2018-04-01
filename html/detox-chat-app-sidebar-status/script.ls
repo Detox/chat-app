@@ -7,7 +7,7 @@
 Polymer(
 	is			: 'detox-chat-app-sidebar-status'
 	behaviors	: [
-		behaviors.state
+		behaviors.state_instance
 	]
 	properties	:
 		online							:
@@ -29,7 +29,6 @@ Polymer(
 			type	: Number
 			value	: 0
 	ready : !->
-		<~! @_state_instance_ready.then
 		state	= @_state_instance
 		state
 			.on('online_changed', (new_online) !~>

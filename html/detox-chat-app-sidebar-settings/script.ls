@@ -9,7 +9,7 @@ Polymer(
 	behaviors	: [
 		behaviors.experience_level
 		behaviors.help
-		behaviors.state
+		behaviors.state_instance
 	]
 	properties	:
 		settings_announce						:
@@ -55,7 +55,6 @@ Polymer(
 			type		: Object
 		settings_reconnects_intervals_string	: String
 	ready : !->
-		<~! @_state_instance_ready.then
 		state									= @_state_instance
 		@settings_announce						= @_bool_to_string(state.get_settings_announce())
 		@settings_block_contact_requests_for	= state.get_settings_block_contact_requests_for() / 60 / 60 / 24 # In days
@@ -138,9 +137,10 @@ Polymer(
 			Do not change this setting unless you know what you're doing.</p>
 		"""
 		csw.functions.simple_modal(content)
-	_settings_bucket_size_changed : !->
-		if @settings_bucket_size != @_state_instance.get_settings_bucket_size()
-			@_state_instance.set_settings_bucket_size(@settings_bucket_size)
+	_settings_bucket_size_changed : (value) !->
+		value	= parseInt(value)
+		if value != @_state_instance.get_settings_bucket_size()
+			@_state_instance.set_settings_bucket_size(value)
 			csw.functions.notify('Saved changes to bucket size setting', 'success', 'right', 3)
 	_help_settings_bucket_size : !->
 		content	= """
@@ -149,9 +149,10 @@ Polymer(
 			Do not change this setting unless you know what you're doing.</p>
 		"""
 		csw.functions.simple_modal(content)
-	_settings_experience_changed : !->
-		if @settings_experience != @_state_instance.get_settings_experience()
-			@_state_instance.set_settings_experience(@settings_experience)
+	_settings_experience_changed : (value) !->
+		value	= parseInt(value)
+		if value != @_state_instance.get_settings_experience()
+			@_state_instance.set_settings_experience(value)
 			csw.functions.notify('Saved changes to user experience level setting', 'success', 'right', 3)
 	_help_settings_experience : !->
 		content	= """
@@ -190,9 +191,10 @@ Polymer(
 			Do not change this setting unless you know what you're doing.</p>
 		"""
 		csw.functions.simple_modal(content)
-	_settings_max_pending_segments_changed : !->
-		if @settings_max_pending_segments != @_state_instance.get_settings_max_pending_segments()
-			@_state_instance.set_settings_max_pending_segments(@settings_max_pending_segments)
+	_settings_max_pending_segments_changed : (value) !->
+		value	= parseInt(value)
+		if value != @_state_instance.get_settings_max_pending_segments()
+			@_state_instance.set_settings_max_pending_segments(value)
 			csw.functions.notify('Saved changes to max pending segments setting', 'success', 'right', 3)
 	_help_settings_max_pending_segments : !->
 		content	= """
@@ -200,9 +202,10 @@ Polymer(
 			<p>Do not change this setting unless you know what you're doing.</p>
 		"""
 		csw.functions.simple_modal(content)
-	_settings_number_of_intermediate_nodes_changed : !->
-		if @settings_number_of_intermediate_nodes != @_state_instance.get_settings_number_of_intermediate_nodes()
-			@_state_instance.set_settings_number_of_intermediate_nodes(@settings_number_of_intermediate_nodes)
+	_settings_number_of_intermediate_nodes_changed : (value) !->
+		value	= parseInt(value)
+		if value != @_state_instance.get_settings_number_of_intermediate_nodes()
+			@_state_instance.set_settings_number_of_intermediate_nodes(value)
 			csw.functions.notify('Saved changes to number of intermediate nodes setting', 'success', 'right', 3)
 	_help_settings_number_of_intermediate_nodes : !->
 		content	= """
@@ -211,9 +214,10 @@ Polymer(
 			Do not change this setting unless you know what you're doing.</p>
 		"""
 		csw.functions.simple_modal(content)
-	_settings_number_of_introduction_nodes_changed : !->
-		if @settings_number_of_introduction_nodes != @_state_instance.get_settings_number_of_introduction_nodes()
-			@_state_instance.set_settings_number_of_introduction_nodes(@settings_number_of_introduction_nodes)
+	_settings_number_of_introduction_nodes_changed : (value) !->
+		value	= parseInt(value)
+		if value != @_state_instance.get_settings_number_of_introduction_nodes()
+			@_state_instance.set_settings_number_of_introduction_nodes(value)
 			csw.functions.notify('Saved changes to number of introduction nodes setting', 'success', 'right', 3)
 	_help_settings_number_of_introduction_nodes : !->
 		content	= """
@@ -231,9 +235,10 @@ Polymer(
 			<p>If not online then on next start application will not try to connect to Detox network and related functionality will not work properly.</p>
 		"""
 		csw.functions.simple_modal(content)
-	_settings_packets_per_second_changed : !->
-		if @settings_packets_per_second != @_state_instance.get_settings_packets_per_second()
-			@_state_instance.set_settings_packets_per_second(@settings_packets_per_second)
+	_settings_packets_per_second_changed : (value) !->
+		value	= parseInt(value)
+		if value != @_state_instance.get_settings_packets_per_second()
+			@_state_instance.set_settings_packets_per_second(value)
 			csw.functions.notify('Saved changes to packets per second setting', 'success', 'right', 3)
 	_help_settings_packets_per_second : !->
 		content	= """

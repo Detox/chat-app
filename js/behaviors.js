@@ -5,9 +5,9 @@
  * @license 0BSD
  */
 (function(){
-  function Wrapper(){
-    var state, experience_level, help;
-    state = {
+  function Wrapper(detoxChat, state){
+    var state_instance, experience_level, help;
+    state_instance = {
       properties: {
         chatId: {
           type: String,
@@ -15,21 +15,16 @@
         }
       },
       created: function(){
-        var this$ = this;
-        this._state_instance_ready = require(['@detox/chat', 'js/state']).then(function(arg$){
-          var detoxChat, state;
-          detoxChat = arg$[0], state = arg$[1];
-          this$._state_instance = state.get_instance(this$.chatId);
-          if (!this$._state_instance.ready()) {
-            csw.functions.notify("Previous state was not found, new identity generated", 'warning', 'right', 60);
-            this$._state_instance.set_seed(detoxChat.generate_seed());
-            this$._state_instance.add_secret(detoxChat.generate_secret().slice(0, 4), 'Default secret');
-          }
-        });
+        this._state_instance = state.get_instance(this.chatId);
+        if (!this._state_instance.ready()) {
+          csw.functions.notify("Previous state was not found, new identity generated", 'warning', 'right', 60);
+          this._state_instance.set_seed(detoxChat.generate_seed());
+          this._state_instance.add_secret(detoxChat.generate_secret().slice(0, 4), 'Default secret');
+        }
       }
     };
     experience_level = [
-      state, {
+      state_instance, {
         advanced_user: {
           type: Boolean,
           value: false
@@ -39,41 +34,36 @@
           value: false
         },
         ready: function(){
-          var this$ = this;
-          this._state_instance_ready.then(function(){
-            var state;
-            state = this$._state_instance;
-            this$.advanced_user = state.get_settings_experience() >= 1;
-            this$.developer = state.get_settings_experience() === 2;
-            state.on('settings_experience_changed', function(experience){
-              this$.advanced_user = experience >= 1;
-              this$.developer = experience === 2;
-            });
+          var state, this$ = this;
+          state = this._state_instance;
+          this.advanced_user = state.get_settings_experience() >= 1;
+          this.developer = state.get_settings_experience() === 2;
+          state.on('settings_experience_changed', function(experience){
+            this$.advanced_user = experience >= 1;
+            this$.developer = experience === 2;
           });
         }
       }
     ];
     help = [
-      state, {
+      state_instance, {
         properties: {
           help: Boolean
         },
         ready: function(){
           var this$ = this;
-          this._state_instance_ready.then(function(){
-            this$.help = this$._state_instance.get_settings_help();
-            this$._state_instance.on('settings_help_changed', function(help){
-              this$.help = help;
-            });
+          this.help = this._state_instance.get_settings_help();
+          this._state_instance.on('settings_help_changed', function(help){
+            this$.help = help;
           });
         }
       }
     ];
     return {
-      state: state,
+      state_instance: state_instance,
       experience_level: experience_level,
       help: help
     };
   }
-  define(Wrapper);
+  define(['@detox/chat', 'js/state'], Wrapper);
 }).call(this);

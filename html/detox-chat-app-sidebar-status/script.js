@@ -10,7 +10,7 @@
     behaviors = arg$[0];
     Polymer({
       is: 'detox-chat-app-sidebar-status',
-      behaviors: [behaviors.state],
+      behaviors: [behaviors.state_instance],
       properties: {
         online: {
           type: Boolean,
@@ -38,23 +38,20 @@
         }
       },
       ready: function(){
-        var this$ = this;
-        this._state_instance_ready.then(function(){
-          var state;
-          state = this$._state_instance;
-          state.on('online_changed', function(new_online){
-            this$.online = new_online;
-          }).on('announced_changed', function(new_announced){
-            this$.announced = new_announced;
-          }).on('connected_nodes_count_changed', function(connected_nodes_count){
-            this$.connected_nodes_count = connected_nodes_count;
-          }).on('aware_of_nodes_count_changed', function(aware_of_nodes_count){
-            this$.aware_of_nodes_count = aware_of_nodes_count;
-          }).on('routing_paths_count_changed', function(routing_paths_count){
-            this$.routing_paths_count = routing_paths_count;
-          }).on('application_connections_count_changed', function(application_connections_count){
-            this$.application_connections_count = application_connections_count;
-          });
+        var state, this$ = this;
+        state = this._state_instance;
+        state.on('online_changed', function(new_online){
+          this$.online = new_online;
+        }).on('announced_changed', function(new_announced){
+          this$.announced = new_announced;
+        }).on('connected_nodes_count_changed', function(connected_nodes_count){
+          this$.connected_nodes_count = connected_nodes_count;
+        }).on('aware_of_nodes_count_changed', function(aware_of_nodes_count){
+          this$.aware_of_nodes_count = aware_of_nodes_count;
+        }).on('routing_paths_count_changed', function(routing_paths_count){
+          this$.routing_paths_count = routing_paths_count;
+        }).on('application_connections_count_changed', function(application_connections_count){
+          this$.application_connections_count = application_connections_count;
         });
       },
       _online: function(online, connected_nodes_count){
