@@ -10,6 +10,31 @@
     detoxChat = arg$[0], detoxCore = arg$[1], detoxUtils = arg$[2], behaviors = arg$[3];
     detoxChat.ready(function(){
       detoxCore.ready(function(){
+        if ('serviceWorker' in navigator && window.detox_sw_path) {
+          setTimeout(function(){
+            navigator.serviceWorker.register(detox_sw_path).then(function(registration){
+              registration.onupdatefound = function(){
+                var installingWorker;
+                installingWorker = registration.installing;
+                installingWorker.onstatechange = function(){
+                  switch (installingWorker.state) {
+                  case 'installed':
+                    if (navigator.serviceWorker.controller) {
+                      csw.functions.notify('New application version available, refresh page or restart app to see updated version', 'success', 'right', 10);
+                    } else {
+                      csw.functions.notify('Application is ready to work offline', 'success', 'right', 10);
+                    }
+                    break;
+                  case 'redundant':
+                    console.error('The installing service worker became redundant.');
+                  }
+                };
+              };
+            })['catch'](function(e){
+              console.error('Error during service worker registration:', e);
+            });
+          }, 2000);
+        }
         Polymer({
           is: 'detox-chat-app',
           behaviors: [behaviors.state_instance],

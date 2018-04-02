@@ -15,6 +15,7 @@ gulp-requirejs-optimize	= require('gulp-requirejs-optimize')
 run-sequence			= require('run-sequence')
 uglify-es				= require('uglify-es')
 uglify					= require('gulp-uglify/composer')(uglify-es, console)
+workbox-build			= require('workbox-build')
 
 minify_css	= do
 	instance	= new clean-css(
@@ -49,10 +50,12 @@ const BUNDLED_CSS		= 'style.css'
 const BUNDLED_HTML		= 'index.html'
 const BUNDLED_JS		= 'script.js'
 const BUNDLED_MANIFEST	= 'manifest.json'
+const BUNDLED_SW		= 'sw.js'
 const DESTINATION		= 'dist'
 const MINIFIED_CSS		= 'style.min.css'
 const MINIFIED_HTML		= 'index.min.html'
 const MINIFIED_JS		= 'script.min.js'
+const MINIFIED_SW		= 'sw.min.js'
 const SOURCE_CSS		= 'css/style.css'
 const SOURCE_HTML		= 'html/index.html'
 const SOURCE_MANIFEST	= 'manifest.json'
@@ -103,6 +106,9 @@ requirejs_config	=
 	]
 
 gulp
+	.task('bundle-clean', ->
+		del(["#DESTINATION/#BUNDLED_CSS", "#DESTINATION/#BUNDLED_HTML", "#DESTINATION/#BUNDLED_JS", BUNDLED_SW])
+	)
 	.task('bundle-css', !->
 		css		= fs.readFileSync("#SOURCE_CSS", {encoding: 'utf8'})
 		images	= css.match(IMAGES_REGEXP)
@@ -248,6 +254,15 @@ let require, requirejs, define;
 			.pipe(gulp-requirejs-optimize(config))
 			.pipe(gulp.dest(DESTINATION))
 	)
+	.task('bundle-service-worker', ['generate-service-worker'], !->
+		fs.renameSync("#DESTINATION/#BUNDLED_SW", BUNDLED_SW)
+		sw	= fs.readFileSync(BUNDLED_SW, {encoding: 'utf8'})
+		# TODO: Hack, should be possible to remove in future when https://github.com/GoogleChrome/workbox/pull/1403 lands in stable version
+		sw	= sw
+			.replace(/importScripts\("/, "$&#DESTINATION/")
+			.replace(/modulePathPrefix:\s*?"/, "$&#DESTINATION/")
+		fs.writeFileSync(BUNDLED_SW, sw)
+	)
 	.task('clean', ->
 		del("#DESTINATION/*")
 	)
@@ -279,14 +294,32 @@ let require, requirejs, define;
 		fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
 	)
 	.task('default', (callback) !->
-		run-sequence('dist', 'dist:clean', callback)
+		run-sequence('clean', 'main-build', 'bundle-clean', 'minify-service-worker', 'bundle-clean', 'update-index', callback)
 	)
-	.task('dist', (callback) !->
-		run-sequence('clean', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback)
+	.task('generate-service-worker', ->
+		workbox-build.generateSW(
+			cacheId						: 'detox-chat-app'
+			clientsClaim				: true
+			globDirectory				: '.'
+			globPatterns				: [
+				"#DESTINATION/*"
+				'index.html'
+			]
+			ignoreUrlParametersMatching	: [/./]
+			importWorkboxFrom			: 'local'
+			skipWaiting					: true
+			swDest						: "#DESTINATION/sw.js"
+			manifestTransforms			: [
+				(entries) ->
+					for entry in entries
+						entry.revision	= entry.revision.substr(0, 5)
+						if entry.url != 'index.html'
+							entry.url		+= '?' + entry.revision
+					{manifest: entries}
+			]
+		)
 	)
-	.task('dist:clean', ->
-		del(["#DESTINATION/#BUNDLED_CSS", "#DESTINATION/#BUNDLED_HTML", "#DESTINATION/#BUNDLED_JS"])
-	)
+	.task('main-build', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'])
 	.task('minify-css', ['bundle-css'], !->
 		css	= fs.readFileSync("#DESTINATION/#BUNDLED_CSS", {encoding: 'utf8'})
 		fs.writeFileSync("#DESTINATION/#MINIFIED_CSS", minify_css(css))
@@ -307,6 +340,12 @@ let require, requirejs, define;
 			.pipe(gulp-rename(MINIFIED_JS))
 			.pipe(gulp.dest(DESTINATION))
 	)
+	.task('minify-service-worker', ['bundle-service-worker'], ->
+		gulp.src(BUNDLED_SW)
+			.pipe(uglify())
+			.pipe(gulp-rename(MINIFIED_SW))
+			.pipe(gulp.dest('.'))
+	)
 	.task('update-index', !->
 		index					= fs.readFileSync('index.html', {encoding: 'utf8'})
 		critical_css			= fs.readFileSync('css/critical.css', {encoding: 'utf8'}).trim()
@@ -316,6 +355,7 @@ let require, requirejs, define;
 			"#DESTINATION/favicon.ico"
 			"#DESTINATION/#MINIFIED_HTML"
 			"#DESTINATION/#MINIFIED_JS"
+			"#MINIFIED_SW"
 			"#DESTINATION/#BUNDLED_MANIFEST"
 			"#DESTINATION/webcomponents.min.js"
 		]

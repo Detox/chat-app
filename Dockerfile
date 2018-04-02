@@ -18,6 +18,7 @@ LABEL maintainer="Nazar Mokrynskyi <nazar@mokrynskyi.com>"
 
 COPY --from=builder /code/dist /usr/share/nginx/html/dist
 COPY --from=builder /code/index.html /usr/share/nginx/html/
+COPY --from=builder /code/sw.min.js /usr/share/nginx/html/
 
 RUN \
 	apk update && \

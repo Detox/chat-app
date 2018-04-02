@@ -6,6 +6,26 @@
 ([detox-chat, detox-core, detox-utils, behaviors]) <-! require(['@detox/chat', '@detox/core', '@detox/utils', 'js/behaviors']).then
 <~! detox-chat.ready
 <~! detox-core.ready
+if ('serviceWorker' of navigator) && window.detox_sw_path
+	# TODO: Use font loading API to check if fonts were loaded, since they might be slow
+	setTimeout (!->
+		navigator.serviceWorker.register(detox_sw_path)
+			.then (registration) !->
+				registration.onupdatefound = !->
+					installingWorker = registration.installing
+
+					installingWorker.onstatechange = !->
+						switch installingWorker.state
+							case 'installed'
+								if navigator.serviceWorker.controller
+									csw.functions.notify('New application version available, refresh page or restart app to see updated version', 'success', 'right', 10)
+								else
+									csw.functions.notify('Application is ready to work offline', 'success', 'right', 10)
+							case 'redundant'
+								console.error('The installing service worker became redundant.')
+			.catch (e) !->
+				console.error('Error during service worker registration:', e)
+	), 2000
 Polymer(
 	is			: 'detox-chat-app'
 	behaviors	: [

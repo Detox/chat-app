@@ -5,7 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, minify_css, instance, minify_js, file_hash, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BLACKLISTED_FONTS, BUNDLED_CSS, BUNDLED_HTML, BUNDLED_JS, BUNDLED_MANIFEST, DESTINATION, MINIFIED_CSS, MINIFIED_HTML, MINIFIED_JS, SOURCE_CSS, SOURCE_HTML, SOURCE_MANIFEST, requirejs_config;
+  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, workboxBuild, minify_css, instance, minify_js, file_hash, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BLACKLISTED_FONTS, BUNDLED_CSS, BUNDLED_HTML, BUNDLED_JS, BUNDLED_MANIFEST, BUNDLED_SW, DESTINATION, MINIFIED_CSS, MINIFIED_HTML, MINIFIED_JS, MINIFIED_SW, SOURCE_CSS, SOURCE_HTML, SOURCE_MANIFEST, requirejs_config;
   cleanCss = require('clean-css');
   crypto = require('crypto');
   del = require('del');
@@ -18,6 +18,7 @@
   runSequence = require('run-sequence');
   uglifyEs = require('uglify-es');
   uglify = require('gulp-uglify/composer')(uglifyEs, console);
+  workboxBuild = require('workbox-build');
   minify_css = (instance = new cleanCss({
     level: {
       1: {
@@ -53,10 +54,12 @@
   BUNDLED_HTML = 'index.html';
   BUNDLED_JS = 'script.js';
   BUNDLED_MANIFEST = 'manifest.json';
+  BUNDLED_SW = 'sw.js';
   DESTINATION = 'dist';
   MINIFIED_CSS = 'style.min.css';
   MINIFIED_HTML = 'index.min.html';
   MINIFIED_JS = 'script.min.js';
+  MINIFIED_SW = 'sw.min.js';
   SOURCE_CSS = 'css/style.css';
   SOURCE_HTML = 'html/index.html';
   SOURCE_MANIFEST = 'manifest.json';
@@ -101,7 +104,9 @@
       }
     ]
   };
-  gulp.task('bundle-css', function(){
+  gulp.task('bundle-clean', function(){
+    return del([DESTINATION + "/" + BUNDLED_CSS, DESTINATION + "/" + BUNDLED_HTML, DESTINATION + "/" + BUNDLED_JS, BUNDLED_SW]);
+  }).task('bundle-css', function(){
     var css, images, i$, len$, image, image_path, base_name, hash;
     css = fs.readFileSync(SOURCE_CSS + "", {
       encoding: 'utf8'
@@ -165,6 +170,14 @@
       optimize: 'none'
     }, requirejs_config);
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(gulpRequirejsOptimize(config)).pipe(gulp.dest(DESTINATION));
+  }).task('bundle-service-worker', ['generate-service-worker'], function(){
+    var sw;
+    fs.renameSync(DESTINATION + "/" + BUNDLED_SW, BUNDLED_SW);
+    sw = fs.readFileSync(BUNDLED_SW, {
+      encoding: 'utf8'
+    });
+    sw = sw.replace(/importScripts\("/, "$&" + DESTINATION + "/").replace(/modulePathPrefix:\s*?"/, "$&" + DESTINATION + "/");
+    fs.writeFileSync(BUNDLED_SW, sw);
   }).task('clean', function(){
     return del(DESTINATION + "/*");
   }).task('copy-favicon', function(){
@@ -204,12 +217,32 @@
     }
     fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
   }).task('default', function(callback){
-    runSequence('dist', 'dist:clean', callback);
-  }).task('dist', function(callback){
-    runSequence('clean', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'], 'update-index', callback);
-  }).task('dist:clean', function(){
-    return del([DESTINATION + "/" + BUNDLED_CSS, DESTINATION + "/" + BUNDLED_HTML, DESTINATION + "/" + BUNDLED_JS]);
-  }).task('minify-css', ['bundle-css'], function(){
+    runSequence('clean', 'main-build', 'bundle-clean', 'minify-service-worker', 'bundle-clean', 'update-index', callback);
+  }).task('generate-service-worker', function(){
+    return workboxBuild.generateSW({
+      cacheId: 'detox-chat-app',
+      clientsClaim: true,
+      globDirectory: '.',
+      globPatterns: [DESTINATION + "/*", 'index.html'],
+      ignoreUrlParametersMatching: [/./],
+      importWorkboxFrom: 'local',
+      skipWaiting: true,
+      swDest: DESTINATION + "/sw.js",
+      manifestTransforms: [function(entries){
+        var i$, len$, entry;
+        for (i$ = 0, len$ = entries.length; i$ < len$; ++i$) {
+          entry = entries[i$];
+          entry.revision = entry.revision.substr(0, 5);
+          if (entry.url !== 'index.html') {
+            entry.url += '?' + entry.revision;
+          }
+        }
+        return {
+          manifest: entries
+        };
+      }]
+    });
+  }).task('main-build', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js']).task('minify-css', ['bundle-css'], function(){
     var css;
     css = fs.readFileSync(DESTINATION + "/" + BUNDLED_CSS, {
       encoding: 'utf8'
@@ -223,6 +256,8 @@
     })).pipe(gulpRename(MINIFIED_HTML)).pipe(gulp.dest(DESTINATION));
   }).task('minify-js', ['bundle-js', 'copy-wasm'], function(){
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(uglify()).pipe(gulpRename(MINIFIED_JS)).pipe(gulp.dest(DESTINATION));
+  }).task('minify-service-worker', ['bundle-service-worker'], function(){
+    return gulp.src(BUNDLED_SW).pipe(uglify()).pipe(gulpRename(MINIFIED_SW)).pipe(gulp.dest('.'));
   }).task('update-index', function(){
     var index, critical_css, files_for_hash_update, i$, len$, file, hash;
     index = fs.readFileSync('index.html', {
@@ -232,7 +267,7 @@
       encoding: 'utf8'
     }).trim();
     index = index.replace(/<style>.*?<\/style>/g, "<style>" + critical_css + "</style>");
-    files_for_hash_update = [DESTINATION + "/" + MINIFIED_CSS, DESTINATION + "/favicon.ico", DESTINATION + "/" + MINIFIED_HTML, DESTINATION + "/" + MINIFIED_JS, DESTINATION + "/" + BUNDLED_MANIFEST, DESTINATION + "/webcomponents.min.js"];
+    files_for_hash_update = [DESTINATION + "/" + MINIFIED_CSS, DESTINATION + "/favicon.ico", DESTINATION + "/" + MINIFIED_HTML, DESTINATION + "/" + MINIFIED_JS, MINIFIED_SW + "", DESTINATION + "/" + BUNDLED_MANIFEST, DESTINATION + "/webcomponents.min.js"];
     for (i$ = 0, len$ = files_for_hash_update.length; i$ < len$; ++i$) {
       file = files_for_hash_update[i$];
       hash = file_hash(file);
