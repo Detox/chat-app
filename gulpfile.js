@@ -146,7 +146,13 @@
         string = string.trim();
         return string.substring(8, string.length - 9);
       }).join('');
-      js = "(function (callback) {\n	document.head.querySelector('[media=async]').removeAttribute('media');\n	if (window.WebComponents && window.WebComponents.ready) {\n		callback();\n	} else {\n		document.addEventListener('WebComponentsReady', callback, {once: true});\n	}\n})(function () {" + js + "})";
+      /**
+       * Wrapper:
+       * 1) provides simplified require/define implementation that replaces alameda and should be enough for bundled modules
+       * 2) ensures that code is only running when HTML imports were loaded
+       * 3) forces async stylesheet loading and actually apply it by setting `media` property to empty string
+       */
+      js = "let require, requirejs, define;\n(callback => {\n	let defined_modules = {}, current_module = {exports: null}, wait_for = {};\n	function get_defined_module (name, base_name) {\n		if (name == 'exports') {\n			return {};\n		} else if (name == 'module') {\n			return current_module;\n		} else {\n			if (name.startsWith('./')) {\n				name	= base_name.split('/').slice(0, -1).join('/') + '/' + name.substr(2);\n			}\n			return defined_modules[name];\n		}\n	}\n	function load_dependencies (dependencies, base_name, fail_callback) {\n		const loaded_dependencies = [];\n		return dependencies.every(dependency => {\n			const loaded_dependency = get_defined_module(dependency, base_name);\n			if (!loaded_dependency) {\n				if (fail_callback) {\n					fail_callback(dependency);\n				}\n				return false;\n			}\n			loaded_dependencies.push(loaded_dependency);\n			return true;\n		}) && loaded_dependencies;\n	}\n	function add_wait_for (name, callback) {\n		(wait_for[name] = wait_for[name] || []).push(callback);\n	}\n	require = requirejs = (dependencies, callback) => {\n		return new Promise(resolve => {\n			const loaded_dependencies = load_dependencies(\n				dependencies,\n				'',\n				dependency => add_wait_for(\n					dependency,\n					require.bind(null, dependencies, (...loaded_dependencies) => {\n						if (callback) {\n							callback(...loaded_dependencies);\n						}\n						resolve(loaded_dependencies);\n					})\n				)\n			);\n			if (loaded_dependencies) {\n				if (callback) {\n					callback(...loaded_dependencies);\n				}\n				resolve(loaded_dependencies);\n			}\n		});\n	};\n	define = (name, dependencies, wrapper) => {\n		if (!wrapper) {\n			wrapper			= dependencies;\n			dependencies	= [];\n		}\n		const loaded_dependencies = load_dependencies(\n			dependencies,\n			name,\n			dependency => add_wait_for(dependency, define.bind(null, name, dependencies, wrapper))\n		);\n		if (loaded_dependencies) {\n			defined_modules[name] = wrapper(...loaded_dependencies) || current_module.exports;\n			if (wait_for[name]) {\n				wait_for[name].forEach(resolve => resolve());\n				delete wait_for[name];\n			}\n		}\n	};\n	define.amd = {};\n	document.head.querySelector('[media=async]').removeAttribute('media');\n	if (window.WebComponents && window.WebComponents.ready) {\n		callback();\n	} else {\n		document.addEventListener('WebComponentsReady', callback, {once: true});\n	}\n})(() => {" + js + "})";
       html = html.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
       fs.writeFileSync(DESTINATION + "/" + BUNDLED_HTML, html);
       fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
@@ -164,14 +170,10 @@
   }).task('copy-favicon', function(){
     fs.copyFileSync('favicon.ico', DESTINATION + "/favicon.ico");
   }).task('copy-js', function(){
-    var alameda, webcomponents;
-    alameda = fs.readFileSync('node_modules/alameda/alameda.js', {
-      encoding: 'utf8'
-    });
+    var webcomponents;
     webcomponents = fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {
       encoding: 'utf8'
     });
-    fs.writeFileSync(DESTINATION + "/alameda.min.js", minify_js(alameda));
     fs.writeFileSync(DESTINATION + "/webcomponents.min.js", minify_js(webcomponents));
   }).task('copy-manifest', function(){
     var manifest, i$, ref$, len$, icon, base_name, hash;
@@ -230,7 +232,7 @@
       encoding: 'utf8'
     }).trim();
     index = index.replace(/<style>.*?<\/style>/g, "<style>" + critical_css + "</style>");
-    files_for_hash_update = [DESTINATION + "/alameda.min.js", DESTINATION + "/" + MINIFIED_CSS, DESTINATION + "/favicon.ico", DESTINATION + "/" + MINIFIED_HTML, DESTINATION + "/" + MINIFIED_JS, DESTINATION + "/" + BUNDLED_MANIFEST, DESTINATION + "/webcomponents.min.js"];
+    files_for_hash_update = [DESTINATION + "/" + MINIFIED_CSS, DESTINATION + "/favicon.ico", DESTINATION + "/" + MINIFIED_HTML, DESTINATION + "/" + MINIFIED_JS, DESTINATION + "/" + BUNDLED_MANIFEST, DESTINATION + "/webcomponents.min.js"];
     for (i$ = 0, len$ = files_for_hash_update.length; i$ < len$; ++i$) {
       file = files_for_hash_update[i$];
       hash = file_hash(file);

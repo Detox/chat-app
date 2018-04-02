@@ -137,17 +137,94 @@ gulp
 					string	= string.trim()
 					string.substring(8, string.length - 9) # Remove script tag
 				.join('')
-			# Wrapper ensures that code is only running when HTML imports were loaded
-			# We also force async stylesheet loading and actually apply it by setting `media` property to empty string
+			/**
+			 * Wrapper:
+			 * 1) provides simplified require/define implementation that replaces alameda and should be enough for bundled modules
+			 * 2) ensures that code is only running when HTML imports were loaded
+			 * 3) forces async stylesheet loading and actually apply it by setting `media` property to empty string
+			 */
 			js		= """
-(function (callback) {
+let require, requirejs, define;
+(callback => {
+	let defined_modules = {}, current_module = {exports: null}, wait_for = {};
+	function get_defined_module (name, base_name) {
+		if (name == 'exports') {
+			return {};
+		} else if (name == 'module') {
+			return current_module;
+		} else {
+			if (name.startsWith('./')) {
+				name	= base_name.split('/').slice(0, -1).join('/') + '/' + name.substr(2);
+			}
+			return defined_modules[name];
+		}
+	}
+	function load_dependencies (dependencies, base_name, fail_callback) {
+		const loaded_dependencies = [];
+		return dependencies.every(dependency => {
+			const loaded_dependency = get_defined_module(dependency, base_name);
+			if (!loaded_dependency) {
+				if (fail_callback) {
+					fail_callback(dependency);
+				}
+				return false;
+			}
+			loaded_dependencies.push(loaded_dependency);
+			return true;
+		}) && loaded_dependencies;
+	}
+	function add_wait_for (name, callback) {
+		(wait_for[name] = wait_for[name] || []).push(callback);
+	}
+	require = requirejs = (dependencies, callback) => {
+		return new Promise(resolve => {
+			const loaded_dependencies = load_dependencies(
+				dependencies,
+				'',
+				dependency => add_wait_for(
+					dependency,
+					require.bind(null, dependencies, (...loaded_dependencies) => {
+						if (callback) {
+							callback(...loaded_dependencies);
+						}
+						resolve(loaded_dependencies);
+					})
+				)
+			);
+			if (loaded_dependencies) {
+				if (callback) {
+					callback(...loaded_dependencies);
+				}
+				resolve(loaded_dependencies);
+			}
+		});
+	};
+	define = (name, dependencies, wrapper) => {
+		if (!wrapper) {
+			wrapper			= dependencies;
+			dependencies	= [];
+		}
+		const loaded_dependencies = load_dependencies(
+			dependencies,
+			name,
+			dependency => add_wait_for(dependency, define.bind(null, name, dependencies, wrapper))
+		);
+		if (loaded_dependencies) {
+			defined_modules[name] = wrapper(...loaded_dependencies) || current_module.exports;
+			if (wait_for[name]) {
+				wait_for[name].forEach(resolve => resolve());
+				delete wait_for[name];
+			}
+		}
+	};
+	define.amd = {};
 	document.head.querySelector('[media=async]').removeAttribute('media');
 	if (window.WebComponents && window.WebComponents.ready) {
 		callback();
 	} else {
 		document.addEventListener('WebComponentsReady', callback, {once: true});
 	}
-})(function () {#js})
+})(() => {#js})
 			"""
 			html	= html
 				# Useless (in our case) arguments
@@ -178,9 +255,7 @@ gulp
 		fs.copyFileSync('favicon.ico', "#DESTINATION/favicon.ico")
 	)
 	.task('copy-js', !->
-		alameda			= fs.readFileSync('node_modules/alameda/alameda.js', {encoding: 'utf8'})
 		webcomponents	= fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {encoding: 'utf8'})
-		fs.writeFileSync("#DESTINATION/alameda.min.js", minify_js(alameda))
 		fs.writeFileSync("#DESTINATION/webcomponents.min.js", minify_js(webcomponents))
 	)
 	.task('copy-manifest', !->
@@ -237,7 +312,6 @@ gulp
 		critical_css			= fs.readFileSync('css/critical.css', {encoding: 'utf8'}).trim()
 		index					= index.replace(/<style>.*?<\/style>/g, "<style>#critical_css</style>")
 		files_for_hash_update	= [
-			"#DESTINATION/alameda.min.js"
 			"#DESTINATION/#MINIFIED_CSS"
 			"#DESTINATION/favicon.ico"
 			"#DESTINATION/#MINIFIED_HTML"
