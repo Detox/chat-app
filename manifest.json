@@ -16,6 +16,11 @@
 			"src"   : "img/logo-256.png",
 			"type"  : "image/png",
 			"sizes" : "256x256"
+		},
+		{
+			"src"   : "img/logo-600.png",
+			"type"  : "image/png",
+			"sizes" : "600x600"
 		}
 	],
 	"name"             : "Detox Chat",
