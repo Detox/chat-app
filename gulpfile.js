@@ -76,7 +76,7 @@
       'async-eventer': 'node_modules/async-eventer/src/index.min',
       'autosize': 'node_modules/autosize/dist/autosize.min',
       'fixed-size-multiplexer': 'node_modules/fixed-size-multiplexer/src/index.min',
-      'ronion': 'node_modules/ronion/dist/ronion.browser.min',
+      'ronion': 'node_modules/ronion/src/index.min',
       'pako': 'node_modules/pako/dist/pako.min',
       'simple-peer': 'node_modules/simple-peer/simplepeer.min'
     },
