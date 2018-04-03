@@ -6,34 +6,44 @@
  */
 (function(){
   require(['@detox/chat', '@detox/core', '@detox/utils', 'js/behaviors']).then(function(arg$){
-    var detoxChat, detoxCore, detoxUtils, behaviors, this$ = this;
+    var detoxChat, detoxCore, detoxUtils, behaviors, are_arrays_equal, timeoutSet, ArrayMap, this$ = this;
     detoxChat = arg$[0], detoxCore = arg$[1], detoxUtils = arg$[2], behaviors = arg$[3];
+    are_arrays_equal = detoxUtils.are_arrays_equal;
+    timeoutSet = detoxUtils.timeoutSet;
+    ArrayMap = detoxUtils.ArrayMap;
     detoxChat.ready(function(){
       detoxCore.ready(function(){
-        if ('serviceWorker' in navigator && window.detox_sw_path) {
-          setTimeout(function(){
-            navigator.serviceWorker.register(detox_sw_path).then(function(registration){
-              registration.onupdatefound = function(){
-                var installingWorker;
-                installingWorker = registration.installing;
-                installingWorker.onstatechange = function(){
-                  switch (installingWorker.state) {
-                  case 'installed':
-                    if (navigator.serviceWorker.controller) {
-                      csw.functions.notify('New application version available, refresh page or restart app to see updated version', 'success', 'right', 10);
-                    } else {
-                      csw.functions.notify('Application is ready to work offline', 'success', 'right', 10);
-                    }
-                    break;
-                  case 'redundant':
-                    console.error('The installing service worker became redundant.');
+        function register_sw(){
+          navigator.serviceWorker.register(detox_sw_path).then(function(registration){
+            registration.onupdatefound = function(){
+              var installingWorker;
+              installingWorker = registration.installing;
+              installingWorker.onstatechange = function(){
+                switch (installingWorker.state) {
+                case 'installed':
+                  if (navigator.serviceWorker.controller) {
+                    csw.functions.notify('New application version available, refresh page or restart app to see updated version', 'success', 'right', 10);
+                  } else {
+                    csw.functions.notify('Application is ready to work offline', 'success', 'right', 10);
                   }
-                };
+                  break;
+                case 'redundant':
+                  console.error('The installing service worker became redundant.');
+                }
               };
-            })['catch'](function(e){
-              console.error('Error during service worker registration:', e);
-            });
-          }, 2000);
+            };
+          })['catch'](function(e){
+            console.error('Error during service worker registration:', e);
+          });
+        }
+        if ('serviceWorker' in navigator && window.detox_sw_path) {
+          if (document.fonts) {
+            document.fonts.load('bold 0 "Font Awesome 5 Free"').then(function(){
+              return new Promise(timeoutSet.bind(null, 2));
+            }).then(register_sw);
+          } else {
+            register_sw();
+          }
         }
         Polymer({
           is: 'detox-chat-app',
@@ -45,10 +55,7 @@
             this._connect_to_the_network(detoxChat, detoxCore, detoxUtils);
           },
           _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){
-            var are_arrays_equal, timeoutSet, ArrayMap, secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat, this$ = this;
-            are_arrays_equal = detoxUtils.are_arrays_equal;
-            timeoutSet = detoxUtils.timeoutSet;
-            ArrayMap = detoxUtils.ArrayMap;
+            var secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat, this$ = this;
             secrets_exchange_statuses = ArrayMap();
             sent_messages_map = ArrayMap();
             reconnects_pending = ArrayMap();
