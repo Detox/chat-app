@@ -11,7 +11,7 @@ First of all, only 2 latest stable versions of any browser are supported! Don't 
 | Chromium | Flaky, bugs reported, should be better soon           |
 | Firefox  | Fully supported                                       |
 | Safari   | WebRTC support is not good enough yet, hopefully soon |
-| Edge     | Should work, but not one tested it yet, so tell me    |
+| Edge     | RTCDataChannel not supported at all, hopefully soon   |
 
 ## Alpha testing
 Currently application is at alpha quality, but if you feel adventurous and want to take a look, here is how you do it.
