@@ -29,8 +29,8 @@
 		"demo-http-server" : "http-server"
 	},
 	"dependencies"    : {
-		"@detox/chat"                    : "^0.10.0",
-		"@detox/core"                    : "^0.12.0",
+		"@detox/chat"                    : "^0.10.1",
+		"@detox/core"                    : "^0.12.1",
 		"@detox/utils"                   : "^1.6.0",
 		"@polymer/polymer"               : "^2.6.0",
 		"@webcomponents/shadycss"        : "^1.1.2",
