@@ -80,15 +80,17 @@
 			border        : var(--border-base);
 			border-radius : var(--block-padding) var(--block-padding) var(--block-padding) 0;
 			box-sizing    : border-box;
+			flex-shrink   : var(--dialog-message-content-width-shrink);
 			max-width     : var(--dialog-message-content-width-max);
 			padding       : var(--block-padding);
 			word-break    : break-word;
 		}
 
 		.message-details {
-			align-self : center;
-			padding    : var(--block-padding) var(--block-padding) var(--block-padding) 0;
-			opacity    : 0;
+			align-self  : center;
+			flex-shrink : calc(100 - var(--dialog-message-content-width-shrink));
+			padding     : var(--block-padding) var(--block-padding) var(--block-padding) 0;
+			opacity     : 0;
 		}
 	}
 }

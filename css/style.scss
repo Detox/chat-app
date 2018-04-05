@@ -153,6 +153,8 @@ html {
 	--dialog-message-corner-end                : var(--block-padding);
 	--dialog-message-corner-start              : 0%;
 	--dialog-message-content-width-max         : 80%;
+	// Primarily for Firefox for Android, which for some reason wraps words differently without this
+	--dialog-message-content-width-shrink      : 20;
 	--dialog-message-pending-corner            : linear-gradient(var(--sidebar-contact-corner-bottom-right), var(--sidebar-contact-pending-color) var(--dialog-message-corner-start), transparent var(--dialog-message-corner-end));
 	--dialog-send-textarea-max                 : 40vh;
 	--dialog-send-textarea-min                 : 20vh;
