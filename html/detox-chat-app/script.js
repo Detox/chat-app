@@ -5,9 +5,9 @@
  * @license 0BSD
  */
 (function(){
-  require(['@detox/chat', '@detox/core', '@detox/utils', 'js/behaviors']).then(function(arg$){
-    var detoxChat, detoxCore, detoxUtils, behaviors, are_arrays_equal, timeoutSet, ArrayMap, this$ = this;
-    detoxChat = arg$[0], detoxCore = arg$[1], detoxUtils = arg$[2], behaviors = arg$[3];
+  require(['@detox/chat', '@detox/core', '@detox/utils', 'swipe-listener', 'js/behaviors']).then(function(arg$){
+    var detoxChat, detoxCore, detoxUtils, swipeListener, behaviors, are_arrays_equal, timeoutSet, ArrayMap, this$ = this;
+    detoxChat = arg$[0], detoxCore = arg$[1], detoxUtils = arg$[2], swipeListener = arg$[3], behaviors = arg$[4];
     are_arrays_equal = detoxUtils.are_arrays_equal;
     timeoutSet = detoxUtils.timeoutSet;
     ArrayMap = detoxUtils.ArrayMap;
@@ -66,6 +66,17 @@
             this.sidebar_shown = state.get_ui_sidebar_shown();
             state.on('ui_sidebar_shown_changed', function(sidebar_shown){
               this$.sidebar_shown = sidebar_shown;
+            });
+            swipeListener(this);
+            this.addEventListener('swipe', function(e){
+              var directions;
+              directions = e.detail.directions;
+              if (directions.left) {
+                this._state_instance.set_ui_sidebar_shown(false);
+              }
+              if (directions.right) {
+                this._state_instance.set_ui_sidebar_shown(true);
+              }
             });
           },
           _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){

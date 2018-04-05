@@ -21,7 +21,8 @@
       'fixed-size-multiplexer': 'node_modules/fixed-size-multiplexer/src/index',
       'ronion': 'node_modules/ronion/src/index',
       'pako': 'node_modules/pako/dist/pako',
-      'simple-peer': 'node_modules/simple-peer/simplepeer.min'
+      'simple-peer': 'node_modules/simple-peer/simplepeer.min',
+      'swipe-listener': 'node_modules/swipe-listener/dist/swipe-listener'
     },
     'packages': [
       {

@@ -77,6 +77,7 @@ requirejs_config	=
 		'ronion'					: 'node_modules/ronion/src/index.min'
 		'pako'						: 'node_modules/pako/dist/pako.min'
 		'simple-peer'				: 'node_modules/simple-peer/simplepeer.min'
+		'swipe-listener'			: 'node_modules/swipe-listener/dist/swipe-listener.min'
 	'packages'	: [
 		{
 			'name'		: 'aez.wasm',

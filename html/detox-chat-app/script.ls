@@ -3,7 +3,7 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-([detox-chat, detox-core, detox-utils, behaviors]) <-! require(['@detox/chat', '@detox/core', '@detox/utils', 'js/behaviors']).then
+([detox-chat, detox-core, detox-utils, swipe-listener, behaviors]) <-! require(['@detox/chat', '@detox/core', '@detox/utils', 'swipe-listener', 'js/behaviors']).then
 are_arrays_equal	= detox-utils.are_arrays_equal
 timeoutSet			= detox-utils.timeoutSet
 ArrayMap			= detox-utils.ArrayMap
@@ -56,6 +56,15 @@ Polymer(
 		state			= @_state_instance
 		@sidebar_shown	= state.get_ui_sidebar_shown()
 		state.on('ui_sidebar_shown_changed', (@sidebar_shown) !~>)
+		# Handle sidebar showing/hiding with gestures
+		swipe-listener(@)
+		@addEventListener('swipe', (e) !->
+			directions	= e.detail.directions
+			if directions.left
+				@_state_instance.set_ui_sidebar_shown(false)
+			if directions.right
+				@_state_instance.set_ui_sidebar_shown(true)
+		)
 	_connect_to_the_network : (detox-chat, detox-core, detox-utils) !->
 		secrets_exchange_statuses	= ArrayMap()
 		sent_messages_map			= ArrayMap()
