@@ -48,11 +48,25 @@
         Polymer({
           is: 'detox-chat-app',
           behaviors: [behaviors.state_instance],
+          properties: {
+            sidebar_shown: {
+              type: Boolean,
+              value: false
+            }
+          },
           created: function(){
             if (!this._state_instance.get_settings_online()) {
               return;
             }
             this._connect_to_the_network(detoxChat, detoxCore, detoxUtils);
+          },
+          ready: function(){
+            var state, this$ = this;
+            state = this._state_instance;
+            this.sidebar_shown = state.get_ui_sidebar_shown();
+            state.on('ui_sidebar_shown_changed', function(sidebar_shown){
+              this$.sidebar_shown = sidebar_shown;
+            });
           },
           _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){
             var secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat, this$ = this;
@@ -264,6 +278,14 @@
             });
             this._core_instance = core;
             this._chat_instance = chat;
+          },
+          _hide_sidebar: function(){
+            this._state_instance.set_ui_sidebar_shown(false);
+          },
+          _sidebar_click: function(e){
+            if (e.clientX > this.$.sidebar.clientWidth) {
+              this._hide_sidebar();
+            }
           }
         });
       });

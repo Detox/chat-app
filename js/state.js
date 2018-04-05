@@ -66,7 +66,8 @@
         application_connections_count: 0,
         messages: ArrayMap(),
         ui: {
-          active_contact: null
+          active_contact: null,
+          sidebar_shown: false
         },
         online_contacts: ArraySet(),
         contacts_with_pending_messages: ArraySet(),
@@ -319,6 +320,21 @@
           this._update_contact_last_read_message(old_active_contact);
           this._update_contact_with_unread_messages(old_active_contact);
         }
+      }
+      /**
+       * @return {boolean}
+       */,
+      'get_ui_sidebar_shown': function(){
+        return this._local_state.ui.sidebar_shown;
+      }
+      /**
+       * @param {boolean} new_sidebar_shown
+       */,
+      'set_ui_sidebar_shown': function(new_sidebar_shown){
+        var old_sidebar_shown;
+        old_sidebar_shown = this._local_state.ui.sidebar_shown;
+        this._local_state.ui.sidebar_shown = new_sidebar_shown;
+        this['fire']('ui_sidebar_shown_changed', new_sidebar_shown, old_sidebar_shown);
       }
       /**
        * @return {boolean}

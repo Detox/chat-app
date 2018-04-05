@@ -117,7 +117,9 @@ Polymer(
 			"""
 		csw.functions.simple_modal(content)
 	_set_active_contact : (e) !->
-		@_state_instance.set_ui_active_contact(e.model.item.id)
+		@_state_instance
+			..set_ui_active_contact(e.model.item.id)
+			..set_ui_sidebar_shown(false)
 	_rename_contact : (e) !->
 		modal	= csw.functions.prompt("New nickname:", (new_nickname) !~>
 			@_state_instance.set_contact_nickname(e.model.item.id, new_nickname)

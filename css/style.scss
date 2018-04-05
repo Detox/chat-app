@@ -9,14 +9,9 @@ html {
 	font-size                                  : var(--font-size-base);
 	line-height                                : 1.2;
 
-	body {
-		margin : 0;
-
-		detox-chat-app {
-			height : 100vh;
-			width  : 100vw;
-		}
-	}
+	/* Application container */
+	--app-height                               : 100vh;
+	--app-width                                : 100vw;
 
 	/* Generic colors :: Text */
 
@@ -123,6 +118,7 @@ html {
 
 	/* Notify-specific styles */
 
+	--notify-content-max-width                 : 45vw;
 	--notify-transition-duration               : .5s;
 	--notify-translate                         : 50vh;
 	--notify-content-padding                   : var(--block-padding) 2.5em var(--block-padding) var(--block-padding);
@@ -132,6 +128,8 @@ html {
 	--sidebar-width-min                        : 300px;
 	--sidebar-width-max                        : 420px;
 	--sidebar-width-base                       : 20%;
+	--sidebar-shadow                           : linear-gradient(to right, var(--background-color-sidebar), transparent);
+	--sidebar-shadow-opacity                   : .75;
 
 	/* Contacts tab in sidebar */
 
@@ -158,4 +156,11 @@ html {
 	--dialog-message-pending-corner            : linear-gradient(var(--sidebar-contact-corner-bottom-right), var(--sidebar-contact-pending-color) var(--dialog-message-corner-start), transparent var(--dialog-message-corner-end));
 	--dialog-send-textarea-max                 : 40vh;
 	--dialog-send-textarea-min                 : 20vh;
+}
+
+// Would be nice to have this value in CSS property, but it is not working:(
+@media (max-width : 768px) {
+	html {
+		--notify-content-max-width : 70vw;
+	}
 }

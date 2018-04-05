@@ -29,7 +29,28 @@
         ArrayMap = detoxUtils.ArrayMap;
         text_messages = ArrayMap();
         state = this._state_instance;
-        state.on('ui_active_contact_changed', function(new_active_contact, old_active_contact){
+        this.active_contact = !!state.get_ui_active_contact();
+        state.on('contact_messages_changed', function(contact_id){
+          var active_contact, messages_list, need_to_update_scroll;
+          active_contact = state.get_ui_active_contact();
+          if (active_contact && are_arrays_equal(contact_id, active_contact)) {
+            messages_list = this$.$['messages-list'];
+            need_to_update_scroll = messages_list.scrollHeight - messages_list.offsetHeight === messages_list.scrollTop;
+            this$.messages = state.get_contact_messages(contact_id);
+            this$.notifyPath('messages');
+            if (need_to_update_scroll) {
+              this$.$['messages-list-template'].render();
+              messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
+            }
+          }
+        }).on('contact_changed', function(new_contact){
+          var ref$;
+          if (((ref$ = this$.contact) != null && ref$.id) && are_arrays_equal(this$.contact.id, new_contact.id)) {
+            this$.contact = new_contact;
+          }
+        }).on('contact_deleted', function(old_contact){
+          text_messages['delete'](old_contact.id);
+        }).on('ui_active_contact_changed', function(new_active_contact, old_active_contact){
           var text_message, messages_list;
           text_message = this$.text_message.trim();
           if (text_message && old_active_contact) {
@@ -53,27 +74,10 @@
           this$.$['messages-list-template'].render();
           messages_list = this$.$['messages-list'];
           messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
-        }).on('contact_messages_changed', function(contact_id){
-          var active_contact, messages_list, need_to_update_scroll;
-          active_contact = state.get_ui_active_contact();
-          if (active_contact && are_arrays_equal(contact_id, active_contact)) {
-            messages_list = this$.$['messages-list'];
-            need_to_update_scroll = messages_list.scrollHeight - messages_list.offsetHeight === messages_list.scrollTop;
-            this$.messages = state.get_contact_messages(contact_id);
-            this$.notifyPath('messages');
-            if (need_to_update_scroll) {
-              this$.$['messages-list-template'].render();
-              messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
-            }
-          }
-        }).on('contact_changed', function(new_contact){
-          var ref$;
-          if (((ref$ = this$.contact) != null && ref$.id) && are_arrays_equal(this$.contact.id, new_contact.id)) {
-            this$.contact = new_contact;
-          }
-        }).on('contact_deleted', function(old_contact){
-          text_messages['delete'](old_contact.id);
         });
+      },
+      _show_sidebar: function(){
+        this._state_instance.set_ui_sidebar_shown(true);
       },
       _send: function(){
         var text_message, state, contact_id;

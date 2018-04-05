@@ -14,8 +14,18 @@
 	height        : var(--form-element-height);
 	background    : var(--background-sidebar);
 	border-bottom : var(--border-base);
+	display       : flex;
+	flex-shrink   : 0;
 	line-height   : var(--form-element-height);
-	padding       : 0 var(--block-padding);
+
+	csw-button {
+		display : none;
+	}
+
+	div {
+		flex-grow : 1;
+		padding   : 0 var(--block-padding);
+	}
 }
 
 #welcome {
@@ -77,7 +87,7 @@
 
 		.message-details {
 			align-self : center;
-			padding    : var(--block-padding);
+			padding    : var(--block-padding) var(--block-padding) var(--block-padding) 0;
 			opacity    : 0;
 		}
 	}
@@ -107,5 +117,14 @@
 
 	button {
 		height : 100%;
+	}
+}
+
+// Would be nice to have this value in CSS property, but it is not working:(
+@media (max-width : 768px) {
+	#contact-details {
+		csw-button {
+			display : inline-block;
+		}
 	}
 }

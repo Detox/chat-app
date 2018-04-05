@@ -114,7 +114,10 @@
             csw.functions.simple_modal(content);
           },
           _set_active_contact: function(e){
-            this._state_instance.set_ui_active_contact(e.model.item.id);
+            var x$;
+            x$ = this._state_instance;
+            x$.set_ui_active_contact(e.model.item.id);
+            x$.set_ui_sidebar_shown(false);
           },
           _rename_contact: function(e){
             var modal, this$ = this;

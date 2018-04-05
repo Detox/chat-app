@@ -25,7 +25,27 @@ Polymer(
 
 		text_messages		= ArrayMap()
 		state				= @_state_instance
+		@active_contact		= !!state.get_ui_active_contact()
 		state
+			.on('contact_messages_changed', (contact_id) !~>
+				active_contact	= state.get_ui_active_contact()
+				if active_contact && are_arrays_equal(contact_id, active_contact)
+					messages_list			= @$['messages-list']
+					need_to_update_scroll	= messages_list.scrollHeight - messages_list.offsetHeight == messages_list.scrollTop
+					@messages				= state.get_contact_messages(contact_id)
+					@notifyPath('messages')
+					if need_to_update_scroll
+						# Force synchronous messages render in order to be sure scrolling works properly
+						@$['messages-list-template'].render()
+						messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
+			)
+			.on('contact_changed', (new_contact) !~>
+				if @contact?id && are_arrays_equal(@contact.id, new_contact.id)
+					@contact	= new_contact
+			)
+			.on('contact_deleted', (old_contact) !~>
+				text_messages.delete(old_contact.id)
+			)
 			.on('ui_active_contact_changed', (new_active_contact, old_active_contact) !~>
 				text_message	= @text_message.trim()
 				if text_message && old_active_contact
@@ -48,25 +68,8 @@ Polymer(
 				messages_list			= @$['messages-list']
 				messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
 			)
-			.on('contact_messages_changed', (contact_id) !~>
-				active_contact	= state.get_ui_active_contact()
-				if active_contact && are_arrays_equal(contact_id, active_contact)
-					messages_list			= @$['messages-list']
-					need_to_update_scroll	= messages_list.scrollHeight - messages_list.offsetHeight == messages_list.scrollTop
-					@messages				= state.get_contact_messages(contact_id)
-					@notifyPath('messages')
-					if need_to_update_scroll
-						# Force synchronous messages render in order to be sure scrolling works properly
-						@$['messages-list-template'].render()
-						messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
-			)
-			.on('contact_changed', (new_contact) !~>
-				if @contact?id && are_arrays_equal(@contact.id, new_contact.id)
-					@contact	= new_contact
-			)
-			.on('contact_deleted', (old_contact) !~>
-				text_messages.delete(old_contact.id)
-			)
+	_show_sidebar : !->
+		@_state_instance.set_ui_sidebar_shown(true)
 	_send : !->
 		text_message	= @text_message.trim()
 		if !text_message

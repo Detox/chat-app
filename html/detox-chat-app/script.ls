@@ -43,11 +43,19 @@ Polymer(
 	behaviors	: [
 		behaviors.state_instance
 	]
+	properties	:
+		sidebar_shown	:
+			type	: Boolean
+			value	: false
 	created : !->
 		if !@_state_instance.get_settings_online()
 			# We're working offline
 			return
 		@_connect_to_the_network(detox-chat, detox-core, detox-utils)
+	ready : !->
+		state			= @_state_instance
+		@sidebar_shown	= state.get_ui_sidebar_shown()
+		state.on('ui_sidebar_shown_changed', (@sidebar_shown) !~>)
 	_connect_to_the_network : (detox-chat, detox-core, detox-utils) !->
 		secrets_exchange_statuses	= ArrayMap()
 		sent_messages_map			= ArrayMap()
@@ -252,4 +260,10 @@ Polymer(
 			)
 		@_core_instance	= core
 		@_chat_instance	= chat
+	_hide_sidebar : !->
+		@_state_instance.set_ui_sidebar_shown(false)
+	_sidebar_click : (e) !->
+		# It is not possible to handle clicks on ::before and ::after directly, so we check it this way
+		if e.clientX > @$.sidebar.clientWidth
+			@_hide_sidebar()
 )

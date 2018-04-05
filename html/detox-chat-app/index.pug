@@ -1,12 +1,14 @@
 dom-module(id="detox-chat-app")
 	link(rel="import" href="style.css" type="css")
 	template
-		#sidebar
-			csw-tabs
-				csw-button: button(type="button") Contacts
-				csw-button: button(type="button") Profile
-				csw-button(icon="cogs" tooltip="Settings"): button(type="button")
-			csw-switcher
+		#sidebar(sidebar-shown$="[[sidebar_shown]]" on-click="_sidebar_click")
+			#header
+				csw-tabs(selected="{{selected_tab}}")
+					csw-button: button(type="button") Contacts
+					csw-button: button(type="button") Profile
+					csw-button(icon="cogs" tooltip="Settings"): button(type="button")
+				csw-button(icon="times"): button(type="button" on-click="_hide_sidebar")
+			csw-switcher(selected="[[selected_tab]]")
 				detox-chat-app-sidebar-contacts(chat-id="[[chat-id]]")
 				detox-chat-app-sidebar-profile(chat-id="[[chat-id]]")
 				detox-chat-app-sidebar-settings(chat-id="[[chat-id]]")
