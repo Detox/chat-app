@@ -130,3 +130,14 @@ csw-group {
 		}
 	}
 }
+
+// Would be nice to have this value in CSS property, but it is not working:(
+@media (max-width : 768px) {
+	csw-group {
+		.contact-item {
+			csw-icon {
+				display : inline-block;
+			}
+		}
+	}
+}
