@@ -77,6 +77,8 @@
 
 			--csw-button: {
 				background-color : var(--button-background);
+				/* Buttons are rounded by default in Firefox for Android, remove that */
+				border-radius    : 0;
 				box-sizing       : border-box;
 				color            : var(--button-color);
 				height           : var(--form-element-height);
