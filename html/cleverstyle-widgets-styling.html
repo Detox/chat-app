@@ -281,7 +281,7 @@
 			/* Notify */
 
 			--csw-notify: {
-				padding     : var(--block-padding);
+				padding     : var(--block-padding) var(--block-padding) 0 var(--block-padding);
 				transition  : all var(--notify-transition-duration) cubic-bezier(0.47, 0, 0.75, 0.72); /* In - Sine */
 				will-change : transform;
 			};
@@ -333,6 +333,7 @@
 			};
 
 			--csw-notify-bottom: {
+				padding   : 0 var(--block-padding) var(--block-padding) var(--block-padding);
 				transform : translateY(var(--notify-translate));
 			};
 
