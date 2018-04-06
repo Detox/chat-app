@@ -4,8 +4,7 @@
  * @license 0BSD
  */
 ([detox-chat, detox-crypto, detox-utils, behaviors]) <-! require(['@detox/chat', '@detox/crypto', '@detox/utils', 'js/behaviors']).then
-<~! detox-chat.ready
-<~! detox-crypto.ready
+
 Polymer(
 	is			: 'detox-chat-app-sidebar-contacts'
 	behaviors	: [
@@ -75,6 +74,9 @@ Polymer(
 	_add_contact : !->
 		@add_contact	= true
 	_add_contact_confirm : !->
+		<~! detox-chat.ready
+		<~! detox-crypto.ready
+
 		try
 			[public_key, remote_secret]	= detox-chat.id_decode(@new_contact_id)
 			own_public_key				= detox-crypto.create_keypair(@_state_instance.get_seed()).ed25519.public

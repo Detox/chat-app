@@ -6,85 +6,86 @@
  */
 (function(){
   require(['@detox/chat', '@detox/core', '@detox/utils', 'swipe-listener', 'js/behaviors']).then(function(arg$){
-    var detoxChat, detoxCore, detoxUtils, swipeListener, behaviors, are_arrays_equal, timeoutSet, ArrayMap, this$ = this;
+    var detoxChat, detoxCore, detoxUtils, swipeListener, behaviors, are_arrays_equal, timeoutSet, ArrayMap;
     detoxChat = arg$[0], detoxCore = arg$[1], detoxUtils = arg$[2], swipeListener = arg$[3], behaviors = arg$[4];
     are_arrays_equal = detoxUtils.are_arrays_equal;
     timeoutSet = detoxUtils.timeoutSet;
     ArrayMap = detoxUtils.ArrayMap;
-    detoxChat.ready(function(){
-      detoxCore.ready(function(){
-        function register_sw(){
-          navigator.serviceWorker.register(detox_sw_path).then(function(registration){
-            registration.onupdatefound = function(){
-              var installingWorker;
-              installingWorker = registration.installing;
-              installingWorker.onstatechange = function(){
-                switch (installingWorker.state) {
-                case 'installed':
-                  if (navigator.serviceWorker.controller) {
-                    csw.functions.notify('New application version available, refresh page or restart app to see updated version', 'success', 'right', 10);
-                  } else {
-                    csw.functions.notify('Application is ready to work offline', 'success', 'right', 10);
-                  }
-                  break;
-                case 'redundant':
-                  console.error('The installing service worker became redundant.');
-                }
-              };
-            };
-          })['catch'](function(e){
-            console.error('Error during service worker registration:', e);
-          });
+    function register_sw(){
+      navigator.serviceWorker.register(detox_sw_path).then(function(registration){
+        registration.onupdatefound = function(){
+          var installingWorker;
+          installingWorker = registration.installing;
+          installingWorker.onstatechange = function(){
+            switch (installingWorker.state) {
+            case 'installed':
+              if (navigator.serviceWorker.controller) {
+                csw.functions.notify('New application version available, refresh page or restart app to see updated version', 'success', 'right', 10);
+              } else {
+                csw.functions.notify('Application is ready to work offline', 'success', 'right', 10);
+              }
+              break;
+            case 'redundant':
+              console.error('The installing service worker became redundant.');
+            }
+          };
+        };
+      })['catch'](function(e){
+        console.error('Error during service worker registration:', e);
+      });
+    }
+    if ('serviceWorker' in navigator && window.detox_sw_path) {
+      if (document.fonts) {
+        document.fonts.load('bold 0 "Font Awesome 5 Free"').then(function(){
+          return new Promise(timeoutSet.bind(null, 2));
+        }).then(register_sw);
+      } else {
+        register_sw();
+      }
+    }
+    Polymer({
+      is: 'detox-chat-app',
+      behaviors: [behaviors.state_instance],
+      properties: {
+        sidebar_shown: {
+          type: Boolean,
+          value: false
         }
-        if ('serviceWorker' in navigator && window.detox_sw_path) {
-          if (document.fonts) {
-            document.fonts.load('bold 0 "Font Awesome 5 Free"').then(function(){
-              return new Promise(timeoutSet.bind(null, 2));
-            }).then(register_sw);
-          } else {
-            register_sw();
+      },
+      created: function(){
+        if (!this._state_instance.get_settings_online()) {
+          return;
+        }
+        this._connect_to_the_network();
+      },
+      ready: function(){
+        var state, this$ = this;
+        state = this._state_instance;
+        this.sidebar_shown = state.get_ui_sidebar_shown();
+        state.on('ui_sidebar_shown_changed', function(sidebar_shown){
+          this$.sidebar_shown = sidebar_shown;
+        });
+        swipeListener(this);
+        this.addEventListener('swipe', function(e){
+          var directions;
+          directions = e.detail.directions;
+          if (directions.left) {
+            this._state_instance.set_ui_sidebar_shown(false);
           }
-        }
-        Polymer({
-          is: 'detox-chat-app',
-          behaviors: [behaviors.state_instance],
-          properties: {
-            sidebar_shown: {
-              type: Boolean,
-              value: false
-            }
-          },
-          created: function(){
-            if (!this._state_instance.get_settings_online()) {
-              return;
-            }
-            this._connect_to_the_network(detoxChat, detoxCore, detoxUtils);
-          },
-          ready: function(){
-            var state, this$ = this;
-            state = this._state_instance;
-            this.sidebar_shown = state.get_ui_sidebar_shown();
-            state.on('ui_sidebar_shown_changed', function(sidebar_shown){
-              this$.sidebar_shown = sidebar_shown;
-            });
-            swipeListener(this);
-            this.addEventListener('swipe', function(e){
-              var directions;
-              directions = e.detail.directions;
-              if (directions.left) {
-                this._state_instance.set_ui_sidebar_shown(false);
-              }
-              if (directions.right) {
-                this._state_instance.set_ui_sidebar_shown(true);
-              }
-            });
-          },
-          _connect_to_the_network: function(detoxChat, detoxCore, detoxUtils){
-            var secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat, this$ = this;
+          if (directions.right) {
+            this._state_instance.set_ui_sidebar_shown(true);
+          }
+        });
+      },
+      _connect_to_the_network: function(){
+        var this$ = this;
+        detoxChat.ready(function(){
+          detoxCore.ready(function(){
+            var secrets_exchange_statuses, sent_messages_map, reconnects_pending, state, core, chat;
             secrets_exchange_statuses = ArrayMap();
             sent_messages_map = ArrayMap();
             reconnects_pending = ArrayMap();
-            state = this._state_instance;
+            state = this$._state_instance;
             core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_settings_packets_per_second(), state.get_settings_bucket_size());
             chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes());
             /**
@@ -287,19 +288,19 @@
                 chat.nickname(contact, new_nickname);
               }
             });
-            this._core_instance = core;
-            this._chat_instance = chat;
-          },
-          _hide_sidebar: function(){
-            this._state_instance.set_ui_sidebar_shown(false);
-          },
-          _sidebar_click: function(e){
-            if (e.clientX > this.$.sidebar.clientWidth) {
-              this._hide_sidebar();
-            }
-          }
+            this$._core_instance = core;
+            this$._chat_instance = chat;
+          });
         });
-      });
+      },
+      _hide_sidebar: function(){
+        this._state_instance.set_ui_sidebar_shown(false);
+      },
+      _sidebar_click: function(e){
+        if (e.clientX > this.$.sidebar.clientWidth) {
+          this._hide_sidebar();
+        }
+      }
     });
   });
 }).call(this);

@@ -80,7 +80,7 @@
           this$.send_ctrl_enter = send_ctrl_enter;
         });
       },
-      connectedCallback: function(){
+      connected: function(){
         var this$ = this;
         hotkeysJs('Ctrl+Enter', function(e){
           if (e.composedPath()[0] === this$.$.textarea) {

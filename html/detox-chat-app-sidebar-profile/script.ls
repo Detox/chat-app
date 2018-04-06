@@ -4,8 +4,7 @@
  * @license 0BSD
  */
 ([detox-chat, detox-crypto, behaviors]) <-! require(['@detox/chat', '@detox/crypto', 'js/behaviors']).then
-<~! detox-chat.ready
-<~! detox-crypto.ready
+
 Polymer(
 	is			: 'detox-chat-app-sidebar-profile'
 	behaviors	: [
@@ -25,6 +24,9 @@ Polymer(
 			value	: 4
 		nickname			: String
 	ready : !->
+		<~! detox-chat.ready
+		<~! detox-crypto.ready
+
 		id_encode	= detox-chat.id_encode
 
 		state		= @_state_instance

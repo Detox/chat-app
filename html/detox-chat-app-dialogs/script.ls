@@ -71,7 +71,7 @@ Polymer(
 				messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
 			)
 			.on('settings_send_ctrl_enter_changed', (@send_ctrl_enter) !~>)
-	connectedCallback : !->
+	connected : !->
 		hotkeys-js('Ctrl+Enter', (e) !~>
 			if e.composedPath()[0] == @$.textarea
 				@_send()

@@ -7,8 +7,6 @@
 are_arrays_equal	= detox-utils.are_arrays_equal
 timeoutSet			= detox-utils.timeoutSet
 ArrayMap			= detox-utils.ArrayMap
-<~! detox-chat.ready
-<~! detox-core.ready
 
 !function register_sw
 	navigator.serviceWorker.register(detox_sw_path)
@@ -51,7 +49,7 @@ Polymer(
 		if !@_state_instance.get_settings_online()
 			# We're working offline
 			return
-		@_connect_to_the_network(detox-chat, detox-core, detox-utils)
+		@_connect_to_the_network()
 	ready : !->
 		state			= @_state_instance
 		@sidebar_shown	= state.get_ui_sidebar_shown()
@@ -65,7 +63,10 @@ Polymer(
 			if directions.right
 				@_state_instance.set_ui_sidebar_shown(true)
 		)
-	_connect_to_the_network : (detox-chat, detox-core, detox-utils) !->
+	_connect_to_the_network : !->
+		<~! detox-chat.ready
+		<~! detox-core.ready
+
 		secrets_exchange_statuses	= ArrayMap()
 		sent_messages_map			= ArrayMap()
 		reconnects_pending			= ArrayMap()
