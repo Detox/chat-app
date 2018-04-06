@@ -42,7 +42,7 @@
         }
       },
       ready: function(){
-        var ArraySet, state, this$ = this;
+        var ArraySet, state, current_location, url, contact, contact_splitted, this$ = this;
         ArraySet = detoxUtils.ArraySet;
         state = this._state_instance;
         this.contacts = state.get_contacts();
@@ -68,6 +68,21 @@
         }).on('ui_active_contact_changed', function(){
           this$.ui_active_contact = ArraySet([state.get_ui_active_contact() || new Uint8Array(0)]);
         });
+        if (navigator.registerProtocolHandler) {
+          current_location = location.href.split('?')[0];
+          navigator.registerProtocolHandler('web+detoxchat', current_location + "?contact=%s", 'Detox Chat');
+        }
+        if (location.search) {
+          url = new URL(location.href);
+          contact = url.searchParams.get('contact');
+          if (contact) {
+            contact_splitted = contact.split(' ');
+            this.add_contact = true;
+            this.new_contact_id = contact_splitted[0];
+            this.new_contact_name = contact_splitted.slice(1).join(' ');
+            csw.functions.notify('Contact addition form is filled, confirm if you want to proceed', 'success', 'right', 5);
+          }
+        }
       },
       _hide_header: function(list, add_contact){
         return !list.length || add_contact;
