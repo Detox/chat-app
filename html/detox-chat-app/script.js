@@ -40,7 +40,7 @@
           if (directions.left) {
             this._state_instance.set_ui_sidebar_shown(false);
           }
-          if (directions.right) {
+          if (directions.right && e.detail.x[0] <= document.documentElement.clientWidth / 8) {
             this._state_instance.set_ui_sidebar_shown(true);
           }
         });

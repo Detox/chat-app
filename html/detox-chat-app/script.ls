@@ -32,7 +32,7 @@ Polymer(
 			directions	= e.detail.directions
 			if directions.left
 				@_state_instance.set_ui_sidebar_shown(false)
-			if directions.right
+			if directions.right && e.detail.x[0] <= document.documentElement.clientWidth / 8
 				@_state_instance.set_ui_sidebar_shown(true)
 		)
 	_connect_to_the_network : !->
