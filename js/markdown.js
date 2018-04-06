@@ -9,7 +9,7 @@
     var renderer, options;
     renderer = new marked.Renderer();
     renderer.link = function(){
-      return marked.Renderer.prototype.link.apply(this, arguments).replace(/<a/, '$& target="_blank" rel="noopener"');
+      return marked.Renderer.prototype.link.apply(this, arguments).replace(/<a/, '$& target="_blank" rel="noreferrer noopener"');
     };
     renderer.image = renderer.link;
     options = {

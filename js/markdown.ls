@@ -6,7 +6,7 @@
 function Wrapper (marked)
 	renderer		= new marked.Renderer()
 	renderer.link	= ->
-		marked.Renderer::link.apply(@, &).replace(/<a/, '$& target="_blank" rel="noopener"')
+		marked.Renderer::link.apply(@, &).replace(/<a/, '$& target="_blank" rel="noreferrer noopener"')
 	# Don't render images, treat them as links
 	renderer.image	= renderer.link
 	options			=
