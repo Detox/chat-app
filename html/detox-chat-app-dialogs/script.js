@@ -18,6 +18,7 @@
         },
         contact: Object,
         messages: Array,
+        send_ctrl_enter: Boolean,
         text_message: {
           type: String,
           value: ''
@@ -30,6 +31,7 @@
         text_messages = ArrayMap();
         state = this._state_instance;
         this.active_contact = !!state.get_ui_active_contact();
+        this.send_ctrl_enter = state.get_settings_send_ctrl_enter();
         state.on('contact_messages_changed', function(contact_id){
           var active_contact, messages_list, need_to_update_scroll;
           active_contact = state.get_ui_active_contact();
@@ -74,6 +76,8 @@
           this$.$['messages-list-template'].render();
           messages_list = this$.$['messages-list'];
           messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
+        }).on('settings_send_ctrl_enter_changed', function(send_ctrl_enter){
+          this$.send_ctrl_enter = send_ctrl_enter;
         });
       },
       connectedCallback: function(){
@@ -81,11 +85,21 @@
         hotkeysJs('Ctrl+Enter', function(e){
           if (e.path[0] === this$.$.textarea) {
             this$._send();
+            e.preventDefault();
+          }
+        });
+        hotkeysJs('Enter', function(e){
+          if (e.path[0] === this$.$.textarea && !this$.send_ctrl_enter) {
+            this$._send();
+            e.preventDefault();
           }
         });
       },
       _show_sidebar: function(){
         this._state_instance.set_ui_sidebar_shown(true);
+      },
+      _send_placeholder: function(send_ctrl_enter){
+        return 'Type you message here; ' + (send_ctrl_enter ? 'Enter for new line, Ctrl+Enter for sending' : 'Shift+Enter for new line, Enter for sending');
       },
       _send: function(){
         var text_message, state, contact_id;

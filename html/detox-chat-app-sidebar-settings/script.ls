@@ -54,6 +54,9 @@ Polymer(
 			observer	: '_settings_reconnects_intervals_changed'
 			type		: Object
 		settings_reconnects_intervals_string	: String
+		settings_send_ctrl_enter				:
+			observer	: '_settings_send_ctrl_enter_changed'
+			type		: String
 	ready : !->
 		state									= @_state_instance
 		@settings_announce						= @_bool_to_string(state.get_settings_announce())
@@ -69,6 +72,7 @@ Polymer(
 		@settings_online						= @_bool_to_string(state.get_settings_online())
 		@settings_packets_per_second			= state.get_settings_packets_per_second()
 		@settings_reconnects_intervals			= state.get_settings_reconnects_intervals()
+		@settings_send_ctrl_enter				= @_bool_to_string(state.get_settings_send_ctrl_enter())
 		state
 			.on('settings_announce_changed', (new_settings_announce) !~>
 				new_settings_announce	= @_bool_to_string(new_settings_announce)
@@ -91,6 +95,9 @@ Polymer(
 			)
 			.on('settings_packets_per_second_changed', (@settings_packets_per_second) !~>)
 			.on('settings_reconnects_intervals_changed', (@settings_reconnects_intervals) !~>)
+			.on('settings_send_ctrl_enter_changed', (new_settings_send_ctrl_enter) !~>
+				new_settings_send_ctrl_enter	= @_bool_to_string(new_settings_send_ctrl_enter)
+			)
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
 	_settings_announce_changed : !->
@@ -264,6 +271,15 @@ Polymer(
 			<p>This option controls time intervals (in seconds) between connection attempts.</p>
 			<p>First number is max number of attempts and second is number is delay for it. More attempts is made, larger delays become.<br>
 			Do not change this setting unless you know what you're doing.</p>
+		"""
+		csw.functions.simple_modal(content)
+	_settings_send_ctrl_enter_changed : !->
+		if @settings_send_ctrl_enter != @_bool_to_string(@_state_instance.get_settings_send_ctrl_enter())
+			@_state_instance.set_settings_send_ctrl_enter(@settings_send_ctrl_enter == '1')
+			csw.functions.notify('Saved changes to send message with setting', 'success', 'right', 3)
+	_help_settings_send_ctrl_enter : !->
+		content	= """
+			<p>Either send message with Ctrl+Enter and use Enter for new line or use Enter to send message and Shift+Enter for new line.</p>
 		"""
 		csw.functions.simple_modal(content)
 )

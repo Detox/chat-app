@@ -16,6 +16,16 @@ dom-module(id="detox-chat-app-sidebar-settings")
 					input(type="radio" value="2")
 					| Developer
 			label
+				div Send message with:
+				csw-icon(mono icon="question" on-click="_help_settings_send_ctrl_enter" tooltip="What is this?" hidden="[[!help]]")
+			csw-group
+				csw-label-button(value="{{settings_send_ctrl_enter}}"): label
+					input(type="radio" value="0")
+					| Enter
+				csw-label-button: label
+					input(type="radio" value="1")
+					| Ctrl+Enter
+			label
 				div Help buttons:
 				csw-icon(mono icon="question" on-click="_help_settings_help" tooltip="Help buttons?" hidden="[[!help]]")
 			csw-group

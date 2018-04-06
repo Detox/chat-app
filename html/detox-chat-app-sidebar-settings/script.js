@@ -66,7 +66,11 @@
           observer: '_settings_reconnects_intervals_changed',
           type: Object
         },
-        settings_reconnects_intervals_string: String
+        settings_reconnects_intervals_string: String,
+        settings_send_ctrl_enter: {
+          observer: '_settings_send_ctrl_enter_changed',
+          type: String
+        }
       },
       ready: function(){
         var state, this$ = this;
@@ -84,6 +88,7 @@
         this.settings_online = this._bool_to_string(state.get_settings_online());
         this.settings_packets_per_second = state.get_settings_packets_per_second();
         this.settings_reconnects_intervals = state.get_settings_reconnects_intervals();
+        this.settings_send_ctrl_enter = this._bool_to_string(state.get_settings_send_ctrl_enter());
         state.on('settings_announce_changed', function(new_settings_announce){
           new_settings_announce = this$._bool_to_string(new_settings_announce);
         }).on('settings_block_contact_requests_for_changed', function(block_contact_requests_for){
@@ -110,6 +115,8 @@
           this$.settings_packets_per_second = settings_packets_per_second;
         }).on('settings_reconnects_intervals_changed', function(settings_reconnects_intervals){
           this$.settings_reconnects_intervals = settings_reconnects_intervals;
+        }).on('settings_send_ctrl_enter_changed', function(new_settings_send_ctrl_enter){
+          new_settings_send_ctrl_enter = this$._bool_to_string(new_settings_send_ctrl_enter);
         });
       },
       _bool_to_string: function(value){
@@ -301,6 +308,17 @@
       _help_settings_reconnects_intervals: function(){
         var content;
         content = "<p>When you need to connect to one of your contacts, connection will not always succeed.</p>\n<p>This option controls time intervals (in seconds) between connection attempts.</p>\n<p>First number is max number of attempts and second is number is delay for it. More attempts is made, larger delays become.<br>\nDo not change this setting unless you know what you're doing.</p>";
+        csw.functions.simple_modal(content);
+      },
+      _settings_send_ctrl_enter_changed: function(){
+        if (this.settings_send_ctrl_enter !== this._bool_to_string(this._state_instance.get_settings_send_ctrl_enter())) {
+          this._state_instance.set_settings_send_ctrl_enter(this.settings_send_ctrl_enter === '1');
+          csw.functions.notify('Saved changes to send message with setting', 'success', 'right', 3);
+        }
+      },
+      _help_settings_send_ctrl_enter: function(){
+        var content;
+        content = "<p>Either send message with Ctrl+Enter and use Enter for new line or use Enter to send message and Shift+Enter for new line.</p>";
         csw.functions.simple_modal(content);
       }
     });

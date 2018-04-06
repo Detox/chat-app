@@ -16,6 +16,7 @@ Polymer(
 			value	: false
 		contact			: Object
 		messages		: Array
+		send_ctrl_enter	: Boolean
 		text_message	:
 			type	: String
 			value	: ''
@@ -26,6 +27,7 @@ Polymer(
 		text_messages		= ArrayMap()
 		state				= @_state_instance
 		@active_contact		= !!state.get_ui_active_contact()
+		@send_ctrl_enter	= state.get_settings_send_ctrl_enter()
 		state
 			.on('contact_messages_changed', (contact_id) !~>
 				active_contact	= state.get_ui_active_contact()
@@ -68,13 +70,27 @@ Polymer(
 				messages_list			= @$['messages-list']
 				messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
 			)
+			.on('settings_send_ctrl_enter_changed', (@send_ctrl_enter) !~>)
 	connectedCallback : !->
 		hotkeys-js('Ctrl+Enter', (e) !~>
 			if e.path[0] == @$.textarea
 				@_send()
+				e.preventDefault()
+		)
+		hotkeys-js('Enter', (e) !~>
+			if e.path[0] == @$.textarea && !@send_ctrl_enter
+				@_send()
+				e.preventDefault()
 		)
 	_show_sidebar : !->
 		@_state_instance.set_ui_sidebar_shown(true)
+	_send_placeholder : (send_ctrl_enter) ->
+		'Type you message here; ' + (
+			if send_ctrl_enter
+				'Enter for new line, Ctrl+Enter for sending'
+			else
+				'Shift+Enter for new line, Enter for sending'
+		)
 	_send : !->
 		text_message	= @text_message.trim()
 		if !text_message

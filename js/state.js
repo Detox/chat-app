@@ -101,7 +101,8 @@
           'number_of_introduction_nodes': 3,
           'online': true,
           'packets_per_second': 5,
-          'reconnects_intervals': [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]]
+          'reconnects_intervals': [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]],
+          'send_ctrl_enter': true
         };
         x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact #1', 0, 0, null, null, null], [[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 126], 'Fake contact #2', 0, 0, null, null, null]];
         x$['contacts_requests'] = [];
@@ -533,6 +534,22 @@
         old_reconnects_intervals = this._state['reconnects_intervals'];
         this._state['settings']['reconnects_intervals'] = reconnects_intervals;
         this['fire']('settings_reconnects_intervals_changed', reconnects_intervals, old_reconnects_intervals);
+      }
+      /**
+       * @return {boolean} `true` if message should be sent with Ctrl+Enter and `false` if with just Enter
+       */,
+      'get_settings_send_ctrl_enter': function(){
+        return this._state['settings']['send_ctrl_enter'];
+      }
+      /**
+       * @param {boolean} send_ctrl_enter
+       */,
+      'set_settings_send_ctrl_enter': function(send_ctrl_enter){
+        var old_send_ctrl_enter, new_send_ctrl_enter;
+        old_send_ctrl_enter = this._state['send_ctrl_enter'];
+        new_send_ctrl_enter = !!send_ctrl_enter;
+        this._state['settings']['send_ctrl_enter'] = new_send_ctrl_enter;
+        this['fire']('settings_send_ctrl_enter_changed', new_send_ctrl_enter, old_send_ctrl_enter);
       }
       /**
        * @return {!Array<!Contact>}

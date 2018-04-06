@@ -107,6 +107,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 						[100, 300]
 						[Number.MAX_SAFE_INTEGER, 600]
 					]
+					'send_ctrl_enter'				: true
 				..'contacts'					= [
 					# TODO: This is just for demo purposes
 					[
@@ -479,6 +480,19 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_reconnects_intervals					= @_state['reconnects_intervals']
 			@_state['settings']['reconnects_intervals']	= reconnects_intervals
 			@'fire'('settings_reconnects_intervals_changed', reconnects_intervals, old_reconnects_intervals)
+		/**
+		 * @return {boolean} `true` if message should be sent with Ctrl+Enter and `false` if with just Enter
+		 */
+		'get_settings_send_ctrl_enter' : ->
+			@_state['settings']['send_ctrl_enter']
+		/**
+		 * @param {boolean} send_ctrl_enter
+		 */
+		'set_settings_send_ctrl_enter' : (send_ctrl_enter) !->
+			old_send_ctrl_enter						= @_state['send_ctrl_enter']
+			new_send_ctrl_enter						= !!send_ctrl_enter
+			@_state['settings']['send_ctrl_enter']	= new_send_ctrl_enter
+			@'fire'('settings_send_ctrl_enter_changed', new_send_ctrl_enter, old_send_ctrl_enter)
 		/**
 		 * @return {!Array<!Contact>}
 		 */
