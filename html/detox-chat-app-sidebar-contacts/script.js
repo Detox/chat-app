@@ -78,30 +78,28 @@
       _add_contact_confirm: function(){
         var this$ = this;
         detoxChat.ready(function(){
-          detoxCrypto.ready(function(){
-            var ref$, public_key, remote_secret, own_public_key, existing_contact, e;
-            try {
-              ref$ = detoxChat.id_decode(this$.new_contact_id), public_key = ref$[0], remote_secret = ref$[1];
-              own_public_key = detoxCrypto.create_keypair(this$._state_instance.get_seed()).ed25519['public'];
-              if (detoxUtils.are_arrays_equal(public_key, own_public_key)) {
-                csw.functions.notify('Adding yourself to contacts is not supported', 'error', 'right', 3);
-                return;
-              }
-              existing_contact = this$._state_instance.get_contact(public_key);
-              if (existing_contact) {
-                csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>" + existing_contact.nickname + "</i>", 'warning', 'right', 3);
-                return;
-              }
-              this$._state_instance.add_contact(public_key, this$.new_contact_name, remote_secret);
-              csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 5);
-              this$.add_contact = false;
-              this$.new_contact_id = '';
-              this$.new_contact_name = '';
-            } catch (e$) {
-              e = e$;
-              csw.functions.notify('Incorrect ID, check for typos and try again', 'error', 'right', 3);
+          var ref$, public_key, remote_secret, own_public_key, existing_contact, e;
+          try {
+            ref$ = detoxChat.id_decode(this$.new_contact_id), public_key = ref$[0], remote_secret = ref$[1];
+            own_public_key = detoxCrypto.create_keypair(this$._state_instance.get_seed()).ed25519['public'];
+            if (detoxUtils.are_arrays_equal(public_key, own_public_key)) {
+              csw.functions.notify('Adding yourself to contacts is not supported', 'error', 'right', 3);
+              return;
             }
-          });
+            existing_contact = this$._state_instance.get_contact(public_key);
+            if (existing_contact) {
+              csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>" + existing_contact.nickname + "</i>", 'warning', 'right', 3);
+              return;
+            }
+            this$._state_instance.add_contact(public_key, this$.new_contact_name, remote_secret);
+            csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 5);
+            this$.add_contact = false;
+            this$.new_contact_id = '';
+            this$.new_contact_name = '';
+          } catch (e$) {
+            e = e$;
+            csw.functions.notify('Incorrect ID, check for typos and try again', 'error', 'right', 3);
+          }
         });
       },
       _add_contact_cancel: function(){

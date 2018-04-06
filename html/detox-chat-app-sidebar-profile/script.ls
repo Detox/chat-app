@@ -25,7 +25,6 @@ Polymer(
 		nickname			: String
 	ready : !->
 		<~! detox-chat.ready
-		<~! detox-crypto.ready
 
 		id_encode	= detox-chat.id_encode
 

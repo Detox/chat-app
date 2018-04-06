@@ -9,6 +9,8 @@ timeoutSet			= detox-utils.timeoutSet
 ArrayMap			= detox-utils.ArrayMap
 
 !function register_sw
+	# Make sure WebAssembly stuff are loaded too
+	<~! detox-chat.ready
 	navigator.serviceWorker.register(detox_sw_path)
 		.then (registration) !->
 			registration.onupdatefound = !->
@@ -30,10 +32,7 @@ if ('serviceWorker' of navigator) && window.detox_sw_path
 	# Wait for icons font to load, since it is one of the last things loading and we don't want to get it from the network twice
 	# TODO: Edge doesn't support this yet, remove check when it does
 	if document.fonts
-		document.fonts.load('bold 0 "Font Awesome 5 Free"')
-			.then ->
-				new Promise(timeoutSet.bind(null, 2))
-			.then(register_sw)
+		document.fonts.load('bold 0 "Font Awesome 5 Free"').then(register_sw)
 	else
 		register_sw()
 Polymer(
@@ -65,7 +64,6 @@ Polymer(
 		)
 	_connect_to_the_network : !->
 		<~! detox-chat.ready
-		<~! detox-core.ready
 
 		secrets_exchange_statuses	= ArrayMap()
 		sent_messages_map			= ArrayMap()

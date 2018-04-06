@@ -75,7 +75,6 @@ Polymer(
 		@add_contact	= true
 	_add_contact_confirm : !->
 		<~! detox-chat.ready
-		<~! detox-crypto.ready
 
 		try
 			[public_key, remote_secret]	= detox-chat.id_decode(@new_contact_id)

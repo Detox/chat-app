@@ -28,35 +28,33 @@
       ready: function(){
         var this$ = this;
         detoxChat.ready(function(){
-          detoxCrypto.ready(function(){
-            var id_encode, state, public_key;
-            id_encode = detoxChat.id_encode;
-            state = this$._state_instance;
-            function update_secrets(){
-              var secrets, res$, i$, len$, secret;
-              secrets = state.get_secrets();
-              this$.id_default_secret = id_encode(public_key, secrets[0].secret);
-              res$ = [];
-              for (i$ = 0, len$ = secrets.length; i$ < len$; ++i$) {
-                secret = secrets[i$];
-                res$.push({
-                  secret: secret.secret,
-                  id: id_encode(public_key, secret.secret),
-                  name: secret.name
-                });
-              }
-              this$.secrets = res$;
+          var id_encode, state, public_key;
+          id_encode = detoxChat.id_encode;
+          state = this$._state_instance;
+          function update_secrets(){
+            var secrets, res$, i$, len$, secret;
+            secrets = state.get_secrets();
+            this$.id_default_secret = id_encode(public_key, secrets[0].secret);
+            res$ = [];
+            for (i$ = 0, len$ = secrets.length; i$ < len$; ++i$) {
+              secret = secrets[i$];
+              res$.push({
+                secret: secret.secret,
+                id: id_encode(public_key, secret.secret),
+                name: secret.name
+              });
             }
-            public_key = detoxCrypto.create_keypair(state.get_seed()).ed25519['public'];
-            this$.id_base58 = id_encode(public_key, new Uint8Array(0));
-            this$.nickname = state.get_nickname();
-            update_secrets();
-            state.on('nickname_changed', function(new_nickname){
-              if (this$.nickname !== new_nickname) {
-                this$.nickname = new_nickname;
-              }
-            }).on('secrets_changed', update_secrets);
-          });
+            this$.secrets = res$;
+          }
+          public_key = detoxCrypto.create_keypair(state.get_seed()).ed25519['public'];
+          this$.id_base58 = id_encode(public_key, new Uint8Array(0));
+          this$.nickname = state.get_nickname();
+          update_secrets();
+          state.on('nickname_changed', function(new_nickname){
+            if (this$.nickname !== new_nickname) {
+              this$.nickname = new_nickname;
+            }
+          }).on('secrets_changed', update_secrets);
         });
       },
       _nickname_blur: function(){
