@@ -73,12 +73,12 @@ Polymer(
 			.on('settings_send_ctrl_enter_changed', (@send_ctrl_enter) !~>)
 	connectedCallback : !->
 		hotkeys-js('Ctrl+Enter', (e) !~>
-			if e.path[0] == @$.textarea
+			if e.composedPath()[0] == @$.textarea
 				@_send()
 				e.preventDefault()
 		)
 		hotkeys-js('Enter', (e) !~>
-			if e.path[0] == @$.textarea && !@send_ctrl_enter
+			if e.composedPath()[0] == @$.textarea && !@send_ctrl_enter
 				@_send()
 				e.preventDefault()
 		)

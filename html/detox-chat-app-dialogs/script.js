@@ -83,13 +83,13 @@
       connectedCallback: function(){
         var this$ = this;
         hotkeysJs('Ctrl+Enter', function(e){
-          if (e.path[0] === this$.$.textarea) {
+          if (e.composedPath()[0] === this$.$.textarea) {
             this$._send();
             e.preventDefault();
           }
         });
         hotkeysJs('Enter', function(e){
-          if (e.path[0] === this$.$.textarea && !this$.send_ctrl_enter) {
+          if (e.composedPath()[0] === this$.$.textarea && !this$.send_ctrl_enter) {
             this$._send();
             e.preventDefault();
           }
