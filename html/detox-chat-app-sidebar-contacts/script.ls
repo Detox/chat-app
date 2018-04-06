@@ -70,19 +70,20 @@ Polymer(
 				@ui_active_contact	= ArraySet([state.get_ui_active_contact() || new Uint8Array(0)])
 			)
 
+		protocol	= 'web+detoxchat'
 		# Not present on non-secure origins
 		if navigator.registerProtocolHandler
 			# Register protocol handler so that we can add contacts easier
 			current_location	= location.href.split('?')[0]
-			navigator.registerProtocolHandler('web+detoxchat', "#current_location?contact=%s", 'Detox Chat')
+			navigator.registerProtocolHandler(protocol, "#current_location?contact=%s", 'Detox Chat')
 		if location.search
 			url		= new URL(location.href)
 			contact	= url.searchParams.get('contact')
-			if contact
-				contact_splitted	= contact.split(' ')
+			if contact && contact.startsWith("#protocol:")
+				contact_splitted	= contact.substr(protocol.length + 1).split('+')
 				@add_contact		= true
 				@new_contact_id		= contact_splitted[0]
-				@new_contact_name	= contact_splitted.slice(1).join(' ')
+				@new_contact_name	= decodeURIComponent(contact_splitted.slice(1).join(' '))
 				csw.functions.notify('Contact addition form is filled, confirm if you want to proceed', 'success', 'right', 5)
 
 	_hide_header : (list, add_contact) ->

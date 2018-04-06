@@ -42,7 +42,7 @@
         }
       },
       ready: function(){
-        var ArraySet, state, current_location, url, contact, contact_splitted, this$ = this;
+        var ArraySet, state, protocol, current_location, url, contact, contact_splitted, this$ = this;
         ArraySet = detoxUtils.ArraySet;
         state = this._state_instance;
         this.contacts = state.get_contacts();
@@ -68,18 +68,19 @@
         }).on('ui_active_contact_changed', function(){
           this$.ui_active_contact = ArraySet([state.get_ui_active_contact() || new Uint8Array(0)]);
         });
+        protocol = 'web+detoxchat';
         if (navigator.registerProtocolHandler) {
           current_location = location.href.split('?')[0];
-          navigator.registerProtocolHandler('web+detoxchat', current_location + "?contact=%s", 'Detox Chat');
+          navigator.registerProtocolHandler(protocol, current_location + "?contact=%s", 'Detox Chat');
         }
         if (location.search) {
           url = new URL(location.href);
           contact = url.searchParams.get('contact');
-          if (contact) {
-            contact_splitted = contact.split(' ');
+          if (contact && contact.startsWith(protocol + ":")) {
+            contact_splitted = contact.substr(protocol.length + 1).split('+');
             this.add_contact = true;
             this.new_contact_id = contact_splitted[0];
-            this.new_contact_name = contact_splitted.slice(1).join(' ');
+            this.new_contact_name = decodeURIComponent(contact_splitted.slice(1).join(' '));
             csw.functions.notify('Contact addition form is filled, confirm if you want to proceed', 'success', 'right', 5);
           }
         }
