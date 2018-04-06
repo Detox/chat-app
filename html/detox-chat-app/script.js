@@ -11,39 +11,6 @@
     are_arrays_equal = detoxUtils.are_arrays_equal;
     timeoutSet = detoxUtils.timeoutSet;
     ArrayMap = detoxUtils.ArrayMap;
-    function register_sw(){
-      var this$ = this;
-      detoxChat.ready(function(){
-        navigator.serviceWorker.register(detox_sw_path).then(function(registration){
-          registration.onupdatefound = function(){
-            var installingWorker;
-            installingWorker = registration.installing;
-            installingWorker.onstatechange = function(){
-              switch (installingWorker.state) {
-              case 'installed':
-                if (navigator.serviceWorker.controller) {
-                  csw.functions.notify('New application version available, refresh page or restart app to see updated version', 'success', 'right', 10);
-                } else {
-                  csw.functions.notify('Application is ready to work offline', 'success', 'right', 10);
-                }
-                break;
-              case 'redundant':
-                console.error('The installing service worker became redundant.');
-              }
-            };
-          };
-        })['catch'](function(e){
-          console.error('Error during service worker registration:', e);
-        });
-      });
-    }
-    if ('serviceWorker' in navigator && window.detox_sw_path) {
-      if (document.fonts) {
-        document.fonts.load('bold 0 "Font Awesome 5 Free"').then(register_sw);
-      } else {
-        register_sw();
-      }
-    }
     Polymer({
       is: 'detox-chat-app',
       behaviors: [behaviors.state_instance],
