@@ -16,11 +16,9 @@ label {
 		flex-grow : 1;
 	}
 
-	csw-icon {
+	detox-chat-icon-button {
 		color       : var(--text-color-base-disabled);
-		cursor      : pointer;
 		margin-left : calc(var(--block-padding) / 2);
-		width       : auto !important;
 
 		&:hover {
 			color : var(--button-hover-color);

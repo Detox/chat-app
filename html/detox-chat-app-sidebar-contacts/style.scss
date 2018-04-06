@@ -20,9 +20,8 @@ h3 {
 		flex-grow : 1;
 	}
 
-	csw-icon {
+	detox-chat-icon-button {
 		color       : var(--text-color-base-disabled);
-		cursor      : pointer;
 		margin-left : calc(var(--block-padding) / 2);
 
 		&:hover {
@@ -67,8 +66,8 @@ csw-group {
 			color            : var(--button-hover-color);
 			background-color : var(--background-color-highlight);
 
-			csw-icon {
-				display : inline-flex;
+			detox-chat-icon-button {
+				display : inline-block;
 			}
 		}
 
@@ -119,7 +118,7 @@ csw-group {
 			white-space   : nowrap;
 		}
 
-		csw-icon {
+		detox-chat-icon-button {
 			color       : var(--text-color-base-disabled);
 			display     : none;
 			margin-left : calc(var(--block-padding) / 2);
@@ -135,8 +134,8 @@ csw-group {
 @media (max-width : 768px) {
 	csw-group {
 		.contact-item {
-			csw-icon {
-				display : inline-flex;
+			detox-chat-icon-button {
+				display : inline-block;
 			}
 		}
 	}
