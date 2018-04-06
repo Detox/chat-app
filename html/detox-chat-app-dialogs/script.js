@@ -5,9 +5,9 @@
  * @license 0BSD
  */
 (function(){
-  require(['@detox/utils', 'js/behaviors']).then(function(arg$){
-    var detoxUtils, behaviors;
-    detoxUtils = arg$[0], behaviors = arg$[1];
+  require(['@detox/utils', 'hotkeys-js', 'js/behaviors']).then(function(arg$){
+    var detoxUtils, hotkeysJs, behaviors;
+    detoxUtils = arg$[0], hotkeysJs = arg$[1], behaviors = arg$[2];
     Polymer({
       is: 'detox-chat-app-dialogs',
       behaviors: [behaviors.state_instance, Polymer.MutableDataBehavior],
@@ -74,6 +74,14 @@
           this$.$['messages-list-template'].render();
           messages_list = this$.$['messages-list'];
           messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
+        });
+      },
+      connectedCallback: function(){
+        var this$ = this;
+        hotkeysJs('Ctrl+Enter', function(e){
+          if (e.path[0] === this$.$.textarea) {
+            this$._send();
+          }
         });
       },
       _show_sidebar: function(){

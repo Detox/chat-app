@@ -3,7 +3,7 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-([detox-utils, behaviors]) <-! require(['@detox/utils', 'js/behaviors']).then
+([detox-utils, hotkeys-js, behaviors]) <-! require(['@detox/utils', 'hotkeys-js', 'js/behaviors']).then
 Polymer(
 	is			: 'detox-chat-app-dialogs'
 	behaviors	: [
@@ -68,6 +68,11 @@ Polymer(
 				messages_list			= @$['messages-list']
 				messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
 			)
+	connectedCallback : !->
+		hotkeys-js('Ctrl+Enter', (e) !~>
+			if e.path[0] == @$.textarea
+				@_send()
+		)
 	_show_sidebar : !->
 		@_state_instance.set_ui_sidebar_shown(true)
 	_send : !->

@@ -117,14 +117,24 @@
 		}
 	}
 
-	button {
-		height : 100%;
+	csw-button {
+		display : none;
+
+		button {
+			height : 100%;
+		}
 	}
 }
 
 // Would be nice to have this value in CSS property, but it is not working:(
 @media (max-width : 768px) {
 	#contact-details {
+		csw-button {
+			display : inline-block;
+		}
+	}
+
+	#send-form {
 		csw-button {
 			display : inline-block;
 		}
