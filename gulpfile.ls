@@ -357,7 +357,6 @@ let require, requirejs, define;
 			"#DESTINATION/favicon.ico"
 			"#DESTINATION/#MINIFIED_HTML"
 			"#DESTINATION/#MINIFIED_JS"
-			"#MINIFIED_SW"
 			"#DESTINATION/#BUNDLED_MANIFEST"
 			"#DESTINATION/webcomponents.min.js"
 		]

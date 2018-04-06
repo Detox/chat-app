@@ -269,7 +269,7 @@
       encoding: 'utf8'
     }).trim();
     index = index.replace(/<style>.*?<\/style>/g, "<style>" + critical_css + "</style>");
-    files_for_hash_update = [DESTINATION + "/" + MINIFIED_CSS, DESTINATION + "/favicon.ico", DESTINATION + "/" + MINIFIED_HTML, DESTINATION + "/" + MINIFIED_JS, MINIFIED_SW + "", DESTINATION + "/" + BUNDLED_MANIFEST, DESTINATION + "/webcomponents.min.js"];
+    files_for_hash_update = [DESTINATION + "/" + MINIFIED_CSS, DESTINATION + "/favicon.ico", DESTINATION + "/" + MINIFIED_HTML, DESTINATION + "/" + MINIFIED_JS, DESTINATION + "/" + BUNDLED_MANIFEST, DESTINATION + "/webcomponents.min.js"];
     for (i$ = 0, len$ = files_for_hash_update.length; i$ < len$; ++i$) {
       file = files_for_hash_update[i$];
       hash = file_hash(file);
