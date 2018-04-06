@@ -3,7 +3,8 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
-([detox-utils, hotkeys-js, behaviors]) <-! require(['@detox/utils', 'hotkeys-js', 'js/behaviors']).then
+([detox-utils, hotkeys-js, behaviors, markdown]) <-! require(['@detox/utils', 'hotkeys-js', 'js/behaviors', 'js/markdown']).then
+
 Polymer(
 	is			: 'detox-chat-app-dialogs'
 	behaviors	: [
@@ -20,6 +21,9 @@ Polymer(
 		text_message	:
 			type	: String
 			value	: ''
+	created : !->
+		@_ctrl_enter_handler	= @_ctrl_enter_handler.bind(@)
+		@_enter_handler			= @_enter_handler.bind(@)
 	ready : !->
 		are_arrays_equal	= detox-utils.are_arrays_equal
 		ArrayMap			= detox-utils.ArrayMap
@@ -71,21 +75,24 @@ Polymer(
 				messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
 			)
 			.on('settings_send_ctrl_enter_changed', (@send_ctrl_enter) !~>)
-	connected : !->
-		hotkeys-js('Ctrl+Enter', (e) !~>
-			if e.composedPath()[0] == @$.textarea
-				@_send()
-				e.preventDefault()
-		)
-		hotkeys-js('Enter', (e) !~>
-			if e.composedPath()[0] == @$.textarea && !@send_ctrl_enter
-				@_send()
-				e.preventDefault()
-		)
+	attached : !->
+		hotkeys-js('Ctrl+Enter', @_ctrl_enter_handler)
+		hotkeys-js('Enter', @_enter_handler)
+	detached : !->
+		hotkeys-js.unbind('Ctrl+Enter', @_ctrl_enter_handler)
+		hotkeys-js.unbind('Enter', @_enter_handler)
+	_ctrl_enter_handler : (e) !->
+		if e.composedPath()[0] == @$.textarea
+			@_send()
+			e.preventDefault()
+	_enter_handler : (e) !->
+		if e.composedPath()[0] == @$.textarea && !@send_ctrl_enter
+			@_send()
+			e.preventDefault()
 	_show_sidebar : !->
 		@_state_instance.set_ui_sidebar_shown(true)
 	_send_placeholder : (send_ctrl_enter) ->
-		'Type you message here; ' + (
+		'Type you message here, Markdown (GFM) supported!\n' + (
 			if send_ctrl_enter
 				'Enter for new line, Ctrl+Enter for sending'
 			else
@@ -99,6 +106,8 @@ Polymer(
 		state			= @_state_instance
 		contact_id		= state.get_ui_active_contact()
 		state.add_contact_message(contact_id, false, +(new Date), 0, text_message)
+	_markdown_renderer : (markdown_text) ->
+		markdown(markdown_text)
 	_format_date : (date) ->
 		if !date
 			return 'Not yet'

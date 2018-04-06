@@ -17,8 +17,9 @@ requirejs_config	=
 		'autosize'					: 'node_modules/autosize/dist/autosize'
 		'fixed-size-multiplexer'	: 'node_modules/fixed-size-multiplexer/src/index'
 		'hotkeys-js'				: 'node_modules/hotkeys-js/dist/hotkeys'
-		'ronion'					: 'node_modules/ronion/src/index'
+		'marked'					: 'node_modules/marked/marked.min'
 		'pako'						: 'node_modules/pako/dist/pako'
+		'ronion'					: 'node_modules/ronion/src/index'
 		'simple-peer'				: 'node_modules/simple-peer/simplepeer.min'
 		'swipe-listener'			: 'node_modules/swipe-listener/dist/swipe-listener'
 	'packages'	: [

@@ -77,8 +77,9 @@
       'autosize': 'node_modules/autosize/dist/autosize.min',
       'fixed-size-multiplexer': 'node_modules/fixed-size-multiplexer/src/index.min',
       'hotkeys-js': 'node_modules/hotkeys-js/dist/hotkeys.min',
-      'ronion': 'node_modules/ronion/src/index.min',
+      'marked': 'node_modules/marked/marked.min',
       'pako': 'node_modules/pako/dist/pako.min',
+      'ronion': 'node_modules/ronion/src/index.min',
       'simple-peer': 'node_modules/simple-peer/simplepeer.min',
       'swipe-listener': 'node_modules/swipe-listener/dist/swipe-listener.min'
     },

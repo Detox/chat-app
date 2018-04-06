@@ -5,9 +5,9 @@
  * @license 0BSD
  */
 (function(){
-  require(['@detox/utils', 'hotkeys-js', 'js/behaviors']).then(function(arg$){
-    var detoxUtils, hotkeysJs, behaviors;
-    detoxUtils = arg$[0], hotkeysJs = arg$[1], behaviors = arg$[2];
+  require(['@detox/utils', 'hotkeys-js', 'js/behaviors', 'js/markdown']).then(function(arg$){
+    var detoxUtils, hotkeysJs, behaviors, markdown;
+    detoxUtils = arg$[0], hotkeysJs = arg$[1], behaviors = arg$[2], markdown = arg$[3];
     Polymer({
       is: 'detox-chat-app-dialogs',
       behaviors: [behaviors.state_instance, Polymer.MutableDataBehavior],
@@ -23,6 +23,10 @@
           type: String,
           value: ''
         }
+      },
+      created: function(){
+        this._ctrl_enter_handler = this._ctrl_enter_handler.bind(this);
+        this._enter_handler = this._enter_handler.bind(this);
       },
       ready: function(){
         var are_arrays_equal, ArrayMap, text_messages, state, this$ = this;
@@ -80,26 +84,31 @@
           this$.send_ctrl_enter = send_ctrl_enter;
         });
       },
-      connected: function(){
-        var this$ = this;
-        hotkeysJs('Ctrl+Enter', function(e){
-          if (e.composedPath()[0] === this$.$.textarea) {
-            this$._send();
-            e.preventDefault();
-          }
-        });
-        hotkeysJs('Enter', function(e){
-          if (e.composedPath()[0] === this$.$.textarea && !this$.send_ctrl_enter) {
-            this$._send();
-            e.preventDefault();
-          }
-        });
+      attached: function(){
+        hotkeysJs('Ctrl+Enter', this._ctrl_enter_handler);
+        hotkeysJs('Enter', this._enter_handler);
+      },
+      detached: function(){
+        hotkeysJs.unbind('Ctrl+Enter', this._ctrl_enter_handler);
+        hotkeysJs.unbind('Enter', this._enter_handler);
+      },
+      _ctrl_enter_handler: function(e){
+        if (e.composedPath()[0] === this.$.textarea) {
+          this._send();
+          e.preventDefault();
+        }
+      },
+      _enter_handler: function(e){
+        if (e.composedPath()[0] === this.$.textarea && !this.send_ctrl_enter) {
+          this._send();
+          e.preventDefault();
+        }
       },
       _show_sidebar: function(){
         this._state_instance.set_ui_sidebar_shown(true);
       },
       _send_placeholder: function(send_ctrl_enter){
-        return 'Type you message here; ' + (send_ctrl_enter ? 'Enter for new line, Ctrl+Enter for sending' : 'Shift+Enter for new line, Enter for sending');
+        return 'Type you message here, Markdown (GFM) supported!\n' + (send_ctrl_enter ? 'Enter for new line, Ctrl+Enter for sending' : 'Shift+Enter for new line, Enter for sending');
       },
       _send: function(){
         var text_message, state, contact_id;
@@ -111,6 +120,9 @@
         state = this._state_instance;
         contact_id = state.get_ui_active_contact();
         state.add_contact_message(contact_id, false, +new Date, 0, text_message);
+      },
+      _markdown_renderer: function(markdown_text){
+        return markdown(markdown_text);
       },
       _format_date: function(date){
         if (!date) {
