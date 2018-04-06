@@ -158,6 +158,20 @@ html {
 	--dialog-message-pending-corner            : linear-gradient(var(--sidebar-contact-corner-bottom-right), var(--sidebar-contact-pending-color) var(--dialog-message-corner-start), transparent var(--dialog-message-corner-end));
 	--dialog-send-textarea-max                 : 40vh;
 	--dialog-send-textarea-min                 : 20vh;
+
+	/* Global content styling */
+
+	--content-link-color                       : #1f5ca8;
+	--content-link-color-visited               : #9c4cff;
+	--content-blockquote-border-left           : .4em solid var(--border-color-base);
+	--content-blockquote-border-right          : .1em solid var(--border-color-base);
+	--content-blockquote-margin                : .5em 0;
+	--content-blockquote-padding               : 0 1em;
+	--content-code-border-radius               : .3em;
+	--content-code-block-padding               : .5em;
+	--content-code-inline-padding              : .15em;
+	--content-hr-height                        : .1em;
+	--content-hr-background-color              : currentColor;
 }
 
 // Would be nice to have this value in CSS property, but it is not working:(

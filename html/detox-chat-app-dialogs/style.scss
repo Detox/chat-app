@@ -87,8 +87,51 @@
 			box-sizing    : border-box;
 			flex-shrink   : var(--dialog-message-content-width-shrink);
 			max-width     : var(--dialog-message-content-width-max);
+			overflow-x    : auto;
 			padding       : var(--block-padding);
 			word-break    : break-word;
+
+			:first-child {
+				margin-top : 0;
+			}
+
+			:last-child {
+				margin-bottom : 0;
+			}
+
+			// We mostly rely on browser's styles here, but also tweak some stuff a bit
+			a {
+				color : var(--content-link-color);
+
+				&:visited {
+					color : var(--content-link-color-visited);
+				}
+			}
+
+			blockquote {
+				border-left  : var(--content-blockquote-border-left);
+				border-right : var(--content-blockquote-border-right);
+				margin       : var(--content-blockquote-margin);
+				padding      : var(--content-blockquote-padding);
+			}
+
+			pre > code {
+				display    : block;
+				overflow-x : auto;
+				padding    : var(--content-code-block-padding);
+			}
+
+			code {
+				background-color : var(--border-color-base);
+				border-radius    : var(--content-code-border-radius);
+				padding          : var(--content-code-inline-padding);
+			}
+
+			hr {
+				height           : var(--content-hr-height);
+				border           : none;
+				background-color : var(--content-hr-background-color);
+			}
 		}
 
 		.message-details {
@@ -137,6 +180,11 @@
 		csw-button {
 			display : inline-block;
 		}
+	}
+
+	#messages-list {
+		box-sizing : border-box;
+		width      : var(--app-width);
 	}
 
 	#send-form {
