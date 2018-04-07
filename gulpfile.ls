@@ -145,19 +145,15 @@ gulp
 			used_fa_icons	= new Set
 			while m = r.exec(html)
 				used_fa_icons.add(m[1])
-			used_fa_glyphs	= []
 			unused_fa_icons	= []
 			r				= /\.fa-([^:]+):before{content:"([^"]+)"}/g
 			while m = r.exec(html)
 				[definition, icon, glyph]	= m
-				if used_fa_icons.has(icon)
-					used_fa_glyphs.push(glyph)
-				else
+				if !used_fa_icons.has(icon)
 					unused_fa_icons.push(definition)
 			# Remove unused icons definitions
 			for definition in unused_fa_icons
 				html	= html.replace(definition, '')
-			# TODO: Cleanup font file itself using information from `used_fa_glyphs`
 			js = html.match(SCRIPTS_REGEXP)
 				.map (string) ->
 					string	= string.trim()
@@ -339,10 +335,16 @@ let require, requirejs, define;
 			]
 		)
 	)
-	.task('main-build', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-js'])
+	.task('main-build', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-font', 'minify-js'])
 	.task('minify-css', ['bundle-css'], !->
 		css	= fs.readFileSync("#DESTINATION/#BUNDLED_CSS", {encoding: 'utf8'})
 		fs.writeFileSync("#DESTINATION/#MINIFIED_CSS", minify_css(css))
+	)
+	.task('minify-font', ['bundle-html'], !->
+		font		= __dirname + "/#DESTINATION/#FA_FONT"
+		html		= __dirname + "/#DESTINATION/#BUNDLED_HTML"
+		command		= "docker run --rm -v #font:/font.woff2 -v #html:/style.css nazarpc/subset-font"
+		exec(command)
 	)
 	.task('minify-html', ['bundle-html'], ->
 		gulp.src("#DESTINATION/#BUNDLED_HTML")
