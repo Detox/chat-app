@@ -131,15 +131,14 @@ gulp
 			if stderr
 				console.error(stderr)
 			html	= fs.readFileSync("#DESTINATION/#BUNDLED_HTML", {encoding: 'utf8'})
+			# Hack: we know for sure that these files fonts will not be used, so lets remove unused fonts from stylesheet entirely
+			html	= html.replace(new RegExp('@font-face[^}]+(' + BLACKLISTED_FONTS.join('|') + ')[^}]+}', 'g'), '')
 			fonts	= html.match(FONTS_REGEXP)
 			for font in fonts
 				font_path	= font.substring(8, font.length - 2).split('?')[0]
 				base_name	= font_path.split('/').pop()
 				hash		= file_hash(font_path)
 				html		= html.replace(font, "url(#base_name?#hash)")
-				# Hack: we know for sure that these files fonts will not be used
-				if base_name in BLACKLISTED_FONTS
-					continue
 				fs.copyFileSync(font_path, "#DESTINATION/#base_name")
 			js		= html.match(SCRIPTS_REGEXP)
 				.map (string) ->

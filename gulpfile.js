@@ -138,6 +138,7 @@
       html = fs.readFileSync(DESTINATION + "/" + BUNDLED_HTML, {
         encoding: 'utf8'
       });
+      html = html.replace(new RegExp('@font-face[^}]+(' + BLACKLISTED_FONTS.join('|') + ')[^}]+}', 'g'), '');
       fonts = html.match(FONTS_REGEXP);
       for (i$ = 0, len$ = fonts.length; i$ < len$; ++i$) {
         font = fonts[i$];
@@ -145,9 +146,6 @@
         base_name = font_path.split('/').pop();
         hash = file_hash(font_path);
         html = html.replace(font, "url(" + base_name + "?" + hash + ")");
-        if (in$(base_name, BLACKLISTED_FONTS)) {
-          continue;
-        }
         fs.copyFileSync(font_path, DESTINATION + "/" + base_name);
       }
       js = html.match(SCRIPTS_REGEXP).map(function(string){
@@ -278,9 +276,4 @@
     }
     fs.writeFileSync('index.html', index);
   });
-  function in$(x, xs){
-    var i = -1, l = xs.length >>> 0;
-    while (++i < l) if (x === xs[i]) return true;
-    return false;
-  }
 }).call(this);
