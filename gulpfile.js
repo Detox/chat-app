@@ -5,7 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, workboxBuild, minify_css, instance, minify_js, file_hash, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BLACKLISTED_FONTS, BUNDLED_CSS, BUNDLED_HTML, BUNDLED_JS, BUNDLED_MANIFEST, BUNDLED_SW, DESTINATION, MINIFIED_CSS, MINIFIED_HTML, MINIFIED_JS, MINIFIED_SW, SOURCE_CSS, SOURCE_HTML, SOURCE_MANIFEST, requirejs_config;
+  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, workboxBuild, minify_css, instance, minify_js, file_hash, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BLACKLISTED_FONTS, FA_FONT, BUNDLED_CSS, BUNDLED_HTML, BUNDLED_JS, BUNDLED_MANIFEST, BUNDLED_SW, DESTINATION, MINIFIED_CSS, MINIFIED_HTML, MINIFIED_JS, MINIFIED_SW, SOURCE_CSS, SOURCE_HTML, SOURCE_MANIFEST, requirejs_config;
   cleanCss = require('clean-css');
   crypto = require('crypto');
   del = require('del');
@@ -50,6 +50,7 @@
   IMAGES_REGEXP = /url\(\.\.\/img\/.+?\)/g;
   SCRIPTS_REGEXP = /<script>[^]+?<\/script>\n*/g;
   BLACKLISTED_FONTS = ['fa-regular-400.woff2', 'fa-brands-400.woff2'];
+  FA_FONT = 'fa-solid-900.woff2';
   BUNDLED_CSS = 'style.css';
   BUNDLED_HTML = 'index.html';
   BUNDLED_JS = 'script.js';
@@ -128,7 +129,7 @@
     var command;
     command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + DESTINATION + "/" + BUNDLED_HTML + " " + SOURCE_HTML;
     exec(command, function(error, stdout, stderr){
-      var html, fonts, i$, len$, font, font_path, base_name, hash, js;
+      var html, fonts, i$, len$, font, font_path, base_name, hash, r, used_fa_icons, m, used_fa_glyphs, unused_fa_icons, definition, icon, glyph, js;
       if (stdout) {
         console.log(stdout);
       }
@@ -147,6 +148,26 @@
         hash = file_hash(font_path);
         html = html.replace(font, "url(" + base_name + "?" + hash + ")");
         fs.copyFileSync(font_path, DESTINATION + "/" + base_name);
+      }
+      r = /icon="([^"]+)"/g;
+      used_fa_icons = new Set;
+      while (m = r.exec(html)) {
+        used_fa_icons.add(m[1]);
+      }
+      used_fa_glyphs = [];
+      unused_fa_icons = [];
+      r = /\.fa-([^:]+):before{content:"([^"]+)"}/g;
+      while (m = r.exec(html)) {
+        definition = m[0], icon = m[1], glyph = m[2];
+        if (used_fa_icons.has(icon)) {
+          used_fa_glyphs.push(glyph);
+        } else {
+          unused_fa_icons.push(definition);
+        }
+      }
+      for (i$ = 0, len$ = unused_fa_icons.length; i$ < len$; ++i$) {
+        definition = unused_fa_icons[i$];
+        html = html.replace(definition, '');
       }
       js = html.match(SCRIPTS_REGEXP).map(function(string){
         string = string.trim();

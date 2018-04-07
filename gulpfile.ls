@@ -45,6 +45,7 @@ const BLACKLISTED_FONTS	= [
 	'fa-regular-400.woff2'
 	'fa-brands-400.woff2'
 ]
+const FA_FONT			= 'fa-solid-900.woff2'
 
 const BUNDLED_CSS		= 'style.css'
 const BUNDLED_HTML		= 'index.html'
@@ -140,7 +141,24 @@ gulp
 				hash		= file_hash(font_path)
 				html		= html.replace(font, "url(#base_name?#hash)")
 				fs.copyFileSync(font_path, "#DESTINATION/#base_name")
-			js		= html.match(SCRIPTS_REGEXP)
+			r				= /icon="([^"]+)"/g
+			used_fa_icons	= new Set
+			while m = r.exec(html)
+				used_fa_icons.add(m[1])
+			used_fa_glyphs	= []
+			unused_fa_icons	= []
+			r				= /\.fa-([^:]+):before{content:"([^"]+)"}/g
+			while m = r.exec(html)
+				[definition, icon, glyph]	= m
+				if used_fa_icons.has(icon)
+					used_fa_glyphs.push(glyph)
+				else
+					unused_fa_icons.push(definition)
+			# Remove unused icons definitions
+			for definition in unused_fa_icons
+				html	= html.replace(definition, '')
+			# TODO: Cleanup font file itself using information from `used_fa_glyphs`
+			js = html.match(SCRIPTS_REGEXP)
 				.map (string) ->
 					string	= string.trim()
 					string.substring(8, string.length - 9) # Remove script tag
