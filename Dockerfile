@@ -13,10 +13,20 @@ COPY package.json /code/
 
 RUN cd /code && npm install && mkdir dist && node_modules/.bin/gulp
 
+# This is basically a hack, since we use docker container in gulp build and can't call it inside of another docker container during build process
+FROM nazarpc/subset-font as font-builder
+LABEL maintainer="Nazar Mokrynskyi <nazar@mokrynskyi.com>"
+COPY --from=builder /code/dist/fa-solid-900.woff2 /font.woff2
+COPY --from=builder /code/dist/index.min.html /style.css
+
+RUN php subset.php
+
 FROM nginx:alpine
 LABEL maintainer="Nazar Mokrynskyi <nazar@mokrynskyi.com>"
 
 COPY --from=builder /code/dist /usr/share/nginx/html/dist
+COPY --from=font-builder /font.woff2 /usr/share/nginx/html/dist/fa-solid-900.woff2
+COPY --from=builder /code/favicon.ico /usr/share/nginx/html/
 COPY --from=builder /code/index.html /usr/share/nginx/html/
 COPY --from=builder /code/sw.min.js /usr/share/nginx/html/
 

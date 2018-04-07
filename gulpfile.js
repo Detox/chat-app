@@ -270,12 +270,22 @@
       encoding: 'utf8'
     });
     fs.writeFileSync(DESTINATION + "/" + MINIFIED_CSS, minify_css(css));
-  }).task('minify-font', ['bundle-html'], function(){
+  }).task('minify-font', ['bundle-html'], function(callback){
     var font, html, command;
     font = __dirname + ("/" + DESTINATION + "/" + FA_FONT);
     html = __dirname + ("/" + DESTINATION + "/" + BUNDLED_HTML);
     command = "docker run --rm -v " + font + ":/font.woff2 -v " + html + ":/style.css nazarpc/subset-font";
-    exec(command);
+    exec(command, function(error, stdout, stderr){
+      stdout = stdout.replace("[INFO] Subsetting font '/tmp/font.ttf' with ebook '/tmp/characters' into new font '/tmp/font.ttf', containing the following glyphs:\n", '').replace('Processing /tmp/font.ttf => /tmp/font.woff2\n', '').trim();
+      stderr = stderr.replace(/^The glyph named .+ is mapped to.+\n/gm, '').replace(/^But its name indicates it should be mapped to.+\n/gm, '').replace('Traceback (most recent call last):\n  File "/usr/bin/glyphIgo", line 1353, in <module>\n    main()\n  File "/usr/bin/glyphIgo", line 1344, in main\n    returnCode = GlyphIgo(args).execute()\n  File "/usr/bin/glyphIgo", line 1333, in execute\n    returnCode = self.__do_subset()\n  File "/usr/bin/glyphIgo", line 1307, in __do_subset\n    self.__print_char_list(found_char_list)\n  File "/usr/bin/glyphIgo", line 992, in __print_char_list\n    print "\'%s\'\\t%s\\t%s\\t%s" % (escape(c[0]), decCodePoint, hexCodePoint, name)\nUnicodeEncodeError: \'ascii\' codec can\'t encode character u\'\\uf00c\' in position 1: ordinal not in range(128)', '').replace(/^Compressed \d+ to \d+\.\n/gm, '').trim();
+      if (stdout) {
+        console.log(stdout);
+      }
+      if (stderr) {
+        console.error(stderr);
+      }
+      callback();
+    });
   }).task('minify-html', ['bundle-html'], function(){
     return gulp.src(DESTINATION + "/" + BUNDLED_HTML).pipe(gulpHtmlmin({
       decodeEntities: true,
