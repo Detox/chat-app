@@ -180,7 +180,7 @@
         return string.substring(8, string.length - 9);
       }).join('');
       js = js_shell(js);
-      html = html.replace(/assetpath=".+"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
+      html = html.replace(/assetpath=".+?"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
       fs.writeFileSync(DESTINATION + "/" + BUNDLED_HTML, html);
       fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
       callback(error);

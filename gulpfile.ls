@@ -253,7 +253,7 @@ gulp
 			js		= js_shell(js)
 			html	= html
 				# Useless (in our case) arguments
-				.replace(/assetpath=".+"/g, '')
+				.replace(/assetpath=".+?"/g, '')
 				# These 2 files are referenced, but do not actually exist (because Polymer uses crappy practices for its packages)
 				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '')
 				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '')
