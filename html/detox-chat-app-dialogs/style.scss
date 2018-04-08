@@ -20,6 +20,12 @@
 
 	csw-button {
 		display : none;
+
+		&[unread] {
+			button {
+				background-image : var(--menu-button-unread-corner);
+			}
+		}
 	}
 
 	div {

@@ -22,7 +22,8 @@
         text_message: {
           type: String,
           value: ''
-        }
+        },
+        unread_messages: Boolean
       },
       created: function(){
         this._ctrl_enter_handler = this._ctrl_enter_handler.bind(this);
@@ -36,6 +37,7 @@
         state = this._state_instance;
         this.active_contact = !!state.get_ui_active_contact();
         this.send_ctrl_enter = state.get_settings_send_ctrl_enter();
+        this._update_unread_messages();
         state.on('contact_messages_changed', function(contact_id){
           var active_contact, messages_list, need_to_update_scroll;
           active_contact = state.get_ui_active_contact();
@@ -56,6 +58,8 @@
           }
         }).on('contact_deleted', function(old_contact){
           text_messages['delete'](old_contact.id);
+        }).on('contacts_with_unread_messages_changed', function(){
+          this$._update_unread_messages();
         }).on('ui_active_contact_changed', function(new_active_contact, old_active_contact){
           var text_message, messages_list;
           text_message = this$.text_message.trim();
@@ -80,6 +84,7 @@
           this$.$['messages-list-template'].render();
           messages_list = this$.$['messages-list'];
           messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
+          this$._update_unread_messages();
         }).on('settings_send_ctrl_enter_changed', function(send_ctrl_enter){
           this$.send_ctrl_enter = send_ctrl_enter;
         });
@@ -103,6 +108,13 @@
           this._send();
           e.preventDefault();
         }
+      },
+      _update_unread_messages: function(){
+        var state;
+        state = this._state_instance;
+        this.unread_messages = !!state.get_contacts_with_unread_messages().filter(function(contact){
+          return contact !== state.get_ui_active_contact();
+        }).length;
       },
       _show_sidebar: function(){
         this._state_instance.set_ui_sidebar_shown(true);

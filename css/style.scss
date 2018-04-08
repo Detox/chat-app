@@ -135,8 +135,8 @@ html {
 
 	--sidebar-contact-corner-bottom-left       : 45deg;
 	--sidebar-contact-corner-bottom-right      : 315deg;
-	--sidebar-contact-corner-end               : 6%;
-	--sidebar-contact-corner-start             : 0%;
+	--sidebar-contact-corner-end               : var(--block-padding);
+	--sidebar-contact-corner-start             : 0;
 	--sidebar-contact-corner-top-left          : 135deg;
 	--sidebar-contact-corner-top-right         : 225deg;
 	--sidebar-contact-online-color             : var(--text-color-success);
@@ -150,6 +150,7 @@ html {
 
 	/* Main dialog panel */
 
+	--menu-button-unread-corner                : var(--sidebar-contact-unread-corner);
 	--dialog-message-corner-end                : var(--block-padding);
 	--dialog-message-corner-start              : 0%;
 	--dialog-message-content-width-max         : 80%;

@@ -21,6 +21,7 @@ Polymer(
 		text_message	:
 			type	: String
 			value	: ''
+		unread_messages	: Boolean
 	created : !->
 		@_ctrl_enter_handler	= @_ctrl_enter_handler.bind(@)
 		@_enter_handler			= @_enter_handler.bind(@)
@@ -32,6 +33,7 @@ Polymer(
 		state				= @_state_instance
 		@active_contact		= !!state.get_ui_active_contact()
 		@send_ctrl_enter	= state.get_settings_send_ctrl_enter()
+		@_update_unread_messages()
 		state
 			.on('contact_messages_changed', (contact_id) !~>
 				active_contact	= state.get_ui_active_contact()
@@ -51,6 +53,9 @@ Polymer(
 			)
 			.on('contact_deleted', (old_contact) !~>
 				text_messages.delete(old_contact.id)
+			)
+			.on('contacts_with_unread_messages_changed', !~>
+				@_update_unread_messages()
 			)
 			.on('ui_active_contact_changed', (new_active_contact, old_active_contact) !~>
 				text_message	= @text_message.trim()
@@ -73,6 +78,7 @@ Polymer(
 				@$['messages-list-template'].render()
 				messages_list			= @$['messages-list']
 				messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
+				@_update_unread_messages()
 			)
 			.on('settings_send_ctrl_enter_changed', (@send_ctrl_enter) !~>)
 	attached : !->
@@ -89,6 +95,14 @@ Polymer(
 		if e.composedPath()[0] == @$.textarea && !@send_ctrl_enter
 			@_send()
 			e.preventDefault()
+	_update_unread_messages : !->
+		state				= @_state_instance
+		@unread_messages	= !!(
+			state.get_contacts_with_unread_messages()
+				.filter (contact) ->
+					contact != state.get_ui_active_contact()
+				.length
+		)
 	_show_sidebar : !->
 		@_state_instance.set_ui_sidebar_shown(true)
 	_send_placeholder : (send_ctrl_enter) ->
