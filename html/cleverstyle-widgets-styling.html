@@ -76,13 +76,14 @@
 			/* Button */
 
 			--csw-button: {
-				background-color : var(--button-background);
+				-webkit-tap-highlight-color : transparent;
+				background-color            : var(--button-background);
 				/* Buttons are rounded by default in Firefox for Android, remove that */
-				border-radius    : 0;
-				box-sizing       : border-box;
-				color            : var(--button-color);
-				height           : var(--form-element-height);
-				padding          : 0 var(--form-element-padding-horizontal);
+				border-radius               : 0;
+				box-sizing                  : border-box;
+				color                       : var(--button-color);
+				height                      : var(--form-element-height);
+				padding                     : 0 var(--form-element-padding-horizontal);
 			};
 
 			--csw-button-hover: {
@@ -284,9 +285,10 @@
 			/* Notify */
 
 			--csw-notify: {
-				padding     : var(--block-padding) var(--block-padding) 0 var(--block-padding);
-				transition  : all var(--notify-transition-duration) cubic-bezier(0.47, 0, 0.75, 0.72); /* In - Sine */
-				will-change : transform;
+				-webkit-tap-highlight-color : transparent;
+				padding                     : var(--block-padding) var(--block-padding) 0 var(--block-padding);
+				transition                  : all var(--notify-transition-duration) cubic-bezier(0.47, 0, 0.75, 0.72); /* In - Sine */
+				will-change                 : transform;
 			};
 
 			--csw-notify-content: {

@@ -51,12 +51,13 @@ csw-group {
 	display : block;
 
 	.contact-item {
-		align-items      : center;
-		background-color : var(--background-color-interactive);
-		cursor           : pointer;
-		display          : flex;
-		padding          : var(--block-padding);
-		width            : calc(100% - var(--block-padding));
+		-webkit-tap-highlight-color : transparent;
+		align-items                 : center;
+		background-color            : var(--background-color-interactive);
+		cursor                      : pointer;
+		display                     : flex;
+		padding                     : var(--block-padding);
+		width                       : calc(100% - var(--block-padding));
 
 		&:nth-of-type(n+2) {
 			border-top : var(--border-base);
