@@ -63,7 +63,7 @@
 		flex-shrink    : 0;
 		padding-bottom : var(--block-padding);
 
-		&[right] {
+		&[origin=sent] {
 			flex-direction : row-reverse;
 
 			.message-content {

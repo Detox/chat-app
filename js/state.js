@@ -155,7 +155,7 @@
         }
         return results$;
       }.call(this)));
-      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([1, true, +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.']), Message([2, false, +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])]);
+      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([1, State['MESSAGE_ORIGIN_RECEIVED'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.']), Message([2, State['MESSAGE_ORIGIN_SENT'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])]);
       for (i$ = 0, len$ = (ref$ = Array.from(this._state['contacts'].keys())).length; i$ < len$; ++i$) {
         contact_id = ref$[i$];
         this._update_contact_with_pending_messages(contact_id);
@@ -399,13 +399,13 @@
         this['fire']('settings_bucket_size_changed', bucket_size, old_bucket_size);
       }
       /**
-       * @return {number} One of State.EXPERIENCE_*
+       * @return {number} One of State.EXPERIENCE_* constants
        */,
       'get_settings_experience': function(){
         return this._state['settings']['experience'];
       }
       /**
-       * @param {number} experience One of State.EXPERIENCE_*
+       * @param {number} experience One of State.EXPERIENCE_* constants
        */,
       'set_settings_experience': function(experience){
         var old_experience;
@@ -802,7 +802,7 @@
         var i$, ref$, message;
         for (i$ = (ref$ = this['get_contact_messages'](contact_id)).length - 1; i$ >= 0; --i$) {
           message = ref$[i$];
-          if (!message['from'] && !message['date_sent']) {
+          if (message['origin'] === State['MESSAGE_ORIGIN_SENT'] && !message['date_sent']) {
             if (!this._local_state.contacts_with_pending_messages.has(contact_id)) {
               this._local_state.contacts_with_pending_messages.add(contact_id);
               this['fire']('contacts_with_pending_messages_changed');
@@ -821,7 +821,7 @@
         last_read_message = this['get_contact'](contact_id)['last_read_message'];
         for (i$ = 0, len$ = (ref$ = this['get_contact_messages'](contact_id)).length; i$ < len$; ++i$) {
           message = ref$[i$];
-          if (message['from'] && message['date_sent'] > last_read_message) {
+          if (message['origin'] === State['MESSAGE_ORIGIN_RECEIVED'] && message['date_sent'] > last_read_message) {
             if (!this._local_state.contacts_with_unread_messages.has(contact_id)) {
               this._local_state.contacts_with_unread_messages.add(contact_id);
               this['fire']('contacts_with_unread_messages_changed');
@@ -847,28 +847,28 @@
        */,
       'get_contact_messages_to_be_sent': function(contact_id){
         return this['get_contact_messages'](contact_id).filter(function(message){
-          return !message['from'] && !message['date_sent'];
+          return message['origin'] === State['MESSAGE_ORIGIN_SENT'] && !message['date_sent'];
         });
       }
       /**
        * @param {!Uint8Array}	contact_id
-       * @param {boolean}		from			`true` if message was received and `false` if sent to a friend
+       * @param {number}		origin			One of State.MESSAGE_ORIGIN_* constants
        * @param {number}		date_written	When message was written
        * @param {number}		date_sent		When message was sent
        * @param {string} 		text
        *
        * @return {number} Message ID
        */,
-      'add_contact_message': function(contact_id, from, date_written, date_sent, text){
+      'add_contact_message': function(contact_id, origin, date_written, date_sent, text){
         var messages, id, message;
         if (!this._local_state.messages.has(contact_id)) {
           this._local_state.messages.set(contact_id, []);
         }
         messages = this._local_state.messages.get(contact_id);
         id = messages.length ? messages[messages.length - 1]['id'] + 1 : 1;
-        message = Message([id, from, date_written, date_sent, text]);
+        message = Message([id, origin, date_written, date_sent, text]);
         messages.push(message);
-        if (from) {
+        if (origin === State['MESSAGE_ORIGIN_RECEIVED']) {
           this._update_contact_last_active(contact_id);
           if (!are_arrays_equal(this['get_ui_active_contact']() || new Uint8Array(0), contact_id)) {
             this._update_contact_with_unread_messages(contact_id);
@@ -955,7 +955,10 @@
     constants = {
       'EXPERIENCE_REGULAR': 0,
       'EXPERIENCE_ADVANCED': 1,
-      'EXPERIENCE_DEVELOPER': 2
+      'EXPERIENCE_DEVELOPER': 2,
+      'MESSAGE_ORIGIN_SENT': 0,
+      'MESSAGE_ORIGIN_RECEIVED': 1,
+      'MESSAGE_ORIGIN_SERVICE': 2
     };
     Object.assign(State, constants);
     Object.assign(State.prototype, constants);
@@ -967,7 +970,7 @@
     Contact = create_array_object(['id', 'nickname', 'last_time_active', 'last_read_message', 'remote_secret', 'local_secret', 'old_local_secret']);
     ContactRequest = create_array_object(['id', 'name', 'secret_name']);
     ContactRequestBlocked = create_array_object(['id', 'blocked_until']);
-    Message = create_array_object(['id', 'from', 'date_written', 'date_sent', 'text']);
+    Message = create_array_object(['id', 'origin', 'date_written', 'date_sent', 'text']);
     Secret = create_array_object(['secret', 'name']);
     return {
       'Contact': Contact,

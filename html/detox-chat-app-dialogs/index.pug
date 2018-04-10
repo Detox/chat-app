@@ -6,7 +6,7 @@ dom-module(id="detox-chat-app-dialogs")
 			div [[contact.nickname]]
 		#messages-list(hidden="[[!active_contact]]")
 			template#messages-list-template(is="dom-repeat" items="{{messages}}" mutable-data)
-				.message(right$="[[!item.from]]" pending$="[[!item.date_sent]]")
+				.message(origin$="[[_message_origin(item)]]" pending$="[[!item.date_sent]]")
 					.message-content(inner-h-t-m-l="[[_markdown_renderer(item.text)]]")
 					.message-details Written: [[_format_date(item.date_written)]],<br>delivered: [[_format_date(item.date_sent)]]
 		csw-form: form#send-form(hidden="[[!active_contact]]")

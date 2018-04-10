@@ -212,7 +212,7 @@
             }
             for (i$ = (ref$ = state.get_contact_messages(contact_id)).length - 1; i$ >= 0; --i$) {
               old_message = ref$[i$];
-              if (old_message.from) {
+              if (old_message.origin === State.MESSAGE_ORIGIN_RECEIVED) {
                 last_message_received = old_message;
                 break;
               }
@@ -238,7 +238,7 @@
             chat.connect_to(new_contact.id, new_contact.remote_secret);
           }).on('contact_message_added', function(contact_id, message){
             var contact;
-            if (message.from || message.date_received || !state.has_online_contact(contact_id)) {
+            if (message.origin === State.MESSAGE_ORIGIN_RECEIVED || !state.has_online_contact(contact_id)) {
               contact = state.get_contact(contact_id);
               chat.connect_to(contact_id, contact.remote_secret);
               return;

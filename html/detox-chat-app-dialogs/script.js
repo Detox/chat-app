@@ -145,6 +145,16 @@
         } else {
           return new Date(date).toLocaleString();
         }
+      },
+      _message_origin: function(message){
+        switch (message.origin) {
+        case this.state.MESSAGE_ORIGIN_SENT:
+          return 'sent';
+        case this.state.MESSAGE_ORIGIN_RECEIVED:
+          return 'received';
+        case this.state.MESSAGE_ORIGIN_SERVICE:
+          return 'service';
+        }
       }
     });
   });

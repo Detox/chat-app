@@ -196,7 +196,7 @@ Polymer(
 				if !text_message
 					return
 				for old_message in state.get_contact_messages(contact_id) by -1
-					if old_message.from
+					if old_message.origin == State.MESSAGE_ORIGIN_RECEIVED
 						last_message_received = old_message
 						break
 				# `date_sent` always increases, `date_written` never decreases
@@ -223,8 +223,7 @@ Polymer(
 			)
 			.on('contact_message_added', (contact_id, message) !->
 				if (
-					message.from || # Message was received from a friend
-					message.date_received || # Message was received by a friend
+					message.origin == State.MESSAGE_ORIGIN_RECEIVED || # Message was received from a friend
 					!state.has_online_contact(contact_id) # Friend is not currently connected
 				)
 					contact	= state.get_contact(contact_id)

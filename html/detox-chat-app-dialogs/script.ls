@@ -130,4 +130,12 @@ Polymer(
 			(new Date(date)).toLocaleTimeString()
 		else
 			(new Date(date)).toLocaleString()
+	_message_origin : (message) ->
+		switch message.origin
+			case @state.MESSAGE_ORIGIN_SENT
+				'sent'
+			case @state.MESSAGE_ORIGIN_RECEIVED
+				'received'
+			case @state.MESSAGE_ORIGIN_SERVICE
+				'service'
 )
