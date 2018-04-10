@@ -152,7 +152,8 @@ Polymer(
 				)
 					true
 				else
-					# TODO: Notify user that friend might have been compromised, since wrong secret was used!
+					# TODO: If user uses old secret, notify user that friend might have been compromised
+					# TODO: If user uses unknown secret, notify user that it might have been compromised
 					false
 			)
 			.on('connected', (contact_id) !~>
