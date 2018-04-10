@@ -5,7 +5,21 @@
  * @license 0BSD
  */
 (function(){
+  /**
+   * Force passive listeners on in Polymer
+   */
+  var ref$;
   Polymer.setPassiveTouchGestures(true);
+  /**
+   * Register service worker
+   */
+  if ('serviceWorker' in navigator && window.detox_sw_path) {
+    if (document.fonts) {
+      document.fonts.load('bold 0 "Font Awesome 5 Free"').then(register_sw);
+    } else {
+      register_sw();
+    }
+  }
   function register_sw(){
     require(['@detox/chat']).then(function(arg$){
       var detoxChat, this$ = this;
@@ -35,11 +49,23 @@
       });
     });
   }
-  if ('serviceWorker' in navigator && window.detox_sw_path) {
-    if (document.fonts) {
-      document.fonts.load('bold 0 "Font Awesome 5 Free"').then(register_sw);
-    } else {
-      register_sw();
-    }
+  /**
+   * Requesting persistent storage, so that data will not be lost unexpectedly under storage pressure
+   */
+  if (((ref$ = navigator.storage) != null ? ref$.persist : void 8) != null) {
+    navigator.storage.persisted().then(function(persistent){
+      if (!persistent) {
+        console.info('Persistent storage is not yet granted, requesting...');
+        navigator.storage.persist().then(function(granted){
+          if (granted) {
+            console.info('Persistent storage granted');
+          } else {
+            console.warn('Persistent storage denied, data may be lost under storage pressure');
+          }
+        });
+      }
+    });
+  } else {
+    console.warn('Persistent storage not supported, data may be lost under storage pressure');
   }
 }).call(this);
