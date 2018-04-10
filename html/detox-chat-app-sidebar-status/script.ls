@@ -29,7 +29,7 @@ Polymer(
 			type	: Number
 			value	: 0
 	ready : !->
-		state	= @_state_instance
+		state	= @state
 		state
 			.on('online_changed', (new_online) !~>
 				@online	= new_online

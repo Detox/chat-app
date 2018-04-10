@@ -28,7 +28,7 @@ Polymer(
 
 		id_encode	= detox-chat.id_encode
 
-		state		= @_state_instance
+		state		= @state
 
 		!~function update_secrets
 			secrets				= state.get_secrets()
@@ -52,8 +52,8 @@ Polymer(
 			)
 			.on('secrets_changed', update_secrets)
 	_nickname_blur : !->
-		if @nickname != @_state_instance.get_nickname()
-			@_state_instance.set_nickname(@nickname)
+		if @nickname != @state.get_nickname()
+			@state.set_nickname(@nickname)
 			csw.functions.notify('Nickname updated', 'success', 'right', 3)
 	_id_click : (e) !->
 		e.target.select()
@@ -67,7 +67,7 @@ Polymer(
 			csw.functions.notify('Secret name is required', 'error', 'right', 3)
 			return
 		secret	= detox-chat.generate_secret().slice(0, @new_secret_length)
-		@_state_instance.add_secret(secret, new_secret_name)
+		@state.add_secret(secret, new_secret_name)
 		csw.functions.notify('Secret added', 'success', 'right', 3)
 		@add_secret			= false
 		@new_secret_name	= ''
@@ -96,14 +96,14 @@ Polymer(
 			if !new_secret_name
 				csw.functions.notify('Secret name is required', 'error', 'right', 3)
 				return
-			@_state_instance.set_secret_name(e.model.item.secret, new_secret_name)
+			@state.set_secret_name(e.model.item.secret, new_secret_name)
 			csw.functions.notify('Secret name updated', 'success', 'right', 3)
 		)
 		modal.input.value	= e.model.item.name
 		e.preventDefault()
 	_del_secret : (e) !->
 		csw.functions.confirm("<h3>Are you sure you want to delete secret <i>#{e.model.item.name}</i>?</h3>", !~>
-			@_state_instance.del_secret(e.model.item.secret)
+			@state.del_secret(e.model.item.secret)
 		)
 		e.preventDefault()
 )

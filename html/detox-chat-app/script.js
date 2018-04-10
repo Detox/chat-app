@@ -21,14 +21,14 @@
         }
       },
       created: function(){
-        if (!this._state_instance.get_settings_online()) {
+        if (!this.state.get_settings_online()) {
           return;
         }
         this._connect_to_the_network();
       },
       ready: function(){
         var state, this$ = this;
-        state = this._state_instance;
+        state = this.state;
         this.sidebar_shown = state.get_ui_sidebar_shown();
         state.on('ui_sidebar_shown_changed', function(sidebar_shown){
           this$.sidebar_shown = sidebar_shown;
@@ -38,10 +38,10 @@
           var directions;
           directions = e.detail.directions;
           if (directions.left) {
-            this._state_instance.set_ui_sidebar_shown(false);
+            this.state.set_ui_sidebar_shown(false);
           }
           if (directions.right && e.detail.x[0] <= document.documentElement.clientWidth / 8) {
-            this._state_instance.set_ui_sidebar_shown(true);
+            this.state.set_ui_sidebar_shown(true);
           }
         });
       },
@@ -52,7 +52,7 @@
           secrets_exchange_statuses = ArrayMap();
           sent_messages_map = ArrayMap();
           reconnects_pending = ArrayMap();
-          state = this$._state_instance;
+          state = this$.state;
           core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_settings_packets_per_second(), state.get_settings_bucket_size());
           chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes());
           /**
@@ -260,7 +260,7 @@
         });
       },
       _hide_sidebar: function(){
-        this._state_instance.set_ui_sidebar_shown(false);
+        this.state.set_ui_sidebar_shown(false);
       },
       _sidebar_click: function(e){
         if (e.clientX > this.$.sidebar.clientWidth) {

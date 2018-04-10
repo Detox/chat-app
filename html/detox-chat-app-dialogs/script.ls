@@ -30,7 +30,7 @@ Polymer(
 		ArrayMap			= detox-utils.ArrayMap
 
 		text_messages		= ArrayMap()
-		state				= @_state_instance
+		state				= @state
 		@active_contact		= !!state.get_ui_active_contact()
 		@send_ctrl_enter	= state.get_settings_send_ctrl_enter()
 		@_update_unread_messages()
@@ -96,7 +96,7 @@ Polymer(
 			@_send()
 			e.preventDefault()
 	_update_unread_messages : !->
-		state				= @_state_instance
+		state				= @state
 		@unread_messages	= !!(
 			state.get_contacts_with_unread_messages()
 				.filter (contact) ->
@@ -104,7 +104,7 @@ Polymer(
 				.length
 		)
 	_show_sidebar : !->
-		@_state_instance.set_ui_sidebar_shown(true)
+		@state.set_ui_sidebar_shown(true)
 	_send_placeholder : (send_ctrl_enter) ->
 		'Type you message here, Markdown (GFM) supported!\n' + (
 			if send_ctrl_enter
@@ -117,7 +117,7 @@ Polymer(
 		if !text_message
 			return
 		@text_message	= ''
-		state			= @_state_instance
+		state			= @state
 		contact_id		= state.get_ui_active_contact()
 		state.add_contact_message(contact_id, false, +(new Date), 0, text_message)
 	_markdown_renderer : (markdown_text) ->

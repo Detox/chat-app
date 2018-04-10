@@ -18,12 +18,12 @@ Polymer(
 			type	: Boolean
 			value	: false
 	created : !->
-		if !@_state_instance.get_settings_online()
+		if !@state.get_settings_online()
 			# We're working offline
 			return
 		@_connect_to_the_network()
 	ready : !->
-		state			= @_state_instance
+		state			= @state
 		@sidebar_shown	= state.get_ui_sidebar_shown()
 		state.on('ui_sidebar_shown_changed', (@sidebar_shown) !~>)
 		# Handle sidebar showing/hiding with gestures
@@ -31,9 +31,9 @@ Polymer(
 		@addEventListener('swipe', (e) !->
 			directions	= e.detail.directions
 			if directions.left
-				@_state_instance.set_ui_sidebar_shown(false)
+				@state.set_ui_sidebar_shown(false)
 			if directions.right && e.detail.x[0] <= document.documentElement.clientWidth / 8
-				@_state_instance.set_ui_sidebar_shown(true)
+				@state.set_ui_sidebar_shown(true)
 		)
 	_connect_to_the_network : !->
 		<~! detox-chat.ready
@@ -42,7 +42,7 @@ Polymer(
 		sent_messages_map			= ArrayMap()
 		reconnects_pending			= ArrayMap()
 
-		state	= @_state_instance
+		state	= @state
 		core	= detox-core.Core(
 			detox-core.generate_seed()
 			state.get_settings_bootstrap_nodes()
@@ -242,7 +242,7 @@ Polymer(
 		@_core_instance	= core
 		@_chat_instance	= chat
 	_hide_sidebar : !->
-		@_state_instance.set_ui_sidebar_shown(false)
+		@state.set_ui_sidebar_shown(false)
 	_sidebar_click : (e) !->
 		# It is not possible to handle clicks on ::before and ::after directly, so we check it this way
 		if e.clientX > @$.sidebar.clientWidth

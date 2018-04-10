@@ -58,7 +58,7 @@ Polymer(
 			observer	: '_settings_send_ctrl_enter_changed'
 			type		: String
 	ready : !->
-		state									= @_state_instance
+		state									= @state
 		@settings_announce						= @_bool_to_string(state.get_settings_announce())
 		@settings_block_contact_requests_for	= state.get_settings_block_contact_requests_for() / 60 / 60 / 24 # In days
 		@settings_bootstrap_nodes				= state.get_settings_bootstrap_nodes()
@@ -101,8 +101,8 @@ Polymer(
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
 	_settings_announce_changed : !->
-		if @settings_announce != @_bool_to_string(@_state_instance.get_settings_announce())
-			@_state_instance.set_settings_announce(@settings_announce == '1')
+		if @settings_announce != @_bool_to_string(@state.get_settings_announce())
+			@state.set_settings_announce(@settings_announce == '1')
 			csw.functions.notify('Saved changes to announcement setting', 'success', 'right', 3)
 	_help_settings_announce : !->
 		content	= """
@@ -112,8 +112,8 @@ Polymer(
 		csw.functions.simple_modal(content)
 	_settings_block_contact_requests_for_changed : !->
 		settings_block_contact_requests_for	= @settings_block_contact_requests_for * 60 * 60 * 24 # In days
-		if settings_block_contact_requests_for != @_state_instance.get_settings_block_contact_requests_for()
-			@_state_instance.set_settings_block_contact_requests_for(settings_block_contact_requests_for)
+		if settings_block_contact_requests_for != @state.get_settings_block_contact_requests_for()
+			@state.set_settings_block_contact_requests_for(settings_block_contact_requests_for)
 			csw.functions.notify('Saved changes to block contacts request for setting', 'success', 'right', 3)
 	_help_settings_block_contact_requests_for : !->
 		content	= """
@@ -131,7 +131,7 @@ Polymer(
 			if JSON.stringify(@settings_bootstrap_nodes) == JSON.stringify(settings_bootstrap_nodes)
 				return
 			# TODO: Check if object structure is valid
-			@_state_instance.set_settings_bootstrap_nodes(settings_bootstrap_nodes)
+			@state.set_settings_bootstrap_nodes(settings_bootstrap_nodes)
 			csw.functions.notify('Saved changes to bootstrap nodes setting', 'success', 'right', 3)
 		catch
 			csw.functions.notify('Bootstrap nodes syntax error, changes were not saved', 'error', 'right', 3)
@@ -145,8 +145,8 @@ Polymer(
 		csw.functions.simple_modal(content)
 	_settings_bucket_size_changed : (value) !->
 		value	= parseInt(value)
-		if value != @_state_instance.get_settings_bucket_size()
-			@_state_instance.set_settings_bucket_size(value)
+		if value != @state.get_settings_bucket_size()
+			@state.set_settings_bucket_size(value)
 			csw.functions.notify('Saved changes to bucket size setting', 'success', 'right', 3)
 	_help_settings_bucket_size : !->
 		content	= """
@@ -157,8 +157,8 @@ Polymer(
 		csw.functions.simple_modal(content)
 	_settings_experience_changed : (value) !->
 		value	= parseInt(value)
-		if value != @_state_instance.get_settings_experience()
-			@_state_instance.set_settings_experience(value)
+		if value != @state.get_settings_experience()
+			@state.set_settings_experience(value)
 			csw.functions.notify('Saved changes to user experience level setting', 'success', 'right', 3)
 	_help_settings_experience : !->
 		content	= """
@@ -166,8 +166,8 @@ Polymer(
 		"""
 		csw.functions.simple_modal(content)
 	_settings_help_changed : !->
-		if @settings_help != @_bool_to_string(@_state_instance.get_settings_help())
-			@_state_instance.set_settings_help(@settings_help == '1')
+		if @settings_help != @_bool_to_string(@state.get_settings_help())
+			@state.set_settings_help(@settings_help == '1')
 			csw.functions.notify('Saved changes to help setting', 'success', 'right', 3)
 	_help_settings_help : !->
 		content	= """
@@ -183,7 +183,7 @@ Polymer(
 			if JSON.stringify(@settings_ice_servers) == JSON.stringify(settings_ice_servers)
 				return
 			# TODO: Check if object structure is valid
-			@_state_instance.set_settings_ice_servers(settings_ice_servers)
+			@state.set_settings_ice_servers(settings_ice_servers)
 			csw.functions.notify('Saved changes to ICE servers setting', 'success', 'right', 3)
 		catch
 			csw.functions.notify('ICE servers syntax error, changes were not saved', 'error', 'right', 3)
@@ -199,8 +199,8 @@ Polymer(
 		csw.functions.simple_modal(content)
 	_settings_max_pending_segments_changed : (value) !->
 		value	= parseInt(value)
-		if value != @_state_instance.get_settings_max_pending_segments()
-			@_state_instance.set_settings_max_pending_segments(value)
+		if value != @state.get_settings_max_pending_segments()
+			@state.set_settings_max_pending_segments(value)
 			csw.functions.notify('Saved changes to max pending segments setting', 'success', 'right', 3)
 	_help_settings_max_pending_segments : !->
 		content	= """
@@ -210,8 +210,8 @@ Polymer(
 		csw.functions.simple_modal(content)
 	_settings_number_of_intermediate_nodes_changed : (value) !->
 		value	= parseInt(value)
-		if value != @_state_instance.get_settings_number_of_intermediate_nodes()
-			@_state_instance.set_settings_number_of_intermediate_nodes(value)
+		if value != @state.get_settings_number_of_intermediate_nodes()
+			@state.set_settings_number_of_intermediate_nodes(value)
 			csw.functions.notify('Saved changes to number of intermediate nodes setting', 'success', 'right', 3)
 	_help_settings_number_of_intermediate_nodes : !->
 		content	= """
@@ -222,8 +222,8 @@ Polymer(
 		csw.functions.simple_modal(content)
 	_settings_number_of_introduction_nodes_changed : (value) !->
 		value	= parseInt(value)
-		if value != @_state_instance.get_settings_number_of_introduction_nodes()
-			@_state_instance.set_settings_number_of_introduction_nodes(value)
+		if value != @state.get_settings_number_of_introduction_nodes()
+			@state.set_settings_number_of_introduction_nodes(value)
 			csw.functions.notify('Saved changes to number of introduction nodes setting', 'success', 'right', 3)
 	_help_settings_number_of_introduction_nodes : !->
 		content	= """
@@ -233,8 +233,8 @@ Polymer(
 		"""
 		csw.functions.simple_modal(content)
 	_settings_online_changed : !->
-		if @settings_online != @_bool_to_string(@_state_instance.get_settings_online())
-			@_state_instance.set_settings_online(@settings_online == '1')
+		if @settings_online != @_bool_to_string(@state.get_settings_online())
+			@state.set_settings_online(@settings_online == '1')
 			csw.functions.notify('Saved changes to online setting', 'success', 'right', 3)
 	_help_settings_online : !->
 		content	= """
@@ -243,8 +243,8 @@ Polymer(
 		csw.functions.simple_modal(content)
 	_settings_packets_per_second_changed : (value) !->
 		value	= parseInt(value)
-		if value != @_state_instance.get_settings_packets_per_second()
-			@_state_instance.set_settings_packets_per_second(value)
+		if value != @state.get_settings_packets_per_second()
+			@state.set_settings_packets_per_second(value)
 			csw.functions.notify('Saved changes to packets per second setting', 'success', 'right', 3)
 	_help_settings_packets_per_second : !->
 		content	= """
@@ -261,7 +261,7 @@ Polymer(
 			if JSON.stringify(@settings_reconnects_intervals) == JSON.stringify(settings_reconnects_intervals)
 				return
 			# TODO: Check if object structure is valid
-			@_state_instance.set_settings_reconnects_intervals(settings_reconnects_intervals)
+			@state.set_settings_reconnects_intervals(settings_reconnects_intervals)
 			csw.functions.notify('Saved changes to reconnects intervals setting', 'success', 'right', 3)
 		catch
 			csw.functions.notify('Reconnects intervals syntax error, changes were not saved', 'error', 'right', 3)
@@ -274,8 +274,8 @@ Polymer(
 		"""
 		csw.functions.simple_modal(content)
 	_settings_send_ctrl_enter_changed : !->
-		if @settings_send_ctrl_enter != @_bool_to_string(@_state_instance.get_settings_send_ctrl_enter())
-			@_state_instance.set_settings_send_ctrl_enter(@settings_send_ctrl_enter == '1')
+		if @settings_send_ctrl_enter != @_bool_to_string(@state.get_settings_send_ctrl_enter())
+			@state.set_settings_send_ctrl_enter(@settings_send_ctrl_enter == '1')
 			csw.functions.notify('Saved changes to send message with setting', 'success', 'right', 3)
 	_help_settings_send_ctrl_enter : !->
 		content	= """

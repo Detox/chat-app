@@ -30,7 +30,7 @@
         detoxChat.ready(function(){
           var id_encode, state, public_key;
           id_encode = detoxChat.id_encode;
-          state = this$._state_instance;
+          state = this$.state;
           function update_secrets(){
             var secrets, res$, i$, len$, secret;
             secrets = state.get_secrets();
@@ -58,8 +58,8 @@
         });
       },
       _nickname_blur: function(){
-        if (this.nickname !== this._state_instance.get_nickname()) {
-          this._state_instance.set_nickname(this.nickname);
+        if (this.nickname !== this.state.get_nickname()) {
+          this.state.set_nickname(this.nickname);
           csw.functions.notify('Nickname updated', 'success', 'right', 3);
         }
       },
@@ -79,7 +79,7 @@
           return;
         }
         secret = detoxChat.generate_secret().slice(0, this.new_secret_length);
-        this._state_instance.add_secret(secret, new_secret_name);
+        this.state.add_secret(secret, new_secret_name);
         csw.functions.notify('Secret added', 'success', 'right', 3);
         this.add_secret = false;
         this.new_secret_name = '';
@@ -106,7 +106,7 @@
             csw.functions.notify('Secret name is required', 'error', 'right', 3);
             return;
           }
-          this$._state_instance.set_secret_name(e.model.item.secret, new_secret_name);
+          this$.state.set_secret_name(e.model.item.secret, new_secret_name);
           csw.functions.notify('Secret name updated', 'success', 'right', 3);
         });
         modal.input.value = e.model.item.name;
@@ -115,7 +115,7 @@
       _del_secret: function(e){
         var this$ = this;
         csw.functions.confirm("<h3>Are you sure you want to delete secret <i>" + e.model.item.name + "</i>?</h3>", function(){
-          this$._state_instance.del_secret(e.model.item.secret);
+          this$.state.del_secret(e.model.item.secret);
         });
         e.preventDefault();
       }

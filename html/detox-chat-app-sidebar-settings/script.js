@@ -74,7 +74,7 @@
       },
       ready: function(){
         var state, this$ = this;
-        state = this._state_instance;
+        state = this.state;
         this.settings_announce = this._bool_to_string(state.get_settings_announce());
         this.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
         this.settings_bootstrap_nodes = state.get_settings_bootstrap_nodes();
@@ -127,8 +127,8 @@
         }
       },
       _settings_announce_changed: function(){
-        if (this.settings_announce !== this._bool_to_string(this._state_instance.get_settings_announce())) {
-          this._state_instance.set_settings_announce(this.settings_announce === '1');
+        if (this.settings_announce !== this._bool_to_string(this.state.get_settings_announce())) {
+          this.state.set_settings_announce(this.settings_announce === '1');
           csw.functions.notify('Saved changes to announcement setting', 'success', 'right', 3);
         }
       },
@@ -140,8 +140,8 @@
       _settings_block_contact_requests_for_changed: function(){
         var settings_block_contact_requests_for;
         settings_block_contact_requests_for = this.settings_block_contact_requests_for * 60 * 60 * 24;
-        if (settings_block_contact_requests_for !== this._state_instance.get_settings_block_contact_requests_for()) {
-          this._state_instance.set_settings_block_contact_requests_for(settings_block_contact_requests_for);
+        if (settings_block_contact_requests_for !== this.state.get_settings_block_contact_requests_for()) {
+          this.state.set_settings_block_contact_requests_for(settings_block_contact_requests_for);
           csw.functions.notify('Saved changes to block contacts request for setting', 'success', 'right', 3);
         }
       },
@@ -160,7 +160,7 @@
           if (JSON.stringify(this.settings_bootstrap_nodes) === JSON.stringify(settings_bootstrap_nodes)) {
             return;
           }
-          this._state_instance.set_settings_bootstrap_nodes(settings_bootstrap_nodes);
+          this.state.set_settings_bootstrap_nodes(settings_bootstrap_nodes);
           csw.functions.notify('Saved changes to bootstrap nodes setting', 'success', 'right', 3);
         } catch (e$) {
           e = e$;
@@ -174,8 +174,8 @@
       },
       _settings_bucket_size_changed: function(value){
         value = parseInt(value);
-        if (value !== this._state_instance.get_settings_bucket_size()) {
-          this._state_instance.set_settings_bucket_size(value);
+        if (value !== this.state.get_settings_bucket_size()) {
+          this.state.set_settings_bucket_size(value);
           csw.functions.notify('Saved changes to bucket size setting', 'success', 'right', 3);
         }
       },
@@ -186,8 +186,8 @@
       },
       _settings_experience_changed: function(value){
         value = parseInt(value);
-        if (value !== this._state_instance.get_settings_experience()) {
-          this._state_instance.set_settings_experience(value);
+        if (value !== this.state.get_settings_experience()) {
+          this.state.set_settings_experience(value);
           csw.functions.notify('Saved changes to user experience level setting', 'success', 'right', 3);
         }
       },
@@ -197,8 +197,8 @@
         csw.functions.simple_modal(content);
       },
       _settings_help_changed: function(){
-        if (this.settings_help !== this._bool_to_string(this._state_instance.get_settings_help())) {
-          this._state_instance.set_settings_help(this.settings_help === '1');
+        if (this.settings_help !== this._bool_to_string(this.state.get_settings_help())) {
+          this.state.set_settings_help(this.settings_help === '1');
           csw.functions.notify('Saved changes to help setting', 'success', 'right', 3);
         }
       },
@@ -217,7 +217,7 @@
           if (JSON.stringify(this.settings_ice_servers) === JSON.stringify(settings_ice_servers)) {
             return;
           }
-          this._state_instance.set_settings_ice_servers(settings_ice_servers);
+          this.state.set_settings_ice_servers(settings_ice_servers);
           csw.functions.notify('Saved changes to ICE servers setting', 'success', 'right', 3);
         } catch (e$) {
           e = e$;
@@ -231,8 +231,8 @@
       },
       _settings_max_pending_segments_changed: function(value){
         value = parseInt(value);
-        if (value !== this._state_instance.get_settings_max_pending_segments()) {
-          this._state_instance.set_settings_max_pending_segments(value);
+        if (value !== this.state.get_settings_max_pending_segments()) {
+          this.state.set_settings_max_pending_segments(value);
           csw.functions.notify('Saved changes to max pending segments setting', 'success', 'right', 3);
         }
       },
@@ -243,8 +243,8 @@
       },
       _settings_number_of_intermediate_nodes_changed: function(value){
         value = parseInt(value);
-        if (value !== this._state_instance.get_settings_number_of_intermediate_nodes()) {
-          this._state_instance.set_settings_number_of_intermediate_nodes(value);
+        if (value !== this.state.get_settings_number_of_intermediate_nodes()) {
+          this.state.set_settings_number_of_intermediate_nodes(value);
           csw.functions.notify('Saved changes to number of intermediate nodes setting', 'success', 'right', 3);
         }
       },
@@ -255,8 +255,8 @@
       },
       _settings_number_of_introduction_nodes_changed: function(value){
         value = parseInt(value);
-        if (value !== this._state_instance.get_settings_number_of_introduction_nodes()) {
-          this._state_instance.set_settings_number_of_introduction_nodes(value);
+        if (value !== this.state.get_settings_number_of_introduction_nodes()) {
+          this.state.set_settings_number_of_introduction_nodes(value);
           csw.functions.notify('Saved changes to number of introduction nodes setting', 'success', 'right', 3);
         }
       },
@@ -266,8 +266,8 @@
         csw.functions.simple_modal(content);
       },
       _settings_online_changed: function(){
-        if (this.settings_online !== this._bool_to_string(this._state_instance.get_settings_online())) {
-          this._state_instance.set_settings_online(this.settings_online === '1');
+        if (this.settings_online !== this._bool_to_string(this.state.get_settings_online())) {
+          this.state.set_settings_online(this.settings_online === '1');
           csw.functions.notify('Saved changes to online setting', 'success', 'right', 3);
         }
       },
@@ -278,8 +278,8 @@
       },
       _settings_packets_per_second_changed: function(value){
         value = parseInt(value);
-        if (value !== this._state_instance.get_settings_packets_per_second()) {
-          this._state_instance.set_settings_packets_per_second(value);
+        if (value !== this.state.get_settings_packets_per_second()) {
+          this.state.set_settings_packets_per_second(value);
           csw.functions.notify('Saved changes to packets per second setting', 'success', 'right', 3);
         }
       },
@@ -298,7 +298,7 @@
           if (JSON.stringify(this.settings_reconnects_intervals) === JSON.stringify(settings_reconnects_intervals)) {
             return;
           }
-          this._state_instance.set_settings_reconnects_intervals(settings_reconnects_intervals);
+          this.state.set_settings_reconnects_intervals(settings_reconnects_intervals);
           csw.functions.notify('Saved changes to reconnects intervals setting', 'success', 'right', 3);
         } catch (e$) {
           e = e$;
@@ -311,8 +311,8 @@
         csw.functions.simple_modal(content);
       },
       _settings_send_ctrl_enter_changed: function(){
-        if (this.settings_send_ctrl_enter !== this._bool_to_string(this._state_instance.get_settings_send_ctrl_enter())) {
-          this._state_instance.set_settings_send_ctrl_enter(this.settings_send_ctrl_enter === '1');
+        if (this.settings_send_ctrl_enter !== this._bool_to_string(this.state.get_settings_send_ctrl_enter())) {
+          this.state.set_settings_send_ctrl_enter(this.settings_send_ctrl_enter === '1');
           csw.functions.notify('Saved changes to send message with setting', 'success', 'right', 3);
         }
       },

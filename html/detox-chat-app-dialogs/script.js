@@ -34,7 +34,7 @@
         are_arrays_equal = detoxUtils.are_arrays_equal;
         ArrayMap = detoxUtils.ArrayMap;
         text_messages = ArrayMap();
-        state = this._state_instance;
+        state = this.state;
         this.active_contact = !!state.get_ui_active_contact();
         this.send_ctrl_enter = state.get_settings_send_ctrl_enter();
         this._update_unread_messages();
@@ -111,13 +111,13 @@
       },
       _update_unread_messages: function(){
         var state;
-        state = this._state_instance;
+        state = this.state;
         this.unread_messages = !!state.get_contacts_with_unread_messages().filter(function(contact){
           return contact !== state.get_ui_active_contact();
         }).length;
       },
       _show_sidebar: function(){
-        this._state_instance.set_ui_sidebar_shown(true);
+        this.state.set_ui_sidebar_shown(true);
       },
       _send_placeholder: function(send_ctrl_enter){
         return 'Type you message here, Markdown (GFM) supported!\n' + (send_ctrl_enter ? 'Enter for new line, Ctrl+Enter for sending' : 'Shift+Enter for new line, Enter for sending');
@@ -129,7 +129,7 @@
           return;
         }
         this.text_message = '';
-        state = this._state_instance;
+        state = this.state;
         contact_id = state.get_ui_active_contact();
         state.add_contact_message(contact_id, false, +new Date, 0, text_message);
       },

@@ -12,14 +12,15 @@
         chatId: {
           type: String,
           value: 'detox-chat-app'
-        }
+        },
+        state: Object
       },
       created: function(){
-        this._state_instance = state.get_instance(this.chatId);
-        if (!this._state_instance.ready()) {
+        this.state = state.get_instance(this.chatId);
+        if (!this.state.ready()) {
           csw.functions.notify("Previous state was not found, new identity generated", 'warning', 'right', 60);
-          this._state_instance.set_seed(detoxChat.generate_seed());
-          this._state_instance.add_secret(detoxChat.generate_secret().slice(0, 4), 'Default secret');
+          this.state.set_seed(detoxChat.generate_seed());
+          this.state.add_secret(detoxChat.generate_secret().slice(0, 4), 'Default secret');
         }
       }
     };
@@ -35,7 +36,7 @@
         },
         ready: function(){
           var state, this$ = this;
-          state = this._state_instance;
+          state = this.state;
           this.advanced_user = state.get_settings_experience() >= state.EXPERIENCE_ADVANCED;
           this.developer = state.get_settings_experience() === state.EXPERIENCE_DEVELOPER;
           state.on('settings_experience_changed', function(experience){
@@ -52,8 +53,8 @@
         },
         ready: function(){
           var this$ = this;
-          this.help = this._state_instance.get_settings_help();
-          this._state_instance.on('settings_help_changed', function(help){
+          this.help = this.state.get_settings_help();
+          this.state.on('settings_help_changed', function(help){
             this$.help = help;
           });
         }

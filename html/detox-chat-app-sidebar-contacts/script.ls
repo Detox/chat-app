@@ -37,7 +37,7 @@ Polymer(
 	ready : !->
 		ArraySet	= detox-utils.ArraySet
 
-		state							= @_state_instance
+		state							= @state
 		@contacts						= state.get_contacts()
 		@online_contacts				= ArraySet(state.get_online_contacts())
 		@contacts_requests				= state.get_contacts_requests()
@@ -95,15 +95,15 @@ Polymer(
 
 		try
 			[public_key, remote_secret]	= detox-chat.id_decode(@new_contact_id)
-			own_public_key				= detox-crypto.create_keypair(@_state_instance.get_seed()).ed25519.public
+			own_public_key				= detox-crypto.create_keypair(@state.get_seed()).ed25519.public
 			if detox-utils.are_arrays_equal(public_key, own_public_key)
 				csw.functions.notify('Adding yourself to contacts is not supported', 'error', 'right', 3)
 				return
-			existing_contact	= @_state_instance.get_contact(public_key)
+			existing_contact	= @state.get_contact(public_key)
 			if existing_contact
 				csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>#{existing_contact.nickname}</i>", 'warning', 'right', 3)
 				return
-			@_state_instance.add_contact(public_key, @new_contact_name, remote_secret)
+			@state.add_contact(public_key, @new_contact_name, remote_secret)
 			csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 5)
 			@add_contact		= false
 			@new_contact_id		= ''
@@ -135,23 +135,23 @@ Polymer(
 			"""
 		csw.functions.simple_modal(content)
 	_set_active_contact : (e) !->
-		@_state_instance
+		@state
 			..set_ui_active_contact(e.model.item.id)
 			..set_ui_sidebar_shown(false)
 	_rename_contact : (e) !->
 		modal	= csw.functions.prompt("New nickname:", (new_nickname) !~>
-			@_state_instance.set_contact_nickname(e.model.item.id, new_nickname)
+			@state.set_contact_nickname(e.model.item.id, new_nickname)
 			csw.functions.notify('Nickname updated', 'success', 'right', 3)
 		)
 		modal.input.value	= e.model.item.nickname
 		e.stopPropagation()
 	_del_contact : (e) !->
 		csw.functions.confirm("<h3>Are you sure you want to delete contact <i>#{e.model.item.nickname}</i>?</h3>", !~>
-			@_state_instance.del_contact(e.model.item.id)
+			@state.del_contact(e.model.item.id)
 		)
 		e.stopPropagation()
 	_accept_contact_request : (e) !->
-		state	= @_state_instance
+		state	= @state
 
 		item	= e.model.item
 		if @advanced_user

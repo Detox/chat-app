@@ -39,7 +39,7 @@
       },
       ready: function(){
         var state, this$ = this;
-        state = this._state_instance;
+        state = this.state;
         state.on('online_changed', function(new_online){
           this$.online = new_online;
         }).on('announced_changed', function(new_announced){

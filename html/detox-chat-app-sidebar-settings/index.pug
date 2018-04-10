@@ -7,13 +7,13 @@ dom-module(id="detox-chat-app-sidebar-settings")
 				detox-chat-icon-button(icon="question" tooltip="What these levels mean?" hidden="[[!help]]"): button(type="button" on-click="_help_settings_experience")
 			csw-group
 				csw-label-button(value="{{settings_experience}}"): label
-					input(type="radio" value="0")
+					input(type="radio" value="[[state.EXPERIENCE_REGULAR]]")
 					| Regular
 				csw-label-button: label
-					input(type="radio" value="1")
+					input(type="radio" value="[[state.EXPERIENCE_ADVANCED]]")
 					| Advanced
 				csw-label-button: label
-					input(type="radio" value="2")
+					input(type="radio" value="[[state.EXPERIENCE_DEVELOPER]]")
 					| Developer
 			label
 				div Send message with:

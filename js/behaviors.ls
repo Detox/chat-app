@@ -9,12 +9,13 @@ function Wrapper (detox-chat, state)
 			chat-id	:
 				type	: String
 				value	: 'detox-chat-app'
+			state	: Object
 		created : !->
-			@_state_instance	= state.get_instance(@chat-id)
-			if !@_state_instance.ready()
+			@state	= state.get_instance(@chat-id)
+			if !@state.ready()
 				csw.functions.notify("Previous state was not found, new identity generated", 'warning', 'right', 60)
-				@_state_instance.set_seed(detox-chat.generate_seed())
-				@_state_instance.add_secret(detox-chat.generate_secret().slice(0, 4), 'Default secret')
+				@state.set_seed(detox-chat.generate_seed())
+				@state.add_secret(detox-chat.generate_secret().slice(0, 4), 'Default secret')
 	experience_level = [
 		state_instance
 		advanced_user	:
@@ -24,7 +25,7 @@ function Wrapper (detox-chat, state)
 			type	: Boolean
 			value	: false
 		ready : !->
-			state			= @_state_instance
+			state			= @state
 			@advanced_user	= state.get_settings_experience() >= state.EXPERIENCE_ADVANCED
 			@developer		= state.get_settings_experience() == state.EXPERIENCE_DEVELOPER
 			state
@@ -39,8 +40,8 @@ function Wrapper (detox-chat, state)
 		properties	:
 			help	: Boolean
 		ready : !->
-			@help	= @_state_instance.get_settings_help()
-			@_state_instance.on('settings_help_changed', (@help) !~>)
+			@help	= @state.get_settings_help()
+			@state.on('settings_help_changed', (@help) !~>)
 	]
 	{state_instance, experience_level, help}
 

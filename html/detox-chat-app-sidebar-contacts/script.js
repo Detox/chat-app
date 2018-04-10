@@ -44,7 +44,7 @@
       ready: function(){
         var ArraySet, state, protocol, current_location, url, contact, contact_splitted, this$ = this;
         ArraySet = detoxUtils.ArraySet;
-        state = this._state_instance;
+        state = this.state;
         this.contacts = state.get_contacts();
         this.online_contacts = ArraySet(state.get_online_contacts());
         this.contacts_requests = state.get_contacts_requests();
@@ -97,17 +97,17 @@
           var ref$, public_key, remote_secret, own_public_key, existing_contact, e;
           try {
             ref$ = detoxChat.id_decode(this$.new_contact_id), public_key = ref$[0], remote_secret = ref$[1];
-            own_public_key = detoxCrypto.create_keypair(this$._state_instance.get_seed()).ed25519['public'];
+            own_public_key = detoxCrypto.create_keypair(this$.state.get_seed()).ed25519['public'];
             if (detoxUtils.are_arrays_equal(public_key, own_public_key)) {
               csw.functions.notify('Adding yourself to contacts is not supported', 'error', 'right', 3);
               return;
             }
-            existing_contact = this$._state_instance.get_contact(public_key);
+            existing_contact = this$.state.get_contact(public_key);
             if (existing_contact) {
               csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>" + existing_contact.nickname + "</i>", 'warning', 'right', 3);
               return;
             }
-            this$._state_instance.add_contact(public_key, this$.new_contact_name, remote_secret);
+            this$.state.add_contact(public_key, this$.new_contact_name, remote_secret);
             csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 5);
             this$.add_contact = false;
             this$.new_contact_id = '';
@@ -132,14 +132,14 @@
       },
       _set_active_contact: function(e){
         var x$;
-        x$ = this._state_instance;
+        x$ = this.state;
         x$.set_ui_active_contact(e.model.item.id);
         x$.set_ui_sidebar_shown(false);
       },
       _rename_contact: function(e){
         var modal, this$ = this;
         modal = csw.functions.prompt("New nickname:", function(new_nickname){
-          this$._state_instance.set_contact_nickname(e.model.item.id, new_nickname);
+          this$.state.set_contact_nickname(e.model.item.id, new_nickname);
           csw.functions.notify('Nickname updated', 'success', 'right', 3);
         });
         modal.input.value = e.model.item.nickname;
@@ -148,13 +148,13 @@
       _del_contact: function(e){
         var this$ = this;
         csw.functions.confirm("<h3>Are you sure you want to delete contact <i>" + e.model.item.nickname + "</i>?</h3>", function(){
-          this$._state_instance.del_contact(e.model.item.id);
+          this$.state.del_contact(e.model.item.id);
         });
         e.stopPropagation();
       },
       _accept_contact_request: function(e){
         var state, item, content, modal;
-        state = this._state_instance;
+        state = this.state;
         item = e.model.item;
         if (this.advanced_user) {
           content = "<h3>What do you want to do with contact request?</h3>\n<p>ID: <i>" + item.name + "</i></p>\n<p>Secret used: <i>" + item.secret_name + "</i></p>\n<csw-group>\n	<csw-button primary><button id=\"accept\">Accept</button></csw-button>\n	<csw-button><button id=\"reject\">Reject</button></csw-button>\n	<csw-button><button id=\"cancel\">Cancel</button></csw-button>\n</csw-group>";
