@@ -74,39 +74,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				..'version'						= 0
 				..'nickname'					= ''
 				..'seed'						= null
-				..'settings'					=
-					'announce'						: true
-					# Block request from contact we've already rejected for 30 days
-					'block_contact_requests_for'	: 30 * 24 * 60 * 60
-					'bootstrap_nodes'				: [
-						# TODO: This is just for demo purposes, in future must change to real bootstrap node(s)
-						{
-							'node_id'	: '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29'
-							'host'		: '127.0.0.1'
-							'port'		: 16882
-						}
-					]
-					'bucket_size'					: 2
-					'experience'					: State.EXPERIENCE_REGULAR
-					'help'							: true
-					'ice_servers'					: [
-						{urls: 'stun:stun.l.google.com:19302'}
-						{urls: 'stun:global.stun.twilio.com:3478?transport=udp'}
-					]
-					'max_pending_segments'			: 10
-					'number_of_intermediate_nodes'	: 3
-					'number_of_introduction_nodes'	: 3
-					'online'						: true
-					'packets_per_second'			: 5
-					# [reconnection_trial, time_before_next_attempt]
-					'reconnects_intervals'			: [
-						[5, 30]
-						[10, 60]
-						[15, 150]
-						[100, 300]
-						[Number.MAX_SAFE_INTEGER, 600]
-					]
-					'send_ctrl_enter'				: true
+				..'settings'					= JSON.parse(JSON.stringify(State.DEFAULT_SETTINGS))
 				..'contacts'					= [
 					# TODO: This is just for demo purposes
 					[
@@ -825,6 +793,41 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 	# For convenience, assign both on constructor and on instances
 	Object.assign(State, constants)
 	Object.assign(State::, constants)
+
+	# Default settings, potentially can be relatively easily customized
+	State.DEFAULT_SETTINGS	=
+		'announce'						: true
+		# Block request from contact we've already rejected for 30 days
+		'block_contact_requests_for'	: 30 * 24 * 60 * 60
+		'bootstrap_nodes'				: [
+			# TODO: This is just for demo purposes, in future must change to real bootstrap node(s)
+			{
+				'node_id'	: '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29'
+				'host'		: '127.0.0.1'
+				'port'		: 16882
+			}
+		]
+		'bucket_size'					: 2
+		'experience'					: State.EXPERIENCE_REGULAR
+		'help'							: true
+		'ice_servers'					: [
+			{urls: 'stun:stun.l.google.com:19302'}
+			{urls: 'stun:global.stun.twilio.com:3478?transport=udp'}
+		]
+		'max_pending_segments'			: 10
+		'number_of_intermediate_nodes'	: 3
+		'number_of_introduction_nodes'	: 3
+		'online'						: true
+		'packets_per_second'			: 5
+		# [reconnection_trial, time_before_next_attempt]
+		'reconnects_intervals'			: [
+			[5, 30]
+			[10, 60]
+			[15, 150]
+			[100, 300]
+			[Number.MAX_SAFE_INTEGER, 600]
+		]
+		'send_ctrl_enter'				: true
 
 	/**
 	 * Remote secret is used by us to connect to remote friend.

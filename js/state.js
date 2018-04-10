@@ -78,32 +78,7 @@
         x$['version'] = 0;
         x$['nickname'] = '';
         x$['seed'] = null;
-        x$['settings'] = {
-          'announce': true,
-          'block_contact_requests_for': 30 * 24 * 60 * 60,
-          'bootstrap_nodes': [{
-            'node_id': '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29',
-            'host': '127.0.0.1',
-            'port': 16882
-          }],
-          'bucket_size': 2,
-          'experience': State.EXPERIENCE_REGULAR,
-          'help': true,
-          'ice_servers': [
-            {
-              urls: 'stun:stun.l.google.com:19302'
-            }, {
-              urls: 'stun:global.stun.twilio.com:3478?transport=udp'
-            }
-          ],
-          'max_pending_segments': 10,
-          'number_of_intermediate_nodes': 3,
-          'number_of_introduction_nodes': 3,
-          'online': true,
-          'packets_per_second': 5,
-          'reconnects_intervals': [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]],
-          'send_ctrl_enter': true
-        };
+        x$['settings'] = JSON.parse(JSON.stringify(State.DEFAULT_SETTINGS));
         x$['contacts'] = [[[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125], 'Fake contact #1', 0, 0, null, null, null], [[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 126], 'Fake contact #2', 0, 0, null, null, null]];
         x$['contacts_requests'] = [];
         x$['contacts_requests_blocked'] = [];
@@ -962,6 +937,32 @@
     };
     Object.assign(State, constants);
     Object.assign(State.prototype, constants);
+    State.DEFAULT_SETTINGS = {
+      'announce': true,
+      'block_contact_requests_for': 30 * 24 * 60 * 60,
+      'bootstrap_nodes': [{
+        'node_id': '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29',
+        'host': '127.0.0.1',
+        'port': 16882
+      }],
+      'bucket_size': 2,
+      'experience': State.EXPERIENCE_REGULAR,
+      'help': true,
+      'ice_servers': [
+        {
+          urls: 'stun:stun.l.google.com:19302'
+        }, {
+          urls: 'stun:global.stun.twilio.com:3478?transport=udp'
+        }
+      ],
+      'max_pending_segments': 10,
+      'number_of_intermediate_nodes': 3,
+      'number_of_introduction_nodes': 3,
+      'online': true,
+      'packets_per_second': 5,
+      'reconnects_intervals': [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]],
+      'send_ctrl_enter': true
+    };
     /**
      * Remote secret is used by us to connect to remote friend.
      * Local secret is used by remote friend to connect to us.
