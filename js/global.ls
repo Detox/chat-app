@@ -11,15 +11,8 @@ Polymer.setPassiveTouchGestures(true)
  * Register service worker
  */
 if ('serviceWorker' of navigator) && window.detox_sw_path
-	# Wait for icons font to load, since it is one of the last things loading and we don't want to get it from the network twice
-	# TODO: Edge doesn't support this yet, remove check when it does
-	if document.fonts
-		document.fonts.load('bold 0 "Font Awesome 5 Free"').then(register_sw)
-	else
-		register_sw()
-!function register_sw
 	([detox-chat]) <-! require(['@detox/chat']).then
-	# Make sure WebAssembly stuff are loaded too
+	# Make sure WebAssembly stuff are loaded
 	<~! detox-chat.ready
 	navigator.serviceWorker.register(detox_sw_path)
 		.then (registration) !->

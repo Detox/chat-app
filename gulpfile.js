@@ -134,57 +134,46 @@
       fs.copyFileSync(image_path, DESTINATION + "/" + base_name);
     }
     fs.writeFileSync(DESTINATION + "/" + BUNDLED_CSS, css);
-  }).task('bundle-html', function(callback){
-    var command;
-    command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + DESTINATION + "/" + BUNDLED_HTML + " " + SOURCE_HTML;
-    exec(command, function(error, stdout, stderr){
-      var html, fonts, i$, len$, font, font_path, base_name, hash, r, used_fa_icons, m, unused_fa_icons, definition, icon, glyph, js;
-      if (stdout) {
-        console.log(stdout);
-      }
-      if (stderr) {
-        console.error(stderr);
-      }
-      html = fs.readFileSync(DESTINATION + "/" + BUNDLED_HTML, {
-        encoding: 'utf8'
-      });
-      html = html.replace(new RegExp('@font-face[^}]+(' + BLACKLISTED_FONTS.join('|') + ')[^}]+}', 'g'), '');
-      fonts = html.match(FONTS_REGEXP);
-      for (i$ = 0, len$ = fonts.length; i$ < len$; ++i$) {
-        font = fonts[i$];
-        font_path = font.substring(8, font.length - 2).split('?')[0];
-        base_name = font_path.split('/').pop();
-        hash = file_hash(font_path);
-        html = html.replace(font, "url(" + base_name + "?" + hash + ")");
-        fs.copyFileSync(font_path, DESTINATION + "/" + base_name);
-      }
-      r = /icon="([^"]+)"/g;
-      used_fa_icons = new Set;
-      while (m = r.exec(html)) {
-        used_fa_icons.add(m[1]);
-      }
-      unused_fa_icons = [];
-      r = /\.fa-([^:]+):before{content:"([^"]+)"}/g;
-      while (m = r.exec(html)) {
-        definition = m[0], icon = m[1], glyph = m[2];
-        if (!used_fa_icons.has(icon)) {
-          unused_fa_icons.push(definition);
-        }
-      }
-      for (i$ = 0, len$ = unused_fa_icons.length; i$ < len$; ++i$) {
-        definition = unused_fa_icons[i$];
-        html = html.replace(definition, '');
-      }
-      js = html.match(SCRIPTS_REGEXP).map(function(string){
-        string = string.trim();
-        return string.substring(8, string.length - 9);
-      }).join('');
-      js = js_shell(js);
-      html = html.replace(/assetpath=".+?"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
-      fs.writeFileSync(DESTINATION + "/" + BUNDLED_HTML, html);
-      fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
-      callback(error);
+  }).task('bundle-html', ['generate-html'], function(){
+    var html, fonts, i$, len$, font, font_path, base_name, hash, r, used_fa_icons, m, unused_fa_icons, definition, icon, glyph, js;
+    html = fs.readFileSync(DESTINATION + "/" + BUNDLED_HTML, {
+      encoding: 'utf8'
     });
+    html = html.replace(new RegExp('@font-face[^}]+(' + BLACKLISTED_FONTS.join('|') + ')[^}]+}', 'g'), '');
+    fonts = html.match(FONTS_REGEXP);
+    for (i$ = 0, len$ = fonts.length; i$ < len$; ++i$) {
+      font = fonts[i$];
+      font_path = font.substring(8, font.length - 2).split('?')[0];
+      base_name = font_path.split('/').pop();
+      hash = file_hash(font_path);
+      html = html.replace(font, "url(" + base_name + "?" + hash + ")");
+      fs.copyFileSync(font_path, DESTINATION + "/" + base_name);
+    }
+    r = /icon="([^"]+)"/g;
+    used_fa_icons = new Set;
+    while (m = r.exec(html)) {
+      used_fa_icons.add(m[1]);
+    }
+    unused_fa_icons = [];
+    r = /\.fa-([^:]+):before{content:"([^"]+)"}/g;
+    while (m = r.exec(html)) {
+      definition = m[0], icon = m[1], glyph = m[2];
+      if (!used_fa_icons.has(icon)) {
+        unused_fa_icons.push(definition);
+      }
+    }
+    for (i$ = 0, len$ = unused_fa_icons.length; i$ < len$; ++i$) {
+      definition = unused_fa_icons[i$];
+      html = html.replace(definition, '');
+    }
+    js = html.match(SCRIPTS_REGEXP).map(function(string){
+      string = string.trim();
+      return string.substring(8, string.length - 9);
+    }).join('');
+    js = js_shell(js);
+    html = html.replace(/assetpath=".+?"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
+    fs.writeFileSync(DESTINATION + "/" + BUNDLED_HTML, html);
+    fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
   }).task('bundle-js', ['bundle-html'], function(){
     var config;
     config = Object.assign({
@@ -240,6 +229,18 @@
     fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
   }).task('default', function(callback){
     runSequence('clean', 'main-build', 'bundle-clean', 'minify-service-worker', 'bundle-clean', 'update-index', callback);
+  }).task('generate-html', function(callback){
+    var command;
+    command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html " + DESTINATION + "/" + BUNDLED_HTML + " " + SOURCE_HTML;
+    exec(command, function(error, stdout, stderr){
+      if (stdout) {
+        console.log(stdout);
+      }
+      if (stderr) {
+        console.error(stderr);
+      }
+      callback(error);
+    });
   }).task('generate-service-worker', function(){
     return workboxBuild.generateSW({
       cacheId: 'detox-chat-app',
@@ -271,11 +272,19 @@
     });
     fs.writeFileSync(DESTINATION + "/" + MINIFIED_CSS, minify_css(css));
   }).task('minify-font', ['bundle-html'], function(callback){
-    var font, html, command;
+    var font, css, command;
     font = __dirname + ("/" + DESTINATION + "/" + FA_FONT);
-    html = __dirname + ("/" + DESTINATION + "/" + BUNDLED_HTML);
-    command = "docker run --rm -v " + font + ":/font.woff2 -v " + html + ":/style.css nazarpc/subset-font";
+    css = __dirname + ("/" + DESTINATION + "/" + BUNDLED_HTML);
+    command = "docker run --rm -v " + font + ":/font.woff2 -v " + css + ":/style.css nazarpc/subset-font";
     exec(command, function(error, stdout, stderr){
+      var html, r, hash;
+      html = fs.readFileSync(DESTINATION + "/" + BUNDLED_HTML, {
+        encoding: 'utf8'
+      });
+      r = new RegExp(FA_FONT + "\\?\\w+");
+      hash = file_hash(font);
+      html = html.replace(r, FA_FONT + "?" + hash);
+      fs.writeFileSync(DESTINATION + "/" + BUNDLED_HTML, html);
       stdout = stdout.replace("[INFO] Subsetting font '/tmp/font.ttf' with ebook '/tmp/characters' into new font '/tmp/font.ttf', containing the following glyphs:\n", '').replace('Processing /tmp/font.ttf => /tmp/font.woff2\n', '').trim();
       stderr = stderr.replace(/^The glyph named .+ is mapped to.+\n/gm, '').replace(/^But its name indicates it should be mapped to.+\n/gm, '').replace('Traceback (most recent call last):\n  File "/usr/bin/glyphIgo", line 1353, in <module>\n    main()\n  File "/usr/bin/glyphIgo", line 1344, in main\n    returnCode = GlyphIgo(args).execute()\n  File "/usr/bin/glyphIgo", line 1333, in execute\n    returnCode = self.__do_subset()\n  File "/usr/bin/glyphIgo", line 1307, in __do_subset\n    self.__print_char_list(found_char_list)\n  File "/usr/bin/glyphIgo", line 992, in __print_char_list\n    print "\'%s\'\\t%s\\t%s\\t%s" % (escape(c[0]), decCodePoint, hexCodePoint, name)\nUnicodeEncodeError: \'ascii\' codec can\'t encode character u\'\\uf00c\' in position 1: ordinal not in range(128)', '').replace(/^Compressed \d+ to \d+\.\n/gm, '').trim();
       if (stdout) {
@@ -286,7 +295,7 @@
       }
       callback();
     });
-  }).task('minify-html', ['bundle-html'], function(){
+  }).task('minify-html', ['bundle-html', 'minify-font'], function(){
     return gulp.src(DESTINATION + "/" + BUNDLED_HTML).pipe(gulpHtmlmin({
       decodeEntities: true,
       minifyCSS: minify_css,

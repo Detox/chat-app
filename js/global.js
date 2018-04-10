@@ -14,13 +14,6 @@
    * Register service worker
    */
   if ('serviceWorker' in navigator && window.detox_sw_path) {
-    if (document.fonts) {
-      document.fonts.load('bold 0 "Font Awesome 5 Free"').then(register_sw);
-    } else {
-      register_sw();
-    }
-  }
-  function register_sw(){
     require(['@detox/chat']).then(function(arg$){
       var detoxChat, this$ = this;
       detoxChat = arg$[0];

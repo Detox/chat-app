@@ -215,54 +215,46 @@ gulp
 			fs.copyFileSync(image_path, "#DESTINATION/#base_name")
 		fs.writeFileSync("#DESTINATION/#BUNDLED_CSS", css)
 	)
-	.task('bundle-html', (callback) !->
-		command		= "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html #DESTINATION/#BUNDLED_HTML #SOURCE_HTML"
-		exec(command, (error, stdout, stderr) !->
-			if stdout
-				console.log(stdout)
-			if stderr
-				console.error(stderr)
-			html	= fs.readFileSync("#DESTINATION/#BUNDLED_HTML", {encoding: 'utf8'})
-			# Hack: we know for sure that these files fonts will not be used, so lets remove unused fonts from stylesheet entirely
-			html	= html.replace(new RegExp('@font-face[^}]+(' + BLACKLISTED_FONTS.join('|') + ')[^}]+}', 'g'), '')
-			fonts	= html.match(FONTS_REGEXP)
-			for font in fonts
-				font_path	= font.substring(8, font.length - 2).split('?')[0]
-				base_name	= font_path.split('/').pop()
-				hash		= file_hash(font_path)
-				html		= html.replace(font, "url(#base_name?#hash)")
-				fs.copyFileSync(font_path, "#DESTINATION/#base_name")
-			r				= /icon="([^"]+)"/g
-			used_fa_icons	= new Set
-			while m = r.exec(html)
-				used_fa_icons.add(m[1])
-			unused_fa_icons	= []
-			r				= /\.fa-([^:]+):before{content:"([^"]+)"}/g
-			while m = r.exec(html)
-				[definition, icon, glyph]	= m
-				if !used_fa_icons.has(icon)
-					unused_fa_icons.push(definition)
-			# Remove unused icons definitions
-			for definition in unused_fa_icons
-				html	= html.replace(definition, '')
-			js = html.match(SCRIPTS_REGEXP)
-				.map (string) ->
-					string	= string.trim()
-					string.substring(8, string.length - 9) # Remove script tag
-				.join('')
-			js		= js_shell(js)
-			html	= html
-				# Useless (in our case) arguments
-				.replace(/assetpath=".+?"/g, '')
-				# These 2 files are referenced, but do not actually exist (because Polymer uses crappy practices for its packages)
-				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '')
-				.replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '')
-				# Remove all <script> tags, we'll have them included separately
-				.replace(SCRIPTS_REGEXP, '')
-			fs.writeFileSync("#DESTINATION/#BUNDLED_HTML", html)
-			fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
-			callback(error)
-		)
+	.task('bundle-html', ['generate-html'], !->
+		html	= fs.readFileSync("#DESTINATION/#BUNDLED_HTML", {encoding: 'utf8'})
+		# Hack: we know for sure that these files fonts will not be used, so lets remove unused fonts from stylesheet entirely
+		html	= html.replace(new RegExp('@font-face[^}]+(' + BLACKLISTED_FONTS.join('|') + ')[^}]+}', 'g'), '')
+		fonts	= html.match(FONTS_REGEXP)
+		for font in fonts
+			font_path	= font.substring(8, font.length - 2).split('?')[0]
+			base_name	= font_path.split('/').pop()
+			hash		= file_hash(font_path)
+			html		= html.replace(font, "url(#base_name?#hash)")
+			fs.copyFileSync(font_path, "#DESTINATION/#base_name")
+		r				= /icon="([^"]+)"/g
+		used_fa_icons	= new Set
+		while m = r.exec(html)
+			used_fa_icons.add(m[1])
+		unused_fa_icons	= []
+		r				= /\.fa-([^:]+):before{content:"([^"]+)"}/g
+		while m = r.exec(html)
+			[definition, icon, glyph]	= m
+			if !used_fa_icons.has(icon)
+				unused_fa_icons.push(definition)
+		# Remove unused icons definitions
+		for definition in unused_fa_icons
+			html	= html.replace(definition, '')
+		js = html.match(SCRIPTS_REGEXP)
+			.map (string) ->
+				string	= string.trim()
+				string.substring(8, string.length - 9) # Remove script tag
+			.join('')
+		js		= js_shell(js)
+		html	= html
+			# Useless (in our case) arguments
+			.replace(/assetpath=".+?"/g, '')
+			# These 2 files are referenced, but do not actually exist (because Polymer uses crappy practices for its packages)
+			.replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '')
+			.replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '')
+			# Remove all <script> tags, we'll have them included separately
+			.replace(SCRIPTS_REGEXP, '')
+		fs.writeFileSync("#DESTINATION/#BUNDLED_HTML", html)
+		fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
 	)
 	.task('bundle-js', ['bundle-html'], ->
 		config	= Object.assign({
@@ -315,6 +307,16 @@ gulp
 	.task('default', (callback) !->
 		run-sequence('clean', 'main-build', 'bundle-clean', 'minify-service-worker', 'bundle-clean', 'update-index', callback)
 	)
+	.task('generate-html', (callback) !->
+		command		= "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html #DESTINATION/#BUNDLED_HTML #SOURCE_HTML"
+		exec(command, (error, stdout, stderr) !->
+			if stdout
+				console.log(stdout)
+			if stderr
+				console.error(stderr)
+			callback(error)
+		)
+	)
 	.task('generate-service-worker', ->
 		workbox-build.generateSW(
 			cacheId						: 'detox-chat-app'
@@ -344,10 +346,17 @@ gulp
 		fs.writeFileSync("#DESTINATION/#MINIFIED_CSS", minify_css(css))
 	)
 	.task('minify-font', ['bundle-html'], (callback) !->
-		font		= __dirname + "/#DESTINATION/#FA_FONT"
-		html		= __dirname + "/#DESTINATION/#BUNDLED_HTML"
-		command		= "docker run --rm -v #font:/font.woff2 -v #html:/style.css nazarpc/subset-font"
+		font	= __dirname + "/#DESTINATION/#FA_FONT"
+		css		= __dirname + "/#DESTINATION/#BUNDLED_HTML"
+		command	= "docker run --rm -v #font:/font.woff2 -v #css:/style.css nazarpc/subset-font"
 		exec(command, (error, stdout, stderr) !->
+			# We need to update hash for this font, since file contents have changed
+			html	= fs.readFileSync("#DESTINATION/#BUNDLED_HTML", {encoding: 'utf8'})
+			r		= new RegExp("#FA_FONT\\?\\w+")
+			hash	= file_hash(font)
+			html	= html
+				.replace(r, "#FA_FONT?#hash")
+			fs.writeFileSync("#DESTINATION/#BUNDLED_HTML", html)
 			# Remove some known harmless output
 			stdout	= stdout
 				.replace("[INFO] Subsetting font '/tmp/font.ttf' with ebook '/tmp/characters' into new font '/tmp/font.ttf', containing the following glyphs:\n", '')
@@ -368,7 +377,7 @@ gulp
 			callback()
 		)
 	)
-	.task('minify-html', ['bundle-html'], ->
+	.task('minify-html', ['bundle-html', 'minify-font'], ->
 		gulp.src("#DESTINATION/#BUNDLED_HTML")
 			.pipe(gulp-htmlmin(
 				decodeEntities	: true
