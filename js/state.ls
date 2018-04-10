@@ -35,14 +35,16 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 	/**
 	 * @constructor
 	 */
-	!function State (name, initial_state)
+	!function State (chat_id, initial_state)
 		if !(@ instanceof State)
-			return new State(name, initial_state)
+			return new State(chat_id, initial_state)
 		async-eventer.call(@)
 
+		@_chat_id	= chat_id
 		if !initial_state
-			# TODO: localStorage for simplicity, will likely change to IndexedDB in future
-			initial_state	= localStorage.getItem(name)
+			# Synchronous localStorage for contacts, settings and other data
+			# TODO: messages and contacts secrets history archive in IndexedDB
+			initial_state	= localStorage.getItem(chat_id)
 			initial_state	=
 				if initial_state
 					JSON.parse(initial_state)
@@ -161,6 +163,22 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			if callback
 				@_ready.then(callback)
 			Boolean(@_state['seed'])
+		_save_state : !->
+			prepared_state	= {}
+			for key, value of @_state
+				switch key
+					case 'seed'
+						prepared_state[key]	= Array.from(value)
+					case 'contacts', 'contacts_requests', 'contacts_requests_blocked', 'secrets'
+						prepared_state[key]	=
+							for item in Array.from(value.values())
+								contents	= item['array']
+								contents[0]	= Array.from(contents[0])
+								contents
+					default
+						prepared_state[key]	= value
+			# TODO: Unlock when saving messages is added
+			#localStorage.setItem(@_chat_id, JSON.stringify(prepared_state))
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
@@ -176,6 +194,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				@_ready_resolve()
 				delete @_ready_resolve
 			@'fire'('seed_changed', new_seed, old_seed)
+			@_save_state()
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
@@ -189,6 +208,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			new_nickname		= String(nickname)
 			@_state['nickname']	= new_nickname
 			@'fire'('nickname_changed', new_nickname, old_nickname)
+			@_save_state()
 		/**
 		 * @return {boolean} `true` if connected to network
 		 */
@@ -272,10 +292,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_local_state.ui.active_contact	= new_active_contact
 			@'fire'('ui_active_contact_changed', new_active_contact, old_active_contact)
 			if new_active_contact
+				@_update_contact_last_read_message(new_active_contact)
 				@_update_contact_with_unread_messages(new_active_contact)
-			if old_active_contact
-				@_update_contact_last_read_message(old_active_contact)
-				@_update_contact_with_unread_messages(old_active_contact)
 		/**
 		 * @return {boolean}
 		 */
@@ -301,6 +319,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			new_announce					= !!announce
 			@_state['settings']['announce']	= new_announce
 			@'fire'('settings_announce_changed', new_announce, old_announce)
+			@_save_state()
 		/**
 		 * @return {number} In seconds
 		 */
@@ -313,6 +332,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_block_contact_requests_for						= @_state['settings']['block_contact_requests_for']
 			@_state['settings']['block_contact_requests_for']	= parseInt(block_contact_requests_for)
 			@'fire'('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for)
+			@_save_state()
 		/**
 		 * @return {!Array<!Object>}
 		 */
@@ -325,6 +345,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_bootstrap_nodes						= @_state['settings']['bootstrap_nodes']
 			@_state['settings']['bootstrap_nodes']	= bootstrap_nodes
 			@'fire'('settings_bootstrap_nodes_changed', bootstrap_nodes, old_bootstrap_nodes)
+			@_save_state()
 		/**
 		 * @return {number}
 		 */
@@ -337,6 +358,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_bucket_size						= @_state['bucket_size']
 			@_state['settings']['bucket_size']	= parseInt(bucket_size)
 			@'fire'('settings_bucket_size_changed', bucket_size, old_bucket_size)
+			@_save_state()
 		/**
 		 * @return {number} One of State.EXPERIENCE_* constants
 		 */
@@ -349,6 +371,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_experience						= @_state['experience']
 			@_state['settings']['experience']	= parseInt(experience)
 			@'fire'('settings_experience_changed', experience, old_experience)
+			@_save_state()
 		/**
 		 * @return {boolean}
 		 */
@@ -362,6 +385,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			new_help					= !!help
 			@_state['settings']['help']	= new_help
 			@'fire'('settings_help_changed', new_help, old_help)
+			@_save_state()
 		/**
 		 * @return {!Array<!Object>}
 		 */
@@ -374,6 +398,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_ice_servers						= @_state['settings']['ice_servers']
 			@_state['settings']['ice_servers']	= ice_servers
 			@'fire'('settings_ice_servers_changed', ice_servers, old_ice_servers)
+			@_save_state()
 		/**
 		 * @return {number}
 		 */
@@ -386,6 +411,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_max_pending_segments					= @_state['max_pending_segments']
 			@_state['settings']['max_pending_segments']	= parseInt(max_pending_segments)
 			@'fire'('settings_max_pending_segments_changed', max_pending_segments, old_max_pending_segments)
+			@_save_state()
 		/**
 		 * @return {number}
 		 */
@@ -398,6 +424,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_number_of_intermediate_nodes					= @_state['number_of_intermediate_nodes']
 			@_state['settings']['number_of_intermediate_nodes']	= parseInt(number_of_intermediate_nodes)
 			@'fire'('settings_number_of_intermediate_nodes_changed', number_of_intermediate_nodes, old_number_of_intermediate_nodes)
+			@_save_state()
 		/**
 		 * @return {number}
 		 */
@@ -410,6 +437,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_number_of_introduction_nodes					= @_state['number_of_introduction_nodes']
 			@_state['settings']['number_of_introduction_nodes']	= parseInt(number_of_introduction_nodes)
 			@'fire'('settings_number_of_introduction_nodes_changed', number_of_introduction_nodes, old_number_of_introduction_nodes)
+			@_save_state()
 		/**
 		 * @return {boolean} `false` if application works completely offline
 		 */
@@ -423,6 +451,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			new_online						= !!online
 			@_state['settings']['online']	= new_online
 			@'fire'('settings_online_changed', new_online, old_online)
+			@_save_state()
 		/**
 		 * @return {number}
 		 */
@@ -435,6 +464,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_packets_per_second						= @_state['packets_per_second']
 			@_state['settings']['packets_per_second']	= parseInt(packets_per_second)
 			@'fire'('settings_packets_per_second_changed', packets_per_second, old_packets_per_second)
+			@_save_state()
 		/**
 		 * @return {!Array<!Array<number>>}
 		 */
@@ -447,6 +477,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_reconnects_intervals					= @_state['reconnects_intervals']
 			@_state['settings']['reconnects_intervals']	= reconnects_intervals
 			@'fire'('settings_reconnects_intervals_changed', reconnects_intervals, old_reconnects_intervals)
+			@_save_state()
 		/**
 		 * @return {boolean} `true` if message should be sent with Ctrl+Enter and `false` if with just Enter
 		 */
@@ -460,6 +491,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			new_send_ctrl_enter						= !!send_ctrl_enter
 			@_state['settings']['send_ctrl_enter']	= new_send_ctrl_enter
 			@'fire'('settings_send_ctrl_enter_changed', new_send_ctrl_enter, old_send_ctrl_enter)
+			@_save_state()
 		/**
 		 * @return {!Array<!Contact>}
 		 */
@@ -495,6 +527,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_added', new_contact)
 			@'fire'('contacts_changed')
+			@_save_state()
 		/**
 		 * @param {!Uint8Array} contact_id
 		 */
@@ -514,6 +547,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_state['contacts'].set(contact_id, new_contact)
 			@'fire'('contact_changed', new_contact, old_contact)
 			@'fire'('contacts_changed')
+			@_save_state()
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {string}		nickname
@@ -580,6 +614,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_state['contacts'].delete(contact_id)
 			@'fire'('contact_deleted', old_contact)
 			@'fire'('contacts_changed')
+			@_save_state()
 		/**
 		 * @return {!Array<!ContactRequest>}
 		 */
@@ -601,6 +636,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_state['contacts_requests'].set(contact_id, new_contact_request)
 			@'fire'('contact_request_added', new_contact_request)
 			@'fire'('contacts_requests_changed')
+			@_save_state()
 		/**
 		 * @param {!Uint8Array} contact_id
 		 *
@@ -620,6 +656,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_state['contacts_requests_blocked'].set(contact_id, ContactRequestBlocked([contact_id, blocked_until]))
 			@'fire'('contact_request_deleted', old_contact_request)
 			@'fire'('contacts_requests_changed')
+			@_save_state()
 		/**
 		 * @return {!Array<!ContactRequestBlocked>}
 		 */
@@ -752,6 +789,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_state['secrets'].set(new_secret['secret'], new_secret)
 			@'fire'('secret_added', new_secret)
 			@'fire'('secrets_changed')
+			@_save_state()
 		/**
 		 * @param {!Uint8Array}	secret
 		 * @param {string}		name
@@ -762,12 +800,14 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			new_secret['name']	= name
 			@_state['secrets'].set(secret, new_secret)
 			@'fire'('secrets_changed')
+			@_save_state()
 		/**
 		 * @param {!Array<!Secret>} secrets
 		 */
 		'set_secrets' : (secrets) !->
 			@_state['secrets']	= secrets
 			@'fire'('secrets_changed')
+			@_save_state()
 		/**
 		 * @param {!Uint8Array}	secret
 		 */
@@ -778,6 +818,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_state['secrets'].delete(secret)
 			@'fire'('secret_deleted', old_secret)
 			@'fire'('secrets_changed')
+			@_save_state()
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)
 	Object.defineProperty(State::, 'constructor', {value: State})
@@ -848,15 +889,15 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		'Secret'				: Secret
 		'State'					: State
 		/**
-		 * @param {string}	name
+		 * @param {string}	chat_id
 		 * @param {!Object}	initial_state
 		 *
 		 * @return {!detoxState}
 		 */
-		'get_instance'			: (name, initial_state) ->
-			if !(name of global_state)
-				global_state[name]	= State(initial_state)
-			global_state[name]
+		'get_instance'			: (chat_id, initial_state) ->
+			if !(chat_id of global_state)
+				global_state[chat_id]	= State(chat_id, initial_state)
+			global_state[chat_id]
 	}
 
 define(['@detox/chat', '@detox/utils', 'async-eventer'], Wrapper)

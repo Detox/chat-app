@@ -44,14 +44,15 @@
     /**
      * @constructor
      */
-    function State(name, initial_state){
+    function State(chat_id, initial_state){
       var x$, contact, current_date, secret, i$, ref$, len$, contact_id, this$ = this;
       if (!(this instanceof State)) {
-        return new State(name, initial_state);
+        return new State(chat_id, initial_state);
       }
       asyncEventer.call(this);
+      this._chat_id = chat_id;
       if (!initial_state) {
-        initial_state = localStorage.getItem(name);
+        initial_state = localStorage.getItem(chat_id);
         initial_state = initial_state
           ? JSON.parse(initial_state)
           : Object.create(null);
@@ -155,6 +156,33 @@
           this._ready.then(callback);
         }
         return Boolean(this._state['seed']);
+      },
+      _save_state: function(){
+        var prepared_state, key, ref$, value, res$, i$, ref1$, len$, item, contents;
+        prepared_state = {};
+        for (key in ref$ = this._state) {
+          value = ref$[key];
+          switch (key) {
+          case 'seed':
+            prepared_state[key] = Array.from(value);
+            break;
+          case 'contacts':
+          case 'contacts_requests':
+          case 'contacts_requests_blocked':
+          case 'secrets':
+            res$ = [];
+            for (i$ = 0, len$ = (ref1$ = Array.from(value.values())).length; i$ < len$; ++i$) {
+              item = ref1$[i$];
+              contents = item['array'];
+              contents[0] = Array.from(contents[0]);
+              res$.push(contents);
+            }
+            prepared_state[key] = res$;
+            break;
+          default:
+            prepared_state[key] = value;
+          }
+        }
       }
       /**
        * @return {Uint8Array} Seed if configured or `null` otherwise
@@ -174,6 +202,7 @@
           delete this._ready_resolve;
         }
         this['fire']('seed_changed', new_seed, old_seed);
+        this._save_state();
       }
       /**
        * @return {Uint8Array} Seed if configured or `null` otherwise
@@ -190,6 +219,7 @@
         new_nickname = String(nickname);
         this._state['nickname'] = new_nickname;
         this['fire']('nickname_changed', new_nickname, old_nickname);
+        this._save_state();
       }
       /**
        * @return {boolean} `true` if connected to network
@@ -290,11 +320,8 @@
         this._local_state.ui.active_contact = new_active_contact;
         this['fire']('ui_active_contact_changed', new_active_contact, old_active_contact);
         if (new_active_contact) {
+          this._update_contact_last_read_message(new_active_contact);
           this._update_contact_with_unread_messages(new_active_contact);
-        }
-        if (old_active_contact) {
-          this._update_contact_last_read_message(old_active_contact);
-          this._update_contact_with_unread_messages(old_active_contact);
         }
       }
       /**
@@ -327,6 +354,7 @@
         new_announce = !!announce;
         this._state['settings']['announce'] = new_announce;
         this['fire']('settings_announce_changed', new_announce, old_announce);
+        this._save_state();
       }
       /**
        * @return {number} In seconds
@@ -341,7 +369,8 @@
         var old_block_contact_requests_for;
         old_block_contact_requests_for = this._state['settings']['block_contact_requests_for'];
         this._state['settings']['block_contact_requests_for'] = parseInt(block_contact_requests_for);
-        return this['fire']('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for);
+        this['fire']('settings_block_contact_requests_for_changed', block_contact_requests_for, old_block_contact_requests_for);
+        return this._save_state();
       }
       /**
        * @return {!Array<!Object>}
@@ -357,6 +386,7 @@
         old_bootstrap_nodes = this._state['settings']['bootstrap_nodes'];
         this._state['settings']['bootstrap_nodes'] = bootstrap_nodes;
         this['fire']('settings_bootstrap_nodes_changed', bootstrap_nodes, old_bootstrap_nodes);
+        this._save_state();
       }
       /**
        * @return {number}
@@ -372,6 +402,7 @@
         old_bucket_size = this._state['bucket_size'];
         this._state['settings']['bucket_size'] = parseInt(bucket_size);
         this['fire']('settings_bucket_size_changed', bucket_size, old_bucket_size);
+        this._save_state();
       }
       /**
        * @return {number} One of State.EXPERIENCE_* constants
@@ -387,6 +418,7 @@
         old_experience = this._state['experience'];
         this._state['settings']['experience'] = parseInt(experience);
         this['fire']('settings_experience_changed', experience, old_experience);
+        this._save_state();
       }
       /**
        * @return {boolean}
@@ -403,6 +435,7 @@
         new_help = !!help;
         this._state['settings']['help'] = new_help;
         this['fire']('settings_help_changed', new_help, old_help);
+        this._save_state();
       }
       /**
        * @return {!Array<!Object>}
@@ -418,6 +451,7 @@
         old_ice_servers = this._state['settings']['ice_servers'];
         this._state['settings']['ice_servers'] = ice_servers;
         this['fire']('settings_ice_servers_changed', ice_servers, old_ice_servers);
+        this._save_state();
       }
       /**
        * @return {number}
@@ -433,6 +467,7 @@
         old_max_pending_segments = this._state['max_pending_segments'];
         this._state['settings']['max_pending_segments'] = parseInt(max_pending_segments);
         this['fire']('settings_max_pending_segments_changed', max_pending_segments, old_max_pending_segments);
+        this._save_state();
       }
       /**
        * @return {number}
@@ -448,6 +483,7 @@
         old_number_of_intermediate_nodes = this._state['number_of_intermediate_nodes'];
         this._state['settings']['number_of_intermediate_nodes'] = parseInt(number_of_intermediate_nodes);
         this['fire']('settings_number_of_intermediate_nodes_changed', number_of_intermediate_nodes, old_number_of_intermediate_nodes);
+        this._save_state();
       }
       /**
        * @return {number}
@@ -463,6 +499,7 @@
         old_number_of_introduction_nodes = this._state['number_of_introduction_nodes'];
         this._state['settings']['number_of_introduction_nodes'] = parseInt(number_of_introduction_nodes);
         this['fire']('settings_number_of_introduction_nodes_changed', number_of_introduction_nodes, old_number_of_introduction_nodes);
+        this._save_state();
       }
       /**
        * @return {boolean} `false` if application works completely offline
@@ -479,6 +516,7 @@
         new_online = !!online;
         this._state['settings']['online'] = new_online;
         this['fire']('settings_online_changed', new_online, old_online);
+        this._save_state();
       }
       /**
        * @return {number}
@@ -494,6 +532,7 @@
         old_packets_per_second = this._state['packets_per_second'];
         this._state['settings']['packets_per_second'] = parseInt(packets_per_second);
         this['fire']('settings_packets_per_second_changed', packets_per_second, old_packets_per_second);
+        this._save_state();
       }
       /**
        * @return {!Array<!Array<number>>}
@@ -509,6 +548,7 @@
         old_reconnects_intervals = this._state['reconnects_intervals'];
         this._state['settings']['reconnects_intervals'] = reconnects_intervals;
         this['fire']('settings_reconnects_intervals_changed', reconnects_intervals, old_reconnects_intervals);
+        this._save_state();
       }
       /**
        * @return {boolean} `true` if message should be sent with Ctrl+Enter and `false` if with just Enter
@@ -525,6 +565,7 @@
         new_send_ctrl_enter = !!send_ctrl_enter;
         this._state['settings']['send_ctrl_enter'] = new_send_ctrl_enter;
         this['fire']('settings_send_ctrl_enter_changed', new_send_ctrl_enter, old_send_ctrl_enter);
+        this._save_state();
       }
       /**
        * @return {!Array<!Contact>}
@@ -568,6 +609,7 @@
         this._state['contacts'].set(contact_id, new_contact);
         this['fire']('contact_added', new_contact);
         this['fire']('contacts_changed');
+        this._save_state();
       }
       /**
        * @param {!Uint8Array} contact_id
@@ -593,6 +635,7 @@
         this._state['contacts'].set(contact_id, new_contact);
         this['fire']('contact_changed', new_contact, old_contact);
         this['fire']('contacts_changed');
+        this._save_state();
       }
       /**
        * @param {!Uint8Array}	contact_id
@@ -672,6 +715,7 @@
         this._state['contacts']['delete'](contact_id);
         this['fire']('contact_deleted', old_contact);
         this['fire']('contacts_changed');
+        this._save_state();
       }
       /**
        * @return {!Array<!ContactRequest>}
@@ -698,6 +742,7 @@
         this._state['contacts_requests'].set(contact_id, new_contact_request);
         this['fire']('contact_request_added', new_contact_request);
         this['fire']('contacts_requests_changed');
+        this._save_state();
       }
       /**
        * @param {!Uint8Array} contact_id
@@ -721,6 +766,7 @@
         this._state['contacts_requests_blocked'].set(contact_id, ContactRequestBlocked([contact_id, blocked_until]));
         this['fire']('contact_request_deleted', old_contact_request);
         this['fire']('contacts_requests_changed');
+        this._save_state();
       }
       /**
        * @return {!Array<!ContactRequestBlocked>}
@@ -889,6 +935,7 @@
         this._state['secrets'].set(new_secret['secret'], new_secret);
         this['fire']('secret_added', new_secret);
         this['fire']('secrets_changed');
+        this._save_state();
       }
       /**
        * @param {!Uint8Array}	secret
@@ -901,6 +948,7 @@
         new_secret['name'] = name;
         this._state['secrets'].set(secret, new_secret);
         this['fire']('secrets_changed');
+        this._save_state();
       }
       /**
        * @param {!Array<!Secret>} secrets
@@ -908,6 +956,7 @@
       'set_secrets': function(secrets){
         this._state['secrets'] = secrets;
         this['fire']('secrets_changed');
+        this._save_state();
       }
       /**
        * @param {!Uint8Array}	secret
@@ -921,6 +970,7 @@
         this._state['secrets']['delete'](secret);
         this['fire']('secret_deleted', old_secret);
         this['fire']('secrets_changed');
+        this._save_state();
       }
     };
     State.prototype = Object.assign(Object.create(asyncEventer.prototype), State.prototype);
@@ -981,16 +1031,16 @@
       'Secret': Secret,
       'State': State
       /**
-       * @param {string}	name
+       * @param {string}	chat_id
        * @param {!Object}	initial_state
        *
        * @return {!detoxState}
        */,
-      'get_instance': function(name, initial_state){
-        if (!(name in global_state)) {
-          global_state[name] = State(initial_state);
+      'get_instance': function(chat_id, initial_state){
+        if (!(chat_id in global_state)) {
+          global_state[chat_id] = State(chat_id, initial_state);
         }
-        return global_state[name];
+        return global_state[chat_id];
       }
     };
   }

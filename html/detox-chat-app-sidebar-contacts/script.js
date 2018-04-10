@@ -186,8 +186,8 @@
       _unconfirmed: function(contact){
         return !contact.local_secret;
       },
-      _unread: function(contact, ui_active_contact, contacts_with_unread_messages){
-        return !this._selected(contact, ui_active_contact) && contacts_with_unread_messages.has(contact.id);
+      _unread: function(contact, contacts_with_unread_messages){
+        return contacts_with_unread_messages.has(contact.id);
       },
       _pending: function(contact, contacts_with_pending_messages){
         return contacts_with_pending_messages.has(contact.id);

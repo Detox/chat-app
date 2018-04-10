@@ -196,8 +196,8 @@ Polymer(
 		ui_active_contact.has(contact.id)
 	_unconfirmed : (contact) ->
 		!contact.local_secret
-	_unread : (contact, ui_active_contact, contacts_with_unread_messages) ->
-		!@_selected(contact, ui_active_contact) && contacts_with_unread_messages.has(contact.id)
+	_unread : (contact, contacts_with_unread_messages) ->
+		contacts_with_unread_messages.has(contact.id)
 	_pending : (contact, contacts_with_pending_messages) ->
 		contacts_with_pending_messages.has(contact.id)
 )

@@ -27,7 +27,7 @@ dom-module(id="detox-chat-app-sidebar-contacts")
 						selected$="[[_selected(item, ui_active_contact)]]"
 						unconfirmed$="[[_unconfirmed(item)]]"
 						online$="[[_online(item, online_contacts)]]"
-						unread$="[[_unread(item, ui_active_contact, contacts_with_unread_messages)]]"
+						unread$="[[_unread(item, contacts_with_unread_messages)]]"
 						pending$="[[_pending(item, contacts_with_pending_messages)]]"
 					)
 						.nickname [[item.nickname]]
