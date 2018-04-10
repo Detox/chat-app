@@ -25,12 +25,12 @@ function Wrapper (detox-chat, state)
 			value	: false
 		ready : !->
 			state			= @_state_instance
-			@advanced_user	= state.get_settings_experience() >= 1
-			@developer		= state.get_settings_experience() == 2
+			@advanced_user	= state.get_settings_experience() >= state.EXPERIENCE_ADVANCED
+			@developer		= state.get_settings_experience() == state.EXPERIENCE_DEVELOPER
 			state
 				.on('settings_experience_changed', (experience) !~>
-					@advanced_user	= experience >= 1
-					@developer		= experience == 2
+					@advanced_user	= experience >= state.EXPERIENCE_ADVANCED
+					@developer		= experience == state.EXPERIENCE_DEVELOPER
 				)
 	]
 	# TODO: Instead of behavior and separate elements with callbacks, it would be nice to have a custom element for help buttons

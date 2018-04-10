@@ -35,7 +35,7 @@
     }
   }
   function Wrapper(detoxChat, detoxUtils, asyncEventer){
-    var id_encode, are_arrays_equal, ArrayMap, ArraySet, global_state, Contact, ContactRequest, ContactRequestBlocked, Message, Secret;
+    var id_encode, are_arrays_equal, ArrayMap, ArraySet, global_state, constants, Contact, ContactRequest, ContactRequestBlocked, Message, Secret;
     id_encode = detoxChat['id_encode'];
     are_arrays_equal = detoxUtils['are_arrays_equal'];
     ArrayMap = detoxUtils['ArrayMap'];
@@ -87,7 +87,7 @@
             'port': 16882
           }],
           'bucket_size': 2,
-          'experience': 0,
+          'experience': State.EXPERIENCE_REGULAR,
           'help': true,
           'ice_servers': [
             {
@@ -399,13 +399,13 @@
         this['fire']('settings_bucket_size_changed', bucket_size, old_bucket_size);
       }
       /**
-       * @return {number}
+       * @return {number} One of State.EXPERIENCE_*
        */,
       'get_settings_experience': function(){
         return this._state['settings']['experience'];
       }
       /**
-       * @param {number} experience
+       * @param {number} experience One of State.EXPERIENCE_*
        */,
       'set_settings_experience': function(experience){
         var old_experience;
@@ -714,7 +714,7 @@
           return;
         }
         secret_name = this._state['secrets'].get(secret).name;
-        if (this['get_settings_experience'] >= 1) {
+        if (this['get_settings_experience'] >= State.EXPERIENCE_ADVANCED) {
           name = id_encode(contact_id, new Uint8Array(0));
         } else {
           name = id_encode(contact_id, secret);
@@ -952,6 +952,13 @@
     Object.defineProperty(State.prototype, 'constructor', {
       value: State
     });
+    constants = {
+      'EXPERIENCE_REGULAR': 0,
+      'EXPERIENCE_ADVANCED': 1,
+      'EXPERIENCE_DEVELOPER': 2
+    };
+    Object.assign(State, constants);
+    Object.assign(State.prototype, constants);
     /**
      * Remote secret is used by us to connect to remote friend.
      * Local secret is used by remote friend to connect to us.

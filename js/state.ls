@@ -87,8 +87,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 						}
 					]
 					'bucket_size'					: 2
-					# 0 - regular, 1 - advanced, 2 - developer
-					'experience'					: 0
+					'experience'					: State.EXPERIENCE_REGULAR
 					'help'							: true
 					'ice_servers'					: [
 						{urls: 'stun:stun.l.google.com:19302'}
@@ -371,12 +370,12 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_state['settings']['bucket_size']	= parseInt(bucket_size)
 			@'fire'('settings_bucket_size_changed', bucket_size, old_bucket_size)
 		/**
-		 * @return {number}
+		 * @return {number} One of State.EXPERIENCE_*
 		 */
 		'get_settings_experience' : ->
 			@_state['settings']['experience']
 		/**
-		 * @param {number} experience
+		 * @param {number} experience One of State.EXPERIENCE_*
 		 */
 		'set_settings_experience' : (experience) !->
 			old_experience						= @_state['experience']
@@ -626,7 +625,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			if @'has_contact_request'(contact_id)
 				return
 			secret_name	= @_state['secrets'].get(secret).name
-			if @'get_settings_experience' >= 1
+			if @'get_settings_experience' >= State.EXPERIENCE_ADVANCED
 				name	= id_encode(contact_id, new Uint8Array(0))
 			else
 				name	= id_encode(contact_id, secret)
@@ -814,6 +813,15 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 
 	State:: = Object.assign(Object.create(async-eventer::), State::)
 	Object.defineProperty(State::, 'constructor', {value: State})
+
+	# Some constants
+	constants	=
+		'EXPERIENCE_REGULAR'	: 0
+		'EXPERIENCE_ADVANCED'	: 1
+		'EXPERIENCE_DEVELOPER'	: 2
+	# For convenience, assign both on constructor and on instances
+	Object.assign(State, constants)
+	Object.assign(State::, constants)
 
 	/**
 	 * Remote secret is used by us to connect to remote friend.

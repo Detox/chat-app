@@ -36,11 +36,11 @@
         ready: function(){
           var state, this$ = this;
           state = this._state_instance;
-          this.advanced_user = state.get_settings_experience() >= 1;
-          this.developer = state.get_settings_experience() === 2;
+          this.advanced_user = state.get_settings_experience() >= state.EXPERIENCE_ADVANCED;
+          this.developer = state.get_settings_experience() === state.EXPERIENCE_DEVELOPER;
           state.on('settings_experience_changed', function(experience){
-            this$.advanced_user = experience >= 1;
-            this$.developer = experience === 2;
+            this$.advanced_user = experience >= state.EXPERIENCE_ADVANCED;
+            this$.developer = experience === state.EXPERIENCE_DEVELOPER;
           });
         }
       }
