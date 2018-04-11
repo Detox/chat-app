@@ -14,6 +14,7 @@
       '@detox/core': 'node_modules/@detox/core/src/index',
       '@detox/crypto': 'node_modules/@detox/crypto/src/index',
       '@detox/dht': 'node_modules/@detox/dht/dist/detox-dht.browser',
+      '@detox/simple-peer': 'node_modules/@detox/simple-peer/simplepeer.min',
       '@detox/transport': 'node_modules/@detox/transport/src/index',
       '@detox/utils': 'node_modules/@detox/utils/src/index',
       'async-eventer': 'node_modules/async-eventer/src/index',
@@ -23,7 +24,6 @@
       'marked': 'node_modules/marked/marked.min',
       'pako': 'node_modules/pako/dist/pako',
       'ronion': 'node_modules/ronion/src/index',
-      'simple-peer': 'node_modules/simple-peer/simplepeer.min',
       'swipe-listener': 'node_modules/swipe-listener/dist/swipe-listener'
     },
     'packages': [
