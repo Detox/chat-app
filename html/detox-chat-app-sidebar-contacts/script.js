@@ -107,7 +107,7 @@
               csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>" + existing_contact.nickname + "</i>", 'warning', 'right', 3);
               return;
             }
-            this$.state.add_contact(public_key, this$.new_contact_name, remote_secret);
+            this$.state.add_contact(public_key, this$.new_contact_name || this$.new_contact_id, remote_secret);
             csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 5);
             this$.add_contact = false;
             this$.new_contact_id = '';

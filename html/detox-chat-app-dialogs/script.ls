@@ -40,7 +40,7 @@ Polymer(
 				if active_contact && are_arrays_equal(contact_id, active_contact)
 					messages_list			= @$['messages-list']
 					need_to_update_scroll	= messages_list.scrollHeight - messages_list.offsetHeight == messages_list.scrollTop
-					@messages				= state.get_contact_messages(contact_id)
+					(@messages)				<~! state.get_contact_messages(contact_id).then
 					@notifyPath('messages')
 					if need_to_update_scroll
 						# Force synchronous messages render in order to be sure scrolling works properly
@@ -72,7 +72,7 @@ Polymer(
 					return
 				@active_contact	= true
 				@contact		= state.get_contact(new_active_contact)
-				@messages		= state.get_contact_messages(new_active_contact)
+				(@messages)		<~! state.get_contact_messages(new_active_contact).then
 				@notifyPath('messages')
 				# Force synchronous messages render in order to be sure scrolling works properly
 				@$['messages-list-template'].render()
@@ -119,7 +119,7 @@ Polymer(
 		@text_message	= ''
 		state			= @state
 		contact_id		= state.get_ui_active_contact()
-		state.add_contact_message(contact_id, false, +(new Date), 0, text_message)
+		state.add_contact_message(contact_id, state.MESSAGE_ORIGIN_SENT, +(new Date), 0, text_message)
 	_markdown_renderer : (markdown_text) ->
 		markdown(markdown_text)
 	_format_date : (date) ->

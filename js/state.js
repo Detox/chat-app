@@ -5,6 +5,8 @@
  * @license 0BSD
  */
 (function(){
+  var STATE_VERSION;
+  STATE_VERSION = 1;
   function create_array_object(properties_list){
     /**
      * @constructor
@@ -44,20 +46,16 @@
     /**
      * @constructor
      */
-    function State(chat_id, initial_state){
-      var x$, contact, current_date, secret, i$, ref$, len$, contact_id, this$ = this;
+    function State(chat_id){
+      var initial_state, x$, contact, current_date, secret, i$, ref$, len$, contact_id, this$ = this;
       if (!(this instanceof State)) {
-        return new State(chat_id, initial_state);
+        return new State(chat_id);
       }
       asyncEventer.call(this);
       this._chat_id = chat_id;
-      if (!initial_state) {
-        initial_state = localStorage.getItem(chat_id);
-        initial_state = initial_state
-          ? JSON.parse(initial_state)
-          : Object.create(null);
-      }
-      this._state = initial_state;
+      this._state = (initial_state = localStorage.getItem(chat_id), initial_state
+        ? JSON.parse(initial_state)
+        : Object.create(null));
       this._local_state = {
         online: false,
         announced: false,
@@ -74,9 +72,33 @@
         contacts_with_pending_messages: ArraySet(),
         contacts_with_unread_messages: ArraySet()
       };
+      this._database_ready = new Promise(function(resolve){
+        var x$;
+        x$ = indexedDB.open(chat_id, STATE_VERSION);
+        x$.onsuccess = function(e){
+          this$._database = e.target.result;
+          resolve();
+        };
+        x$.onerror = function(e){
+          console.error('Opening messages database failed', e);
+          csw.functions.notify('An error happened during opening messages database', 'right', 'error');
+        };
+        x$.onupgradeneeded = function(e){
+          var messages_store;
+          this$._database = e.target.result;
+          messages_store = this$._database.createObjectStore('messages', {
+            keyPath: 'message_id',
+            autoIncrement: true
+          });
+          messages_store.createIndex('contact_id', 'contact_id');
+          this$['add_contact_message'](this$['get_contacts']()[0]['id'], State['MESSAGE_ORIGIN_RECEIVED'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
+          this$['add_contact_message'](this$['get_contacts']()[0]['id'], State['MESSAGE_ORIGIN_SENT'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
+        };
+      });
+      this._messages_transactions = this._database_ready;
       if (!('version' in this._state)) {
         x$ = this._state;
-        x$['version'] = 1;
+        x$['version'] = STATE_VERSION;
         x$['nickname'] = '';
         x$['seed'] = null;
         x$['settings'] = JSON.parse(JSON.stringify(State.DEFAULT_SETTINGS));
@@ -88,11 +110,23 @@
       if (this._state['seed']) {
         this._state['seed'] = Uint8Array.from(this._state['seed']);
       }
+      this._ready = Promise.all([
+        this._database_ready, new Promise(function(resolve){
+          if (this$._state['seed']) {
+            resolve();
+          } else {
+            this$._ready_resolve = resolve;
+          }
+        })
+      ]);
       this._state['contacts'] = ArrayMap((function(){
         var i$, ref$, len$, results$ = [];
         for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
           contact = ref$[i$];
           contact[0] = Uint8Array.from(contact[0]);
+          contact[4] = contact[4] && Uint8Array.from(contact[4]);
+          contact[5] = contact[5] && Uint8Array.from(contact[5]);
+          contact[6] = contact[6] && Uint8Array.from(contact[6]);
           contact = Contact(contact);
           results$.push([contact['id'], contact]);
         }
@@ -131,19 +165,11 @@
         }
         return results$;
       }.call(this)));
-      this._local_state.messages.set(Array.from(this._state['contacts'].keys())[0], [Message([1, State['MESSAGE_ORIGIN_RECEIVED'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.']), Message([2, State['MESSAGE_ORIGIN_SENT'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])]);
       for (i$ = 0, len$ = (ref$ = Array.from(this._state['contacts'].keys())).length; i$ < len$; ++i$) {
         contact_id = ref$[i$];
         this._update_contact_with_pending_messages(contact_id);
         this._update_contact_with_unread_messages(contact_id);
       }
-      this._ready = new Promise(function(resolve){
-        if (this$._state['seed']) {
-          resolve();
-        } else {
-          this$._ready_resolve = resolve;
-        }
-      });
     }
     State.prototype = {
       /**
@@ -158,7 +184,7 @@
         return Boolean(this._state['seed']);
       },
       _save_state: function(){
-        var prepared_state, key, ref$, value, res$, i$, ref1$, len$, item, contents;
+        var prepared_state, key, ref$, value, res$, i$, ref1$, len$, item, contents, j$, len1$, index;
         prepared_state = {};
         for (key in ref$ = this._state) {
           value = ref$[key];
@@ -173,8 +199,14 @@
             res$ = [];
             for (i$ = 0, len$ = (ref1$ = Array.from(value.values())).length; i$ < len$; ++i$) {
               item = ref1$[i$];
-              contents = item['array'];
-              contents[0] = Array.from(contents[0]);
+              contents = item['array'].slice();
+              for (j$ = 0, len1$ = contents.length; j$ < len1$; ++j$) {
+                index = j$;
+                item = contents[j$];
+                if (item instanceof Uint8Array) {
+                  contents[index] = Array.from(item);
+                }
+              }
               res$.push(contents);
             }
             prepared_state[key] = res$;
@@ -183,6 +215,7 @@
             prepared_state[key] = value;
           }
         }
+        localStorage.setItem(this._chat_id, JSON.stringify(prepared_state));
       }
       /**
        * @return {Uint8Array} Seed if configured or `null` otherwise
@@ -702,7 +735,7 @@
        * @param {!Uint8Array} contact_id
        */,
       'del_contact': function(contact_id){
-        var old_contact;
+        var old_contact, this$ = this;
         old_contact = this['get_contact'](contact_id);
         if (!old_contact) {
           return;
@@ -710,12 +743,12 @@
         if (are_arrays_equal(this['get_ui_active_contact']() || new Uint8Array(0), contact_id)) {
           this['set_ui_active_contact'](null);
         }
-        this._local_state.messages['delete'](contact_id);
-        this['fire']('contact_messages_changed', contact_id);
-        this._state['contacts']['delete'](contact_id);
-        this['fire']('contact_deleted', old_contact);
-        this['fire']('contacts_changed');
-        this._save_state();
+        this['del_contact_messages'](contact_id).then(function(){
+          this$._state['contacts']['delete'](contact_id);
+          this$['fire']('contact_deleted', old_contact);
+          this$['fire']('contacts_changed');
+          this$._save_state();
+        });
       }
       /**
        * @return {!Array<!ContactRequest>}
@@ -820,55 +853,81 @@
        * @param {!Uint8Array} contact_id
        */,
       _update_contact_with_pending_messages: function(contact_id){
-        var i$, ref$, message;
-        for (i$ = (ref$ = this['get_contact_messages'](contact_id)).length - 1; i$ >= 0; --i$) {
-          message = ref$[i$];
-          if (message['origin'] === State['MESSAGE_ORIGIN_SENT'] && !message['date_sent']) {
-            if (!this._local_state.contacts_with_pending_messages.has(contact_id)) {
-              this._local_state.contacts_with_pending_messages.add(contact_id);
-              this['fire']('contacts_with_pending_messages_changed');
+        var this$ = this;
+        this['get_contact_messages'](contact_id).then(function(messages){
+          var i$, message;
+          for (i$ = messages.length - 1; i$ >= 0; --i$) {
+            message = messages[i$];
+            if (message['origin'] === State['MESSAGE_ORIGIN_SENT'] && !message['date_sent']) {
+              if (!this$._local_state.contacts_with_pending_messages.has(contact_id)) {
+                this$._local_state.contacts_with_pending_messages.add(contact_id);
+                this$['fire']('contacts_with_pending_messages_changed');
+              }
+              return;
             }
-            return;
           }
-        }
-        this._local_state.contacts_with_pending_messages['delete'](contact_id);
-        this['fire']('contacts_with_pending_messages_changed');
+          this$._local_state.contacts_with_pending_messages['delete'](contact_id);
+          this$['fire']('contacts_with_pending_messages_changed');
+        });
       }
       /**
        * @param {!Uint8Array} contact_id
        */,
       _update_contact_with_unread_messages: function(contact_id){
-        var last_read_message, i$, ref$, len$, message;
+        var last_read_message, this$ = this;
         last_read_message = this['get_contact'](contact_id)['last_read_message'];
-        for (i$ = 0, len$ = (ref$ = this['get_contact_messages'](contact_id)).length; i$ < len$; ++i$) {
-          message = ref$[i$];
-          if (message['origin'] === State['MESSAGE_ORIGIN_RECEIVED'] && message['date_sent'] > last_read_message) {
-            if (!this._local_state.contacts_with_unread_messages.has(contact_id)) {
-              this._local_state.contacts_with_unread_messages.add(contact_id);
-              this['fire']('contacts_with_unread_messages_changed');
+        this['get_contact_messages'](contact_id).then(function(messages){
+          var i$, len$, message;
+          for (i$ = 0, len$ = messages.length; i$ < len$; ++i$) {
+            message = messages[i$];
+            if (message['origin'] === State['MESSAGE_ORIGIN_RECEIVED'] && message['date_sent'] > last_read_message) {
+              if (!this$._local_state.contacts_with_unread_messages.has(contact_id)) {
+                this$._local_state.contacts_with_unread_messages.add(contact_id);
+                this$['fire']('contacts_with_unread_messages_changed');
+              }
+              return;
             }
-            return;
           }
-        }
-        this._local_state.contacts_with_unread_messages['delete'](contact_id);
-        this['fire']('contacts_with_unread_messages_changed');
+          this$._local_state.contacts_with_unread_messages['delete'](contact_id);
+          this$['fire']('contacts_with_unread_messages_changed');
+        });
       }
       /**
        * @param {!Uint8Array} contact_id
        *
-       * @return {!Array<!Message>}
+       * @return {!Promise} Resolves with `Array<Message>`
        */,
       'get_contact_messages': function(contact_id){
-        return this._local_state.messages.get(contact_id) || [];
+        var messages, this$ = this;
+        messages = this._local_state.messages.get(contact_id);
+        if (messages) {
+          return Promise.resolve(messages);
+        } else {
+          return this._messages_transaction(true, function(messages_store, payload_callback){
+            var x$;
+            x$ = messages_store.index('contact_id').getAll(IDBKeyRange.only(contact_id));
+            x$.onsuccess = function(e){
+              payload_callback(e.target.result);
+            };
+          }).then(function(messages){
+            messages = messages.map(function(message){
+              return Message([message['message_id'], message['origin'], message['date_written'], message['date_sent'], message['text']]);
+            });
+            this$._local_state.messages.set(contact_id, messages);
+            return messages;
+          });
+        }
       }
       /**
        * @param {!Uint8Array} contact_id
        *
-       * @return {!Array<!Message>}
+       * @return {!Promise} Resolves with `Array<Message>`
        */,
       'get_contact_messages_to_be_sent': function(contact_id){
-        return this['get_contact_messages'](contact_id).filter(function(message){
-          return message['origin'] === State['MESSAGE_ORIGIN_SENT'] && !message['date_sent'];
+        return this['get_contact_messages'](contact_id).then(function(messages){
+          return messages.filter(function(message){
+            return message['origin'] === State['MESSAGE_ORIGIN_SENT'] && !message['date_sent'];
+          });
         });
       }
       /**
@@ -878,28 +937,41 @@
        * @param {number}		date_sent		When message was sent
        * @param {string} 		text
        *
-       * @return {number} Message ID
+       * @return {!Promise} Resolves with `message_id`
        */,
       'add_contact_message': function(contact_id, origin, date_written, date_sent, text){
-        var messages, id, message;
-        if (!this._local_state.messages.has(contact_id)) {
-          this._local_state.messages.set(contact_id, []);
-        }
-        messages = this._local_state.messages.get(contact_id);
-        id = messages.length ? messages[messages.length - 1]['id'] + 1 : 1;
-        message = Message([id, origin, date_written, date_sent, text]);
-        messages.push(message);
-        if (origin === State['MESSAGE_ORIGIN_RECEIVED']) {
-          this._update_contact_last_active(contact_id);
-          if (!are_arrays_equal(this['get_ui_active_contact']() || new Uint8Array(0), contact_id)) {
-            this._update_contact_with_unread_messages(contact_id);
+        var this$ = this;
+        return Promise.all([
+          this['get_contact_messages'](contact_id), this._messages_transaction(false, function(messages_store, payload_callback){
+            messages_store.add({
+              'contact_id': contact_id,
+              'origin': origin,
+              'date_written': date_written,
+              'date_sent': date_sent,
+              'text': text
+            }).onsuccess = function(e){
+              payload_callback(e.target.result);
+            };
+          })
+        ]).then(function(arg$){
+          var messages, id, message;
+          messages = arg$[0], id = arg$[1];
+          message = Message([id, origin, date_written, date_sent, text]);
+          messages.push(message);
+          if (origin === State['MESSAGE_ORIGIN_RECEIVED']) {
+            this$._update_contact_last_active(contact_id);
+            if (!are_arrays_equal(this$['get_ui_active_contact']() || new Uint8Array(0), contact_id)) {
+              this$._update_contact_with_unread_messages(contact_id);
+            } else {
+              this$._update_contact_last_read_message(contact_id);
+            }
+          } else {
+            this$._update_contact_with_pending_messages(contact_id);
           }
-        } else {
-          this._update_contact_with_pending_messages(contact_id);
-        }
-        this['fire']('contact_message_added', contact_id, message);
-        this['fire']('contact_messages_changed', contact_id);
-        id;
+          this$['fire']('contact_message_added', contact_id, message);
+          this$['fire']('contact_messages_changed', contact_id);
+          return id;
+        });
       }
       /**
        * @param {!Uint8Array}	contact_id
@@ -907,17 +979,80 @@
        * @param {number}		date		Date when message was sent
        */,
       'set_contact_message_sent': function(contact_id, message_id, date){
-        var messages, i$, message;
-        messages = this._local_state.messages.get(contact_id);
-        for (i$ = messages.length - 1; i$ >= 0; --i$) {
-          message = messages[i$];
-          if (message['id'] === message_id) {
-            message['date_sent'] = date;
-            this._update_contact_with_pending_messages(contact_id);
-            this['fire']('contact_messages_changed', contact_id);
-            break;
+        var this$ = this;
+        this['get_contact_messages'](contact_id).then(function(messages){
+          var i$, message;
+          for (i$ = messages.length - 1; i$ >= 0; --i$) {
+            message = messages[i$];
+            if (message['id'] === message_id) {
+              message['date_sent'] = date;
+              this$._messages_transaction(false, fn$).then(fn1$);
+              break;
+            }
           }
-        }
+          function fn$(messages_store){
+            messages_store.put({
+              'message_id': message_id,
+              'contact_id': contact_id,
+              'origin': message['origin'],
+              'date_written': message['date_written'],
+              'date_sent': message['date_sent'],
+              'text': message['text']
+            });
+          }
+          function fn1$(){
+            this$._update_contact_with_pending_messages(contact_id);
+            return this$['fire']('contact_messages_changed', contact_id);
+          }
+        });
+      }
+      /**
+       * @param {!Uint8Array} contact_id
+       *
+       * @return {!Promise}
+       */,
+      'del_contact_messages': function(contact_id){
+        var this$ = this;
+        return this._messages_transaction(false, function(messages_store){
+          var x$;
+          x$ = messages_store.index('contact_id').openCursor(IDBKeyRange.only(contact_id));
+          x$.onsuccess = function(e){
+            var cursor;
+            cursor = e.target.result;
+            if (cursor) {
+              cursor['delete']();
+              cursor['continue']();
+            }
+          };
+        }).then(function(){
+          this$._local_state.messages['delete'](contact_id);
+          this$['fire']('contact_messages_changed', contact_id);
+        });
+      }
+      /**
+       * @param {boolean}		readonly
+       * @param {!Function}	callback
+       *
+       * @return {!Promise}
+       */,
+      _messages_transaction: function(readonly, callback){
+        var this$ = this;
+        return this._messages_transactions = this._messages_transactions.then(function(){
+          return new Promise(function(resolve, reject){
+            var value, x$, tx;
+            x$ = tx = this$._database.transaction('messages', 'readwrite');
+            x$.oncomplete = function(){
+              resolve(value);
+            };
+            x$.onerror = function(e){
+              console.error('Messages transaction failed', e);
+              reject;
+            };
+            callback(tx.objectStore('messages'), function(result){
+              value = result;
+            });
+          });
+        });
       }
       /**
        * @return {!Array<!Object>}
@@ -1036,9 +1171,9 @@
        *
        * @return {!detoxState}
        */,
-      'get_instance': function(chat_id, initial_state){
+      'get_instance': function(chat_id){
         if (!(chat_id in global_state)) {
-          global_state[chat_id] = State(chat_id, initial_state);
+          global_state[chat_id] = State(chat_id);
         }
         return global_state[chat_id];
       }

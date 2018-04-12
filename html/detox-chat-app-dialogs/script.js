@@ -44,12 +44,14 @@
           if (active_contact && are_arrays_equal(contact_id, active_contact)) {
             messages_list = this$.$['messages-list'];
             need_to_update_scroll = messages_list.scrollHeight - messages_list.offsetHeight === messages_list.scrollTop;
-            this$.messages = state.get_contact_messages(contact_id);
-            this$.notifyPath('messages');
-            if (need_to_update_scroll) {
-              this$.$['messages-list-template'].render();
-              messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
-            }
+            state.get_contact_messages(contact_id).then(function(messages){
+              this$.messages = messages;
+              this$.notifyPath('messages');
+              if (need_to_update_scroll) {
+                this$.$['messages-list-template'].render();
+                messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
+              }
+            });
           }
         }).on('contact_changed', function(new_contact){
           var ref$;
@@ -61,7 +63,7 @@
         }).on('contacts_with_unread_messages_changed', function(){
           this$._update_unread_messages();
         }).on('ui_active_contact_changed', function(new_active_contact, old_active_contact){
-          var text_message, messages_list;
+          var text_message;
           text_message = this$.text_message.trim();
           if (text_message && old_active_contact) {
             text_messages.set(old_active_contact, text_message);
@@ -79,12 +81,15 @@
           }
           this$.active_contact = true;
           this$.contact = state.get_contact(new_active_contact);
-          this$.messages = state.get_contact_messages(new_active_contact);
-          this$.notifyPath('messages');
-          this$.$['messages-list-template'].render();
-          messages_list = this$.$['messages-list'];
-          messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
-          this$._update_unread_messages();
+          state.get_contact_messages(new_active_contact).then(function(messages){
+            var messages_list;
+            this$.messages = messages;
+            this$.notifyPath('messages');
+            this$.$['messages-list-template'].render();
+            messages_list = this$.$['messages-list'];
+            messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
+            this$._update_unread_messages();
+          });
         }).on('settings_send_ctrl_enter_changed', function(send_ctrl_enter){
           this$.send_ctrl_enter = send_ctrl_enter;
         });
@@ -131,7 +136,7 @@
         this.text_message = '';
         state = this.state;
         contact_id = state.get_ui_active_contact();
-        state.add_contact_message(contact_id, false, +new Date, 0, text_message);
+        state.add_contact_message(contact_id, state.MESSAGE_ORIGIN_SENT, +new Date, 0, text_message);
       },
       _markdown_renderer: function(markdown_text){
         return markdown(markdown_text);

@@ -66,7 +66,8 @@ Polymer(
 				nickname	= state.get_nickname()
 				if nickname
 					chat.nickname(contact_id, nickname)
-				for message in state.get_contact_messages_to_be_sent(contact_id)
+				(messages_to_be_sent) <-! state.get_contact_messages_to_be_sent(contact_id).then
+				for message in messages_to_be_sent
 					send_message(contact_id, message)
 		/**
 		 * @param {!Uint8Array}	contact_id
@@ -85,8 +86,9 @@ Polymer(
 			if !contact
 				return
 			# Reconnect when there are messages to be sent or contact was never connected
+			(messages_to_be_sent) <-! state.get_contact_messages_to_be_sent(contact_id).then
 			if !(
-				state.get_contact_messages_to_be_sent(contact_id).length &&
+				messages_to_be_sent.length &&
 				contact.local_secret
 			)
 				return
@@ -196,14 +198,15 @@ Polymer(
 				text_message	= text_message.trim()
 				if !text_message
 					return
-				for old_message in state.get_contact_messages(contact_id) by -1
-					if old_message.origin == State.MESSAGE_ORIGIN_RECEIVED
+				(messages) <-! state.get_contact_messages(contact_id).then
+				for old_message in messages by -1
+					if old_message.origin == state.MESSAGE_ORIGIN_RECEIVED
 						last_message_received = old_message
 						break
 				# `date_sent` always increases, `date_written` never decreases
 				if last_message_received && (last_message_received.date_sent > date_sent || last_message_received.date_written >= date_written)
 					return
-				state.add_contact_message(contact_id, true, date_written, date_sent, text_message)
+				state.add_contact_message(contact_id, state.MESSAGE_ORIGIN_RECEIVED, date_written, date_sent, text_message)
 			)
 			.on('text_message_received', (contact_id, date_sent) !->
 				id	= sent_messages_map.get(contact_id)?.get(date_sent)
@@ -224,7 +227,7 @@ Polymer(
 			)
 			.on('contact_message_added', (contact_id, message) !->
 				if (
-					message.origin == State.MESSAGE_ORIGIN_RECEIVED || # Message was received from a friend
+					message.origin == state.MESSAGE_ORIGIN_RECEIVED || # Message was received from a friend
 					!state.has_online_contact(contact_id) # Friend is not currently connected
 				)
 					contact	= state.get_contact(contact_id)

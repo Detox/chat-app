@@ -59,7 +59,7 @@
            * @param {!Uint8Array} contact_id
            */
           function check_and_add_to_online(contact_id){
-            var secrets_exchange_status, nickname, i$, ref$, len$, message;
+            var secrets_exchange_status, nickname;
             secrets_exchange_status = secrets_exchange_statuses.get(contact_id);
             if (secrets_exchange_status.received && secrets_exchange_status.sent) {
               state.add_online_contact(contact_id);
@@ -67,10 +67,13 @@
               if (nickname) {
                 chat.nickname(contact_id, nickname);
               }
-              for (i$ = 0, len$ = (ref$ = state.get_contact_messages_to_be_sent(contact_id)).length; i$ < len$; ++i$) {
-                message = ref$[i$];
-                send_message(contact_id, message);
-              }
+              state.get_contact_messages_to_be_sent(contact_id).then(function(messages_to_be_sent){
+                var i$, len$, message;
+                for (i$ = 0, len$ = messages_to_be_sent.length; i$ < len$; ++i$) {
+                  message = messages_to_be_sent[i$];
+                  send_message(contact_id, message);
+                }
+              });
             }
           }
           /**
@@ -89,36 +92,39 @@
            * @param {!Uint8Array} contact_id
            */
           function do_reconnect_if_needed(contact_id){
-            var contact, reconnect_pending, i$, ref$, len$, ref1$, reconnection_trial, time_before_next_attempt;
+            var contact;
             contact = state.get_contact(contact_id);
             if (!contact) {
               return;
             }
-            if (!(state.get_contact_messages_to_be_sent(contact_id).length && contact.local_secret)) {
-              return;
-            }
-            if (!reconnects_pending.has(contact_id)) {
-              reconnects_pending.set(contact_id, {
-                trial: 0,
-                timeout: null
-              });
-            }
-            reconnect_pending = reconnects_pending.get(contact_id);
-            if (reconnect_pending.timeout) {
-              return;
-            }
-            ++reconnect_pending.trial;
-            for (i$ = 0, len$ = (ref$ = state.get_settings_reconnects_intervals()).length; i$ < len$; ++i$) {
-              ref1$ = ref$[i$], reconnection_trial = ref1$[0], time_before_next_attempt = ref1$[1];
-              if (reconnect_pending.trial <= reconnection_trial) {
-                reconnect_pending.timeout = timeoutSet(time_before_next_attempt, fn$);
-                break;
+            state.get_contact_messages_to_be_sent(contact_id).then(function(messages_to_be_sent){
+              var reconnect_pending, i$, ref$, len$, ref1$, reconnection_trial, time_before_next_attempt;
+              if (!(messages_to_be_sent.length && contact.local_secret)) {
+                return;
               }
-            }
-            function fn$(){
-              reconnect_pending.timeout = null;
-              chat.connect_to(contact_id, contact.remote_secret);
-            }
+              if (!reconnects_pending.has(contact_id)) {
+                reconnects_pending.set(contact_id, {
+                  trial: 0,
+                  timeout: null
+                });
+              }
+              reconnect_pending = reconnects_pending.get(contact_id);
+              if (reconnect_pending.timeout) {
+                return;
+              }
+              ++reconnect_pending.trial;
+              for (i$ = 0, len$ = (ref$ = state.get_settings_reconnects_intervals()).length; i$ < len$; ++i$) {
+                ref1$ = ref$[i$], reconnection_trial = ref1$[0], time_before_next_attempt = ref1$[1];
+                if (reconnect_pending.trial <= reconnection_trial) {
+                  reconnect_pending.timeout = timeoutSet(time_before_next_attempt, fn$);
+                  break;
+                }
+              }
+              function fn$(){
+                reconnect_pending.timeout = null;
+                chat.connect_to(contact_id, contact.remote_secret);
+              }
+            });
           }
           core.once('ready', function(){
             var i$, ref$, len$, contact;
@@ -205,22 +211,24 @@
               state.set_contact_nickname(contact_id, nickname);
             }
           }).on('text_message', function(contact_id, date_written, date_sent, text_message){
-            var i$, ref$, old_message, last_message_received;
             text_message = text_message.trim();
             if (!text_message) {
               return;
             }
-            for (i$ = (ref$ = state.get_contact_messages(contact_id)).length - 1; i$ >= 0; --i$) {
-              old_message = ref$[i$];
-              if (old_message.origin === State.MESSAGE_ORIGIN_RECEIVED) {
-                last_message_received = old_message;
-                break;
+            state.get_contact_messages(contact_id).then(function(messages){
+              var i$, old_message, last_message_received;
+              for (i$ = messages.length - 1; i$ >= 0; --i$) {
+                old_message = messages[i$];
+                if (old_message.origin === state.MESSAGE_ORIGIN_RECEIVED) {
+                  last_message_received = old_message;
+                  break;
+                }
               }
-            }
-            if (last_message_received && (last_message_received.date_sent > date_sent || last_message_received.date_written >= date_written)) {
-              return;
-            }
-            state.add_contact_message(contact_id, true, date_written, date_sent, text_message);
+              if (last_message_received && (last_message_received.date_sent > date_sent || last_message_received.date_written >= date_written)) {
+                return;
+              }
+              state.add_contact_message(contact_id, state.MESSAGE_ORIGIN_RECEIVED, date_written, date_sent, text_message);
+            });
           }).on('text_message_received', function(contact_id, date_sent){
             var id, ref$;
             id = (ref$ = sent_messages_map.get(contact_id)) != null ? ref$.get(date_sent) : void 8;
@@ -238,7 +246,7 @@
             chat.connect_to(new_contact.id, new_contact.remote_secret);
           }).on('contact_message_added', function(contact_id, message){
             var contact;
-            if (message.origin === State.MESSAGE_ORIGIN_RECEIVED || !state.has_online_contact(contact_id)) {
+            if (message.origin === state.MESSAGE_ORIGIN_RECEIVED || !state.has_online_contact(contact_id)) {
               contact = state.get_contact(contact_id);
               chat.connect_to(contact_id, contact.remote_secret);
               return;

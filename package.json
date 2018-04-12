@@ -1,22 +1,22 @@
 {
-	"name"            : "@detox/chat-app",
-	"description"     : "Reference implementation of Chat application on top of Detox network using Detox Chat protocol",
-	"keywords"        : [
+	"name": "@detox/chat-app",
+	"description": "Reference implementation of Chat application on top of Detox network using Detox Chat protocol",
+	"keywords": [
 		"detox",
 		"chat",
 		"anonymous",
 		"distributed",
 		"p2p"
 	],
-	"version"         : "",
-	"homepage"        : "https://github.com/Detox/chat-app",
-	"author"          : "Nazar Mokrynskyi <nazar@mokrynskyi.com>",
-	"repository"      : {
-		"type" : "git",
-		"url"  : "git://github.com/Detox/chat-app.git"
+	"version": "",
+	"homepage": "https://github.com/Detox/chat-app",
+	"author": "Nazar Mokrynskyi <nazar@mokrynskyi.com>",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/Detox/chat-app.git"
 	},
-	"license"         : "0BSD",
-	"files"           : [
+	"license": "0BSD",
+	"files": [
 		"css",
 		"dist",
 		"html",
@@ -25,35 +25,35 @@
 		"index.html",
 		"index-debug.html"
 	],
-	"scripts"         : {
-		"demo-http-server" : "http-server"
+	"scripts": {
+		"demo-http-server": "http-server"
 	},
-	"dependencies"    : {
-		"@detox/chat"                    : "^0.12.0",
-		"@detox/core"                    : "^0.15.0",
-		"@detox/utils"                   : "^1.6.0",
-		"@polymer/polymer"               : "^2.6.0",
-		"@webcomponents/shadycss"        : "^1.1.3",
-		"@webcomponents/webcomponentsjs" : "^1.2.0",
-		"alameda"                        : "^1.2.1",
-		"autosize"                       : "^4.0.1",
-		"cleverstyle-widgets"            : "^0.9.0",
-		"hotkeys-js"                     : "^3.1.1",
-		"marked"                         : "^0.3.19",
-		"swipe-listener"                 : "^1.0.6"
+	"dependencies": {
+		"@detox/chat": "^0.12.0",
+		"@detox/core": "^0.15.0",
+		"@detox/utils": "^1.6.0",
+		"@polymer/polymer": "^2.6.0",
+		"@webcomponents/shadycss": "^1.1.3",
+		"@webcomponents/webcomponentsjs": "^1.2.0",
+		"alameda": "^1.2.1",
+		"autosize": "^4.0.1",
+		"cleverstyle-widgets": "^0.9.0",
+		"hotkeys-js": "^3.1.1",
+		"marked": "^0.3.19",
+		"swipe-listener": "^1.0.6"
 	},
-	"devDependencies" : {
-		"clean-css"               : "^4.1.11",
-		"del"                     : "^3.0.0",
-		"gulp"                    : "^3.9.1",
-		"gulp-htmlmin"            : "^4.0.0",
-		"gulp-rename"             : "^1.2.2",
-		"gulp-requirejs-optimize" : "^1.3.0",
-		"gulp-uglify"             : "^3.0.0",
-		"http-server"             : "^0.11.1",
-		"polymer-bundler"         : "^3.1.1",
-		"run-sequence"            : "^2.2.1",
-		"uglify-es"               : "^3.3.10",
-		"workbox-build"           : "^3.0.1"
+	"devDependencies": {
+		"clean-css": "^4.1.11",
+		"del": "^3.0.0",
+		"gulp": "^3.9.1",
+		"gulp-htmlmin": "^4.0.0",
+		"gulp-rename": "^1.2.2",
+		"gulp-requirejs-optimize": "^1.3.0",
+		"gulp-uglify": "^3.0.0",
+		"http-server": "^0.11.1",
+		"polymer-bundler": "^3.1.1",
+		"run-sequence": "^2.2.1",
+		"uglify-es": "^3.3.10",
+		"workbox-build": "^3.0.1"
 	}
 }

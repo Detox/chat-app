@@ -3,6 +3,8 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
+const STATE_VERSION = 1
+
 function create_array_object (properties_list)
 	/**
 	 * @constructor
@@ -35,24 +37,22 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 	/**
 	 * @constructor
 	 */
-	!function State (chat_id, initial_state)
+	!function State (chat_id)
 		if !(@ instanceof State)
-			return new State(chat_id, initial_state)
+			return new State(chat_id)
 		async-eventer.call(@)
 
-		@_chat_id	= chat_id
-		if !initial_state
-			# Synchronous localStorage for contacts, settings and other data
-			# TODO: messages and contacts secrets history archive in IndexedDB
-			initial_state	= localStorage.getItem(chat_id)
-			initial_state	=
-				if initial_state
-					JSON.parse(initial_state)
-				else
-					Object.create(null)
+		@_chat_id = chat_id
+		# TODO: contacts secrets history archive in IndexedDB
 
 		# State that is preserved across restarts
-		@_state	= initial_state
+		@_state = do
+			# Synchronous localStorage for contacts, settings and other data
+			initial_state	= localStorage.getItem(chat_id)
+			if initial_state
+				JSON.parse(initial_state)
+			else
+				Object.create(null)
 
 		# State that is only valid for current session
 		@_local_state =
@@ -70,10 +70,31 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			contacts_with_pending_messages	: ArraySet()
 			contacts_with_unread_messages	: ArraySet()
 
+		@_database_ready = new Promise (resolve) !~>
+			indexedDB.open(chat_id, STATE_VERSION)
+				..onsuccess = (e) !~>
+					@_database	= e.target.result
+					resolve()
+				..onerror = (e) !->
+					console.error('Opening messages database failed', e)
+					csw.functions.notify('An error happened during opening messages database', 'right', 'error')
+				..onupgradeneeded = (e) !~>
+					@_database		= e.target.result
+					messages_store	= @_database.createObjectStore('messages', {
+						keyPath			: 'message_id'
+						autoIncrement	: true
+					})
+					messages_store.createIndex('contact_id', 'contact_id')
+					# TODO: This is just for demo purposes
+					@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_RECEIVED'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
+					@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_SENT'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
+
+		@_messages_transactions = @_database_ready
+
 		# v1 of the state structure
 		if !('version' of @_state)
 			@_state
-				..'version'						= 1
+				..'version'						= STATE_VERSION
 				..'nickname'					= ''
 				..'seed'						= null
 				..'settings'					= JSON.parse(JSON.stringify(State.DEFAULT_SETTINGS))
@@ -106,9 +127,22 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		if @_state['seed']
 			@_state['seed']	= Uint8Array.from(@_state['seed'])
 
+		@_ready = Promise.all([
+			@_database_ready
+			new Promise (resolve) !~>
+				# Seed is necessary for operation
+				if @_state['seed']
+					resolve()
+				else
+					@_ready_resolve	= resolve
+		])
+
 		@_state['contacts']						= ArrayMap(
 			for contact in @_state['contacts']
 				contact[0]	= Uint8Array.from(contact[0])
+				contact[4]	= contact[4] && Uint8Array.from(contact[4])
+				contact[5]	= contact[5] && Uint8Array.from(contact[5])
+				contact[6]	= contact[6] && Uint8Array.from(contact[6])
 				contact 	= Contact(contact)
 				[contact['id'], contact]
 		)
@@ -133,25 +167,9 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				[secret['secret'], secret]
 		)
 
-		# TODO: This is just for demo purposes
-		@_local_state.messages.set(
-			Array.from(@_state['contacts'].keys())[0],
-			[
-				Message([1, State['MESSAGE_ORIGIN_RECEIVED'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])
-				Message([2, State['MESSAGE_ORIGIN_SENT'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'])
-			]
-		)
-
 		for contact_id in Array.from(@_state['contacts'].keys())
 			@_update_contact_with_pending_messages(contact_id)
 			@_update_contact_with_unread_messages(contact_id)
-
-		@_ready = new Promise (resolve) !~>
-			# Seed is necessary for operation
-			if @_state['seed']
-				resolve()
-			else
-				@_ready_resolve	= resolve
 
 	State:: =
 		/**
@@ -172,13 +190,14 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 					case 'contacts', 'contacts_requests', 'contacts_requests_blocked', 'secrets'
 						prepared_state[key]	=
 							for item in Array.from(value.values())
-								contents	= item['array']
-								contents[0]	= Array.from(contents[0])
+								contents	= item['array'].slice()
+								for item, index in contents
+									if item instanceof Uint8Array
+										contents[index]	= Array.from(item)
 								contents
 					default
 						prepared_state[key]	= value
-			# TODO: Unlock when saving messages is added
-			#localStorage.setItem(@_chat_id, JSON.stringify(prepared_state))
+			localStorage.setItem(@_chat_id, JSON.stringify(prepared_state))
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
@@ -609,8 +628,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				return
 			if are_arrays_equal(@'get_ui_active_contact'() || new Uint8Array(0), contact_id)
 				@'set_ui_active_contact'(null)
-			@_local_state.messages.delete(contact_id)
-			@'fire'('contact_messages_changed', contact_id)
+			<~! @'del_contact_messages'(contact_id).then
 			@_state['contacts'].delete(contact_id)
 			@'fire'('contact_deleted', old_contact)
 			@'fire'('contacts_changed')
@@ -701,7 +719,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 * @param {!Uint8Array} contact_id
 		 */
 		_update_contact_with_pending_messages : (contact_id) !->
-			for message in @'get_contact_messages'(contact_id) by -1
+			(messages) <~! @'get_contact_messages'(contact_id).then
+			for message in messages by -1
 				if message['origin'] == State['MESSAGE_ORIGIN_SENT'] && !message['date_sent']
 					if !@_local_state.contacts_with_pending_messages.has(contact_id)
 						@_local_state.contacts_with_pending_messages.add(contact_id)
@@ -714,7 +733,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 */
 		_update_contact_with_unread_messages : (contact_id) !->
 			last_read_message	= @'get_contact'(contact_id)['last_read_message']
-			for message in @'get_contact_messages'(contact_id)
+			(messages)			<~! @'get_contact_messages'(contact_id).then
+			for message in messages
 				if message['origin'] == State['MESSAGE_ORIGIN_RECEIVED'] && message['date_sent'] > last_read_message
 					if !@_local_state.contacts_with_unread_messages.has(contact_id)
 						@_local_state.contacts_with_unread_messages.add(contact_id)
@@ -725,18 +745,39 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		/**
 		 * @param {!Uint8Array} contact_id
 		 *
-		 * @return {!Array<!Message>}
+		 * @return {!Promise} Resolves with `Array<Message>`
 		 */
 		'get_contact_messages' : (contact_id) ->
-			@_local_state.messages.get(contact_id) || []
+			messages	= @_local_state.messages.get(contact_id)
+			if messages
+				Promise.resolve(messages)
+			else
+				@_messages_transaction(true, (messages_store, payload_callback) !~>
+					messages_store.index('contact_id').getAll(IDBKeyRange.only(contact_id))
+						..onsuccess	= (e) !~>
+							payload_callback(e.target.result)
+				)
+					.then (messages) ~>
+						messages	= messages.map (message) ->
+							Message([
+								message['message_id']
+								message['origin']
+								message['date_written']
+								message['date_sent']
+								message['text']
+							])
+						@_local_state.messages.set(contact_id, messages)
+						messages
 		/**
 		 * @param {!Uint8Array} contact_id
 		 *
-		 * @return {!Array<!Message>}
+		 * @return {!Promise} Resolves with `Array<Message>`
 		 */
 		'get_contact_messages_to_be_sent' : (contact_id) ->
-			@'get_contact_messages'(contact_id).filter (message) ->
-				message['origin'] == State['MESSAGE_ORIGIN_SENT'] && !message['date_sent']
+			@'get_contact_messages'(contact_id)
+				.then (messages) ->
+					messages.filter (message) ->
+						message['origin'] == State['MESSAGE_ORIGIN_SENT'] && !message['date_sent']
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {number}		origin			One of State.MESSAGE_ORIGIN_* constants
@@ -744,37 +785,100 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 * @param {number}		date_sent		When message was sent
 		 * @param {string} 		text
 		 *
-		 * @return {number} Message ID
+		 * @return {!Promise} Resolves with `message_id`
 		 */
-		'add_contact_message' : (contact_id, origin, date_written, date_sent, text) !->
-			if !@_local_state.messages.has(contact_id)
-				@_local_state.messages.set(contact_id, [])
-			messages	= @_local_state.messages.get(contact_id)
-			id			= if messages.length then messages[* - 1]['id'] + 1 else 1
-			message		= Message([id, origin, date_written, date_sent, text])
-			messages.push(message)
-			if origin == State['MESSAGE_ORIGIN_RECEIVED']
-				@_update_contact_last_active(contact_id)
-				if !are_arrays_equal(@'get_ui_active_contact'() || new Uint8Array(0), contact_id)
-					@_update_contact_with_unread_messages(contact_id)
-			else
-				@_update_contact_with_pending_messages(contact_id)
-			@'fire'('contact_message_added', contact_id, message)
-			@'fire'('contact_messages_changed', contact_id)
-			id
+		'add_contact_message' : (contact_id, origin, date_written, date_sent, text) ->
+			Promise.all([
+				@'get_contact_messages'(contact_id)
+				@_messages_transaction(false, (messages_store, payload_callback) !~>
+					messages_store.add({
+						'contact_id'	: contact_id,
+						'origin'		: origin,
+						'date_written'	: date_written,
+						'date_sent'		: date_sent,
+						'text'			: text
+					})
+						.onsuccess = (e) !->
+							payload_callback(e.target.result)
+				)
+			])
+				.then ([messages, id]) ~>
+					message	= Message([id, origin, date_written, date_sent, text])
+					messages.push(message)
+					if origin == State['MESSAGE_ORIGIN_RECEIVED']
+						@_update_contact_last_active(contact_id)
+						if !are_arrays_equal(@'get_ui_active_contact'() || new Uint8Array(0), contact_id)
+							@_update_contact_with_unread_messages(contact_id)
+						else
+							@_update_contact_last_read_message(contact_id)
+					else
+						@_update_contact_with_pending_messages(contact_id)
+					@'fire'('contact_message_added', contact_id, message)
+					@'fire'('contact_messages_changed', contact_id)
+					id
 		/**
 		 * @param {!Uint8Array}	contact_id
 		 * @param {number}		message_id	Message ID
 		 * @param {number}		date		Date when message was sent
 		 */
 		'set_contact_message_sent' : (contact_id, message_id, date) !->
-			messages	= @_local_state.messages.get(contact_id)
+			(messages) <~! @'get_contact_messages'(contact_id).then
 			for message in messages by -1 # Should be faster to start from the end
 				if message['id'] == message_id
 					message['date_sent']	= date
-					@_update_contact_with_pending_messages(contact_id)
-					@'fire'('contact_messages_changed', contact_id)
+					@_messages_transaction(false, (messages_store) !~>
+						messages_store.put({
+							'message_id'	: message_id
+							'contact_id'	: contact_id,
+							'origin'		: message['origin'],
+							'date_written'	: message['date_written'],
+							'date_sent'		: message['date_sent'],
+							'text'			: message['text']
+						})
+					)
+						.then ~>
+							@_update_contact_with_pending_messages(contact_id)
+							@'fire'('contact_messages_changed', contact_id)
 					break
+		/**
+		 * @param {!Uint8Array} contact_id
+		 *
+		 * @return {!Promise}
+		 */
+		'del_contact_messages' : (contact_id) ->
+			@_messages_transaction(false, (messages_store) !~>
+				messages_store.index('contact_id').openCursor(IDBKeyRange.only(contact_id))
+					..onsuccess	= (e) !~>
+						cursor = e.target.result
+						if cursor
+							cursor.delete()
+							cursor.continue()
+			)
+				.then !~>
+					@_local_state.messages.delete(contact_id)
+					@'fire'('contact_messages_changed', contact_id)
+		/**
+		 * @param {boolean}		readonly
+		 * @param {!Function}	callback
+		 *
+		 * @return {!Promise}
+		 */
+		_messages_transaction : (readonly, callback) ->
+			# This way we make all transactions sequential, this is because we only sync data to database, but primarily work with messages in local state
+			@_messages_transactions	= @_messages_transactions
+				.then ~>
+					new Promise (resolve, reject) !~>
+						var value
+						tx	= @_database.transaction('messages', 'readwrite')
+							..oncomplete	= !->
+								resolve(value)
+							..onerror		= (e) !->
+								console.error('Messages transaction failed', e)
+								reject
+						# Call function from second argument if you want promise to resolve with some value in it
+						callback(tx.objectStore('messages'), (result) !->
+							value	:= result
+						)
 		/**
 		 * @return {!Array<!Object>}
 		 */
@@ -894,9 +998,9 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 *
 		 * @return {!detoxState}
 		 */
-		'get_instance'			: (chat_id, initial_state) ->
+		'get_instance'			: (chat_id) ->
 			if !(chat_id of global_state)
-				global_state[chat_id]	= State(chat_id, initial_state)
+				global_state[chat_id]	= State(chat_id)
 			global_state[chat_id]
 	}
 
