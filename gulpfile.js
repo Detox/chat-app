@@ -99,13 +99,13 @@
         'location': 'node_modules/aez.wasm',
         'main': 'src/index.min'
       }, {
+        'name': 'blake2.wasm',
+        'location': 'node_modules/blake2.wasm',
+        'main': 'src/index.min'
+      }, {
         'name': 'ed25519-to-x25519.wasm',
         'location': 'node_modules/ed25519-to-x25519.wasm',
         'main': 'src/index.min'
-      }, {
-        'name': 'jssha',
-        'location': 'node_modules/jssha',
-        'main': 'src/sha'
       }, {
         'name': 'noise-c.wasm',
         'location': 'node_modules/noise-c.wasm',

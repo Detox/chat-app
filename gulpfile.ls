@@ -179,14 +179,14 @@ requirejs_config	=
 			'main'		: 'src/index.min'
 		}
 		{
-			'name'		: 'ed25519-to-x25519.wasm',
-			'location'	: 'node_modules/ed25519-to-x25519.wasm',
+			'name'		: 'blake2.wasm',
+			'location'	: 'node_modules/blake2.wasm',
 			'main'		: 'src/index.min'
 		}
 		{
-			'name'		: 'jssha',
-			'location'	: 'node_modules/jssha',
-			'main'		: 'src/sha'
+			'name'		: 'ed25519-to-x25519.wasm',
+			'location'	: 'node_modules/ed25519-to-x25519.wasm',
+			'main'		: 'src/index.min'
 		}
 		{
 			'name'		: 'noise-c.wasm',
