@@ -70,10 +70,10 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			contacts_with_pending_messages	: ArraySet()
 			contacts_with_unread_messages	: ArraySet()
 
-		# v0 of the state structure
+		# v1 of the state structure
 		if !('version' of @_state)
 			@_state
-				..'version'						= 0
+				..'version'						= 1
 				..'nickname'					= ''
 				..'seed'						= null
 				..'settings'					= JSON.parse(JSON.stringify(State.DEFAULT_SETTINGS))

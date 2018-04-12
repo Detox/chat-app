@@ -76,7 +76,7 @@
       };
       if (!('version' in this._state)) {
         x$ = this._state;
-        x$['version'] = 0;
+        x$['version'] = 1;
         x$['nickname'] = '';
         x$['seed'] = null;
         x$['settings'] = JSON.parse(JSON.stringify(State.DEFAULT_SETTINGS));
