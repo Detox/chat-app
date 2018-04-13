@@ -181,7 +181,36 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			if callback
 				@_ready.then(callback)
 			Boolean(@_state['seed'])
-		_save_state : !->
+		/**
+		 * @return {!Promise} Resolves with {Blob}
+		 */
+		'get_as_blob' : ->
+			Promise.all(
+				for let contact in @'get_contacts'()
+					@_messages_transaction((messages_store, payload_callback) !~>
+						messages_store.index('contact_id').getAll(IDBKeyRange.only(contact.id))
+							..onsuccess	= (e) !~>
+								messages	= e.target.result
+								messages	= messages.map (message) ->
+									[message['message_id'], message['origin'], message['date_written'], message['date_sent'], message['text']]
+								payload_callback(new Blob([JSON.stringify(messages)]))
+					)
+			)
+				.then (messages_blobs) ~>
+					serialized_state	= @_serialize_state()
+					header				= JSON.stringify(
+						[serialized_state.length].concat(messages_blobs.map (blob) ->
+							blob.size
+						)
+					)
+					header_length		= new ArrayBuffer(4)
+					view				= new DataView(header_length)
+					view.setUint32(0, header.length, false)
+					new Blob([header_length, header, serialized_state].concat(messages_blobs))
+		/**
+		 * @return {string} JSON string
+		 */
+		_serialize_state : ->
 			prepared_state	= {}
 			for key, value of @_state
 				switch key
@@ -197,7 +226,9 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 								contents
 					default
 						prepared_state[key]	= value
-			localStorage.setItem(@_chat_id, JSON.stringify(prepared_state))
+			JSON.stringify(prepared_state)
+		_save_state : !->
+			localStorage.setItem(@_chat_id, @_serialize_state())
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise
 		 */
@@ -752,7 +783,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			if messages
 				Promise.resolve(messages)
 			else
-				@_messages_transaction(true, (messages_store, payload_callback) !~>
+				@_messages_transaction((messages_store, payload_callback) !~>
 					messages_store.index('contact_id').getAll(IDBKeyRange.only(contact_id))
 						..onsuccess	= (e) !~>
 							payload_callback(e.target.result)
@@ -790,7 +821,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		'add_contact_message' : (contact_id, origin, date_written, date_sent, text) ->
 			Promise.all([
 				@'get_contact_messages'(contact_id)
-				@_messages_transaction(false, (messages_store, payload_callback) !~>
+				@_messages_transaction((messages_store, payload_callback) !~>
 					messages_store.add({
 						'contact_id'	: contact_id,
 						'origin'		: origin,
@@ -826,7 +857,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			for message in messages by -1 # Should be faster to start from the end
 				if message['id'] == message_id
 					message['date_sent']	= date
-					@_messages_transaction(false, (messages_store) !~>
+					@_messages_transaction((messages_store) !~>
 						messages_store.put({
 							'message_id'	: message_id
 							'contact_id'	: contact_id,
@@ -846,7 +877,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 * @return {!Promise}
 		 */
 		'del_contact_messages' : (contact_id) ->
-			@_messages_transaction(false, (messages_store) !~>
+			@_messages_transaction((messages_store) !~>
 				messages_store.index('contact_id').openCursor(IDBKeyRange.only(contact_id))
 					..onsuccess	= (e) !~>
 						cursor = e.target.result
@@ -858,12 +889,11 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 					@_local_state.messages.delete(contact_id)
 					@'fire'('contact_messages_changed', contact_id)
 		/**
-		 * @param {boolean}		readonly
 		 * @param {!Function}	callback
 		 *
 		 * @return {!Promise}
 		 */
-		_messages_transaction : (readonly, callback) ->
+		_messages_transaction : (callback) ->
 			# This way we make all transactions sequential, this is because we only sync data to database, but primarily work with messages in local state
 			@_messages_transactions	= @_messages_transactions
 				.then ~>

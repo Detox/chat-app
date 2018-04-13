@@ -321,6 +321,25 @@
         content = "<p>Either send message with Ctrl+Enter and use Enter for new line or use Enter to send message and Shift+Enter for new line.</p>";
         csw.functions.simple_modal(content);
       },
+      _backup: function(){
+        this.state.get_as_blob().then(function(blob){
+          var date, x$;
+          date = new Date;
+          date = [date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()].join('-');
+          x$ = document.createElement('a');
+          x$.href = URL.createObjectURL(blob);
+          x$.download = "detox-chat-backup-" + date + ".bin";
+          x$.click();
+        });
+      },
+      _restore: function(){
+        csw.functions.alert('Not implemented yet');
+      },
+      _help_backup_restore_data: function(){
+        var content;
+        content = "<p>This will backup your contacts, settings and messages history.</p>\n<p>If you're migrating from one browser to another or one machine to another, this will allow you to backup your data here and restore them somewhere else.</p>";
+        csw.functions.simple_modal(content);
+      },
       _remove_all_of_the_data: function(){
         var content, this$ = this;
         content = "<p>Are really, REALLY sure you want to proceed with deletion?</p>\n<p>WARNING: This operation can't be undone!</p>";
@@ -341,7 +360,7 @@
             }).then(function(){
               return detox_service_worker_registration.unregister();
             }).then(function(){
-              return window.close();
+              window.close();
             });
           } else {
             window.close();

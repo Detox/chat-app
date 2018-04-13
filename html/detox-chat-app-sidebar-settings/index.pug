@@ -92,6 +92,12 @@ dom-module(id="detox-chat-app-sidebar-settings")
 				detox-chat-icon-button(icon="question" tooltip="What are reconnects intervals?" hidden="[[!help]]"): button(type="button" on-click="_help_settings_reconnects_intervals")
 			csw-textarea(hidden="[[!developer]]"): textarea(rows="10" wrap="off" value="{{settings_reconnects_intervals_string}}" on-blur="_settings_reconnects_intervals_blur")
 			label
+				div.recommended Backup and restore data
+				detox-chat-icon-button.recommended(icon="question" tooltip="What can be backed up and restored?" hidden="[[!help]]"): button(type="button" on-click="_help_backup_restore_data")
+			div
+				csw-button: button.recommended(type="button" on-click="_backup") Backup
+				csw-button: button.recommended(type="button" on-click="_restore") Restore
+			label
 				div.dangerous Remove all of the data
 				detox-chat-icon-button.dangerous(icon="question" tooltip="What will be removed?" hidden="[[!help]]"): button(type="button" on-click="_help_remove_all_of_the_data")
 			csw-button: button.dangerous(type="button" on-click="_remove_all_of_the_data") Remove

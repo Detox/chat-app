@@ -182,8 +182,49 @@
           this._ready.then(callback);
         }
         return Boolean(this._state['seed']);
-      },
-      _save_state: function(){
+      }
+      /**
+       * @return {!Promise} Resolves with {Blob}
+       */,
+      'get_as_blob': function(){
+        var this$ = this;
+        return Promise.all((function(){
+          var i$, ref$, len$, results$ = [];
+          for (i$ = 0, len$ = (ref$ = this['get_contacts']()).length; i$ < len$; ++i$) {
+            results$.push((fn$.call(this, ref$[i$])));
+          }
+          return results$;
+          function fn$(contact){
+            var this$ = this;
+            return this._messages_transaction(function(messages_store, payload_callback){
+              var x$;
+              x$ = messages_store.index('contact_id').getAll(IDBKeyRange.only(contact.id));
+              x$.onsuccess = function(e){
+                var messages;
+                messages = e.target.result;
+                messages = messages.map(function(message){
+                  return [message['message_id'], message['origin'], message['date_written'], message['date_sent'], message['text']];
+                });
+                payload_callback(new Blob([JSON.stringify(messages)]));
+              };
+            });
+          }
+        }.call(this))).then(function(messages_blobs){
+          var serialized_state, header, header_length, view;
+          serialized_state = this$._serialize_state();
+          header = JSON.stringify([serialized_state.length].concat(messages_blobs.map(function(blob){
+            return blob.size;
+          })));
+          header_length = new ArrayBuffer(4);
+          view = new DataView(header_length);
+          view.setUint32(0, header.length, false);
+          return new Blob([header_length, header, serialized_state].concat(messages_blobs));
+        });
+      }
+      /**
+       * @return {string} JSON string
+       */,
+      _serialize_state: function(){
         var prepared_state, key, ref$, value, res$, i$, ref1$, len$, item, contents, j$, len1$, index;
         prepared_state = {};
         for (key in ref$ = this._state) {
@@ -215,7 +256,10 @@
             prepared_state[key] = value;
           }
         }
-        localStorage.setItem(this._chat_id, JSON.stringify(prepared_state));
+        return JSON.stringify(prepared_state);
+      },
+      _save_state: function(){
+        localStorage.setItem(this._chat_id, this._serialize_state());
       }
       /**
        * @return {Uint8Array} Seed if configured or `null` otherwise
@@ -903,7 +947,7 @@
         if (messages) {
           return Promise.resolve(messages);
         } else {
-          return this._messages_transaction(true, function(messages_store, payload_callback){
+          return this._messages_transaction(function(messages_store, payload_callback){
             var x$;
             x$ = messages_store.index('contact_id').getAll(IDBKeyRange.only(contact_id));
             x$.onsuccess = function(e){
@@ -942,7 +986,7 @@
       'add_contact_message': function(contact_id, origin, date_written, date_sent, text){
         var this$ = this;
         return Promise.all([
-          this['get_contact_messages'](contact_id), this._messages_transaction(false, function(messages_store, payload_callback){
+          this['get_contact_messages'](contact_id), this._messages_transaction(function(messages_store, payload_callback){
             messages_store.add({
               'contact_id': contact_id,
               'origin': origin,
@@ -986,7 +1030,7 @@
             message = messages[i$];
             if (message['id'] === message_id) {
               message['date_sent'] = date;
-              this$._messages_transaction(false, fn$).then(fn1$);
+              this$._messages_transaction(fn$).then(fn1$);
               break;
             }
           }
@@ -1013,7 +1057,7 @@
        */,
       'del_contact_messages': function(contact_id){
         var this$ = this;
-        return this._messages_transaction(false, function(messages_store){
+        return this._messages_transaction(function(messages_store){
           var x$;
           x$ = messages_store.index('contact_id').openCursor(IDBKeyRange.only(contact_id));
           x$.onsuccess = function(e){
@@ -1030,12 +1074,11 @@
         });
       }
       /**
-       * @param {boolean}		readonly
        * @param {!Function}	callback
        *
        * @return {!Promise}
        */,
-      _messages_transaction: function(readonly, callback){
+      _messages_transaction: function(callback){
         var this$ = this;
         return this._messages_transactions = this._messages_transactions.then(function(){
           return new Promise(function(resolve, reject){

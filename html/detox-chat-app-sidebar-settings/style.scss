@@ -42,6 +42,10 @@ csw-textarea {
 	margin-bottom : 0;
 }
 
+.recommended {
+	color : var(--text-color-success);
+}
+
 .dangerous {
 	color : var(--text-color-error);
 }

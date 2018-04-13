@@ -282,6 +282,24 @@ Polymer(
 			<p>Either send message with Ctrl+Enter and use Enter for new line or use Enter to send message and Shift+Enter for new line.</p>
 		"""
 		csw.functions.simple_modal(content)
+	_backup : !->
+		# TODO: Probably restart into offline mode and then do backup
+		@state.get_as_blob().then (blob) !->
+			date	= new Date
+			date	= [date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()].join('-')
+			document.createElement('a')
+				..href		= URL.createObjectURL(blob)
+				..download	= "detox-chat-backup-#date.bin"
+				..click()
+	_restore : !->
+		# TODO: Probably restart into offline mode and then do restoration
+		csw.functions.alert('Not implemented yet')
+	_help_backup_restore_data : !->
+		content	= """
+			<p>This will backup your contacts, settings and messages history.</p>
+			<p>If you're migrating from one browser to another or one machine to another, this will allow you to backup your data here and restore them somewhere else.</p>
+		"""
+		csw.functions.simple_modal(content)
 	_remove_all_of_the_data : !->
 		content	= """
 			<p>Are really, REALLY sure you want to proceed with deletion?</p>
@@ -299,7 +317,7 @@ Polymer(
 						)
 					.then ->
 						detox_service_worker_registration.unregister()
-					.then ->
+					.then !->
 						window.close()
 			else
 				window.close()
