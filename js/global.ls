@@ -100,7 +100,7 @@ function notify (status, title, details, timeout)
 		if typeof details == 'number'
 			timeout	:= details
 			details	:= ''
-		if !document.hidden || !Notification || Notification.permission == 'denied'
+		if document.hasFocus() || !Notification || Notification.permission == 'denied'
 			page_notification(status, title, details, timeout, resolve)
 		else if Notification.permission == 'default'
 			if !desktop_notification_permission_requested
