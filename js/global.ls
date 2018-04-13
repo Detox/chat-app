@@ -40,7 +40,7 @@ if ('serviceWorker' of navigator) && window.detox_sw_path
 /**
  * Requesting persistent storage, so that data will not be lost unexpectedly under storage pressure
  */
-if navigator.storage?.persist?
+if navigator.storage?.persist
 	navigator.storage.persisted().then (persistent) !->
 		if !persistent
 			console.info 'Persistent storage is not yet granted, requesting...'

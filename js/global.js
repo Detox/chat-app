@@ -54,7 +54,7 @@
   /**
    * Requesting persistent storage, so that data will not be lost unexpectedly under storage pressure
    */
-  if (((ref$ = navigator.storage) != null ? ref$.persist : void 8) != null) {
+  if ((ref$ = navigator.storage) != null && ref$.persist) {
     navigator.storage.persisted().then(function(persistent){
       if (!persistent) {
         console.info('Persistent storage is not yet granted, requesting...');
