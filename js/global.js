@@ -5,10 +5,11 @@
  * @license 0BSD
  */
 (function(){
+  var IN_APP, ref$;
+  IN_APP = location.search === '?home';
   /**
    * Force passive listeners on in Polymer
    */
-  var ref$;
   Polymer.setPassiveTouchGestures(true);
   /**
    * Register service worker
@@ -26,13 +27,21 @@
               switch (installingWorker.state) {
               case 'installed':
                 if (navigator.serviceWorker.controller) {
-                  csw.functions.notify('New application version available, refresh page or restart app to see updated version', 'success', 'right', 10);
+                  if (IN_APP) {
+                    csw.functions.notify('Application was updated in background and new version ready to be used, restart to enjoy it', 'success', 'right', 10);
+                  } else {
+                    csw.functions.notify('Website was updated in background and new version ready to be used, refresh page to enjoy it', 'success', 'right', 10);
+                  }
                 } else {
-                  csw.functions.notify('Application is ready to work offline', 'success', 'right', 10);
+                  if (IN_APP) {
+                    csw.functions.notify('Application is ready to work offline', 'success', 'right', 10);
+                  } else {
+                    csw.functions.notify('Website is ready to work offline', 'success', 'right', 10);
+                  }
                 }
                 break;
               case 'redundant':
-                console.error('The installing service worker became redundant.');
+                console.error('The installing service worker became redundant');
               }
             };
           };

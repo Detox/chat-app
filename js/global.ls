@@ -3,6 +3,7 @@
  * @author  Nazar Mokrynskyi <nazar@mokrynskyi.com>
  * @license 0BSD
  */
+const IN_APP = location.search == '?home'
 /**
  * Force passive listeners on in Polymer
  */
@@ -23,11 +24,17 @@ if ('serviceWorker' of navigator) && window.detox_sw_path
 					switch installingWorker.state
 						case 'installed'
 							if navigator.serviceWorker.controller
-								csw.functions.notify('New application version available, refresh page or restart app to see updated version', 'success', 'right', 10)
+								if IN_APP
+									csw.functions.notify('Application was updated in background and new version ready to be used, restart to enjoy it', 'success', 'right', 10)
+								else
+									csw.functions.notify('Website was updated in background and new version ready to be used, refresh page to enjoy it', 'success', 'right', 10)
 							else
-								csw.functions.notify('Application is ready to work offline', 'success', 'right', 10)
+								if IN_APP
+									csw.functions.notify('Application is ready to work offline', 'success', 'right', 10)
+								else
+									csw.functions.notify('Website is ready to work offline', 'success', 'right', 10)
 						case 'redundant'
-							console.error('The installing service worker became redundant.')
+							console.error('The installing service worker became redundant')
 		.catch (e) !->
 			console.error('Error during service worker registration:', e)
 /**
