@@ -59,92 +59,70 @@
 	}
 
 	.message {
-		display        : flex;
-		flex-shrink    : 0;
-		padding-bottom : var(--block-padding);
+		background-color : var(--background-color-highlight);
+		border           : var(--border-base);
+		border-radius    : var(--block-padding) var(--block-padding) var(--block-padding) 0;
+		box-sizing       : border-box;
+		flex-shrink      : 0;
+		margin-bottom    : var(--block-padding);
+		max-width        : var(--dialog-message-width-max);
+		overflow-x       : auto;
+		padding          : var(--block-padding);
+		word-break       : break-word;
+
+		&[origin=received] {
+			margin-right : auto;
+		}
 
 		&[origin=sent] {
-			flex-direction : row-reverse;
-
-			.message-content {
-				border-radius : var(--block-padding) var(--block-padding) 0 var(--block-padding);
-			}
-
-			.message-details {
-				padding    : var(--block-padding) var(--block-padding) var(--block-padding) 0;
-				text-align : right;
-			}
+			border-radius : var(--block-padding) var(--block-padding) 0 var(--block-padding);
+			margin-left   : auto;
 		}
 
 		&[pending] {
-			.message-content {
-				background-image : var(--dialog-message-pending-corner);
+			background-image : var(--dialog-message-pending-corner);
+		}
+
+		:first-child {
+			margin-top : 0;
+		}
+
+		:last-child {
+			margin-bottom : 0;
+		}
+
+		// We mostly rely on browser's styles here, but also tweak some stuff a bit
+		a {
+			color : var(--content-link-color);
+
+			&:visited {
+				color : var(--content-link-color-visited);
 			}
 		}
 
-		&:hover .message-details {
-			opacity : 1;
+		blockquote {
+			border-left  : var(--content-blockquote-border-left);
+			border-right : var(--content-blockquote-border-right);
+			margin       : var(--content-blockquote-margin);
+			padding      : var(--content-blockquote-padding);
 		}
 
-		.message-content {
-			background    : var(--background-color-highlight);
-			border        : var(--border-base);
-			border-radius : var(--block-padding) var(--block-padding) var(--block-padding) 0;
-			box-sizing    : border-box;
-			flex-shrink   : var(--dialog-message-content-width-shrink);
-			max-width     : var(--dialog-message-content-width-max);
-			overflow-x    : auto;
-			padding       : var(--block-padding);
-			word-break    : break-word;
-
-			:first-child {
-				margin-top : 0;
-			}
-
-			:last-child {
-				margin-bottom : 0;
-			}
-
-			// We mostly rely on browser's styles here, but also tweak some stuff a bit
-			a {
-				color : var(--content-link-color);
-
-				&:visited {
-					color : var(--content-link-color-visited);
-				}
-			}
-
-			blockquote {
-				border-left  : var(--content-blockquote-border-left);
-				border-right : var(--content-blockquote-border-right);
-				margin       : var(--content-blockquote-margin);
-				padding      : var(--content-blockquote-padding);
-			}
-
-			pre > code {
-				display    : block;
-				overflow-x : auto;
-				padding    : var(--content-code-block-padding);
-			}
-
-			code {
-				background-color : var(--border-color-base);
-				border-radius    : var(--content-code-border-radius);
-				padding          : var(--content-code-inline-padding);
-			}
-
-			hr {
-				height           : var(--content-hr-height);
-				border           : none;
-				background-color : var(--content-hr-background-color);
-			}
+		pre > code {
+			display    : block;
+			overflow-x : auto;
+			padding    : var(--content-code-block-padding);
 		}
 
-		.message-details {
-			align-self  : center;
-			flex-shrink : calc(100 - var(--dialog-message-content-width-shrink));
-			opacity     : 0;
-			padding     : var(--block-padding) 0 var(--block-padding) var(--block-padding);
+		code {
+			background-color : var(--border-color-base);
+			border-radius    : var(--content-code-border-radius);
+			padding          : var(--content-code-inline-padding);
+		}
+
+		hr {
+			height           : var(--content-hr-height);
+			border           : none;
+			background-color : var(--content-hr-background-color);
 		}
 	}
 }

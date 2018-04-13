@@ -153,17 +153,15 @@ html {
 	--menu-button-unread-corner                : var(--sidebar-contact-unread-corner);
 	--dialog-message-corner-end                : var(--block-padding);
 	--dialog-message-corner-start              : 0%;
-	--dialog-message-content-width-max         : 80%;
-	// Primarily for Firefox for Android, which for some reason wraps words differently without this
-	--dialog-message-content-width-shrink      : 20;
+	--dialog-message-width-max                 : 80%;
 	--dialog-message-pending-corner            : linear-gradient(var(--sidebar-contact-corner-bottom-right), var(--sidebar-contact-pending-color) var(--dialog-message-corner-start), transparent var(--dialog-message-corner-end));
 	--dialog-send-textarea-max                 : 40vh;
 	--dialog-send-textarea-min                 : 20vh;
 
 	/* Global content styling */
 
-	--content-link-color                       : #1f5ca8;
-	--content-link-color-visited               : #9c4cff;
+	--content-link-color                       : #6dadfd;
+	--content-link-color-visited               : #b477ff;
 	--content-blockquote-border-left           : .4em solid var(--border-color-base);
 	--content-blockquote-border-right          : .1em solid var(--border-color-base);
 	--content-blockquote-margin                : .5em 0;
@@ -178,6 +176,7 @@ html {
 // Would be nice to have this value in CSS property, but it is not working:(
 @media (max-width : 768px) {
 	html {
+		--dialog-message-width-max : 90%;
 		--notify-content-max-width : 70vw;
 	}
 }
