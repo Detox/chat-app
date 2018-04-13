@@ -13,7 +13,7 @@ function Wrapper (detox-chat, state)
 		created : !->
 			@state	= state.get_instance(@chat-id)
 			if !@state.ready()
-				csw.functions.notify("Previous state was not found, new identity generated", 'warning', 'right', 60)
+				detox_chat_app.notify_warning('Previous state was not found, new identity generated', 60)
 				@state.set_seed(detox-chat.generate_seed())
 				@state.add_secret(detox-chat.generate_secret().slice(0, 4), 'Default secret')
 	experience_level = [

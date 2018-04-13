@@ -54,21 +54,21 @@ Polymer(
 	_nickname_blur : !->
 		if @nickname != @state.get_nickname()
 			@state.set_nickname(@nickname)
-			csw.functions.notify('Nickname updated', 'success', 'right', 3)
+			detox_chat_app.notify_success('Nickname updated', 3)
 	_id_click : (e) !->
 		e.target.select()
 		document.execCommand('copy')
-		csw.functions.notify('ID copied to clipboard', 'success', 'right', 3)
+		detox_chat_app.notify_success('ID copied to clipboard', 3)
 	_add_secret : !->
 		@add_secret	= true
 	_add_secret_confirm : !->
 		new_secret_name	= @new_secret_name.trim()
 		if !new_secret_name
-			csw.functions.notify('Secret name is required', 'error', 'right', 3)
+			detox_chat_app.notify_error('Secret name is required', 3)
 			return
 		secret	= detox-chat.generate_secret().slice(0, @new_secret_length)
 		@state.add_secret(secret, new_secret_name)
-		csw.functions.notify('Secret added', 'success', 'right', 3)
+		detox_chat_app.notify_success('Secret added', 3)
 		@add_secret			= false
 		@new_secret_name	= ''
 		@new_secret_length	= 4
@@ -94,10 +94,10 @@ Polymer(
 		modal	= csw.functions.prompt("New secret name:", (new_secret_name) !~>
 			new_secret_name	= new_secret_name.trim()
 			if !new_secret_name
-				csw.functions.notify('Secret name is required', 'error', 'right', 3)
+				detox_chat_app.notify_error('Secret name is required', 3)
 				return
 			@state.set_secret_name(e.model.item.secret, new_secret_name)
-			csw.functions.notify('Secret name updated', 'success', 'right', 3)
+			detox_chat_app.notify_success('Secret name updated', 3)
 		)
 		modal.input.value	= e.model.item.name
 		e.preventDefault()

@@ -53,7 +53,7 @@ Polymer(
 				@online_contacts	= ArraySet(state.get_online_contacts())
 			)
 			.on('contact_request_added', !~>
-				csw.functions.notify('Incoming contact request received', 'warning', 'right', 3)
+				detox_chat_app.notify_warning('Incoming contact request received', 3)
 			)
 			.on('contacts_requests_changed', !~>
 				# TODO: Sort contacts
@@ -84,7 +84,7 @@ Polymer(
 				@add_contact		= true
 				@new_contact_id		= contact_splitted[0]
 				@new_contact_name	= decodeURIComponent(contact_splitted.slice(1).join(' '))
-				csw.functions.notify('Contact addition form is filled, confirm if you want to proceed', 'success', 'right', 5)
+				detox_chat_app.notify_success('Contact addition form is filled, confirm if you want to proceed', 5)
 
 	_hide_header : (list, add_contact) ->
 		!list.length || add_contact
@@ -97,19 +97,19 @@ Polymer(
 			[public_key, remote_secret]	= detox-chat.id_decode(@new_contact_id)
 			own_public_key				= detox-crypto.create_keypair(@state.get_seed()).ed25519.public
 			if detox-utils.are_arrays_equal(public_key, own_public_key)
-				csw.functions.notify('Adding yourself to contacts is not supported', 'error', 'right', 3)
+				detox_chat_app.notify_error('Adding yourself to contacts is not supported', 3)
 				return
 			existing_contact	= @state.get_contact(public_key)
 			if existing_contact
-				csw.functions.notify("Not added: this contact is already in contacts list under nickname <i>#{existing_contact.nickname}</i>", 'warning', 'right', 3)
+				detox_chat_app.notify_warning("Not added: this contact is already in contacts list under nickname <i>#{existing_contact.nickname}</i>", 3)
 				return
 			@state.add_contact(public_key, @new_contact_name || @new_contact_id, remote_secret)
-			csw.functions.notify("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 'success', 'right', 5)
+			detox_chat_app.notify_success("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 5)
 			@add_contact		= false
 			@new_contact_id		= ''
 			@new_contact_name	= ''
 		catch
-			csw.functions.notify('Incorrect ID, check for typos and try again', 'error', 'right', 3)
+			detox_chat_app.notify_error('Incorrect ID, check for typos and try again', 3)
 	_add_contact_cancel : !->
 		@add_contact	= false
 	_help : !->
@@ -141,7 +141,7 @@ Polymer(
 	_rename_contact : (e) !->
 		modal	= csw.functions.prompt("New nickname:", (new_nickname) !~>
 			@state.set_contact_nickname(e.model.item.id, new_nickname)
-			csw.functions.notify('Nickname updated', 'success', 'right', 3)
+			detox_chat_app.notify_success('Nickname updated', 3)
 		)
 		modal.input.value	= e.model.item.nickname
 		e.stopPropagation()
@@ -180,12 +180,12 @@ Polymer(
 			state.add_contact(item.id, item.name, new Uint8Array(0))
 			state.del_contact_request(item.id)
 			modal.close()
-			csw.functions.notify('Contact added', 'success', 'right', 3)
+			detox_chat_app.notify_success('Contact added', 3)
 		)
 		modal.querySelector('#reject').addEventListener('click', !->
 			state.del_contact_request(item.id)
 			modal.close()
-			csw.functions.notify('Contact request rejected', 'warning', 'right', 3)
+			detox_chat_app.notify_warning('Contact request rejected', 3)
 		)
 		modal.querySelector('#cancel').addEventListener('click', !->
 			modal.close()

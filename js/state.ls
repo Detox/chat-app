@@ -77,7 +77,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 					resolve()
 				..onerror = (e) !->
 					console.error('Opening messages database failed', e)
-					csw.functions.notify('An error happened during opening messages database', 'right', 'error')
+					detox_chat_app.notify_error('An error happened during opening messages database')
 				..onupgradeneeded = (e) !~>
 					@_database		= e.target.result
 					messages_store	= @_database.createObjectStore('messages', {
