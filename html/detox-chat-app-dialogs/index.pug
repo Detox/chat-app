@@ -5,8 +5,10 @@ dom-module(id="detox-chat-app-dialogs")
 			csw-button(icon="bars" unread$="[[unread_messages]]"): button(type="button" on-click="_show_sidebar")
 			div [[contact.nickname]]
 		#messages-list(hidden="[[!active_contact]]")
-			template#messages-list-template(is="dom-repeat" items="{{messages}}" mutable-data)
-				.message(origin$="[[_message_origin(item)]]" pending$="[[!item.date_sent]]" inner-h-t-m-l="[[_markdown_renderer(item.text)]] <csw-tooltip></csw-tooltip>" tooltip="Written: [[_format_date(item.date_written)]],<br>delivered: [[_format_date(item.date_sent)]]")
+			//- Hack: This is needed because otherwise padding on parent element will have no effect
+			.inner
+				template#messages-list-template(is="dom-repeat" items="{{messages}}" mutable-data)
+					.message(origin$="[[_message_origin(item)]]" pending$="[[!item.date_sent]]" inner-h-t-m-l="[[_markdown_renderer(item.text)]] <csw-tooltip></csw-tooltip>" tooltip="Written: [[_format_date(item.date_written)]],<br>delivered: [[_format_date(item.date_sent)]]")
 		csw-form: form#send-form(hidden="[[!active_contact]]")
 			csw-textarea(autosize): textarea#textarea(value="{{text_message}}" placeholder="[[_send_placeholder(send_ctrl_enter)]]")
 			csw-button: button(type="button" on-click="_send") Send

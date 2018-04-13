@@ -47,82 +47,90 @@
 }
 
 #messages-list {
-	display        : flex;
-	flex-direction : column;
-	flex-grow      : 1;
-	overflow-x     : hidden;
-	overflow-y     : auto;
-	padding        : var(--block-padding);
+	flex-grow  : 1;
+	overflow-x : hidden;
+	overflow-y : auto;
+	padding    : var(--block-padding);
 
 	&[hidden] {
 		display : none;
 	}
 
-	.message {
-		background-color : var(--background-color-highlight);
-		border           : var(--border-base);
-		border-radius    : var(--block-padding) var(--block-padding) var(--block-padding) 0;
-		box-sizing       : border-box;
-		flex-shrink      : 0;
-		margin-bottom    : var(--block-padding);
-		max-width        : var(--dialog-message-width-max);
-		overflow-x       : auto;
-		padding          : var(--block-padding);
-		word-break       : break-word;
+	.inner {
+		display        : flex;
+		flex-direction : column;
 
-		&[origin=received] {
-			margin-right : auto;
-		}
+		.message {
+			background-color : var(--background-color-highlight);
+			border           : var(--border-base);
+			border-radius    : var(--block-padding) var(--block-padding) var(--block-padding) 0;
+			box-sizing       : border-box;
+			flex-shrink      : 0;
+			margin-bottom    : var(--block-padding);
+			max-width        : var(--dialog-message-width-max);
+			overflow-x       : auto;
+			padding          : var(--block-padding);
+			word-break       : break-word;
 
-		&[origin=sent] {
-			border-radius : var(--block-padding) var(--block-padding) 0 var(--block-padding);
-			margin-left   : auto;
-		}
-
-		&[pending] {
-			background-image : var(--dialog-message-pending-corner);
-		}
-
-		:first-child {
-			margin-top : 0;
-		}
-
-		:last-child {
-			margin-bottom : 0;
-		}
-
-		// We mostly rely on browser's styles here, but also tweak some stuff a bit
-		a {
-			color : var(--content-link-color);
-
-			&:visited {
-				color : var(--content-link-color-visited);
+			&:last-of-type {
+				// Hack: This is needed for Chromium, otherwise it throws additional margin (because it doesn't follow the latest version of the spec)
+				margin-bottom : 0;
 			}
-		}
 
-		blockquote {
-			border-left  : var(--content-blockquote-border-left);
-			border-right : var(--content-blockquote-border-right);
-			margin       : var(--content-blockquote-margin);
-			padding      : var(--content-blockquote-padding);
-		}
+			&[origin=received] {
+				margin-right : auto;
+			}
 
-		pre > code {
-			display    : block;
-			overflow-x : auto;
-			padding    : var(--content-code-block-padding);
-		}
+			&[origin=sent] {
+				border-radius : var(--block-padding) var(--block-padding) 0 var(--block-padding);
+				margin-left   : auto;
+			}
 
-		code {
-			background-color : var(--border-color-base);
-			border-radius    : var(--content-code-border-radius);
-			padding          : var(--content-code-inline-padding);
-		}
+			&[pending] {
+				background-image : var(--dialog-message-pending-corner);
+			}
 
-		hr {
-			height           : var(--content-hr-height);
-			border           : none;
-			background-color : var(--content-hr-background-color);
+			:first-child {
+				margin-top : 0;
+			}
+
+			:last-child {
+				margin-bottom : 0;
+			}
+
+			// We mostly rely on browser's styles here, but also tweak some stuff a bit
+			a {
+				color : var(--content-link-color);
+
+				&:visited {
+					color : var(--content-link-color-visited);
+				}
+			}
+
+			blockquote {
+				border-left  : var(--content-blockquote-border-left);
+				border-right : var(--content-blockquote-border-right);
+				margin       : var(--content-blockquote-margin);
+				padding      : var(--content-blockquote-padding);
+			}
+
+			pre > code {
+				display    : block;
+				overflow-x : auto;
+				padding    : var(--content-code-block-padding);
+			}
+
+			code {
+				background-color : var(--border-color-base);
+				border-radius    : var(--content-code-border-radius);
+				padding          : var(--content-code-inline-padding);
+			}
+
+			hr {
+				height           : var(--content-hr-height);
+				border           : none;
+				background-color : var(--content-hr-background-color);
+			}
 		}
 	}
 }
