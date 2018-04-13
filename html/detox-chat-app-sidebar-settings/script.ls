@@ -103,7 +103,7 @@ Polymer(
 	_settings_announce_changed : !->
 		if @settings_announce != @_bool_to_string(@state.get_settings_announce())
 			@state.set_settings_announce(@settings_announce == '1')
-			detox_chat_app.notify_success('Saved changes to announcement setting', 3)
+			detox_chat_app.notify_success('Saved changes to announcement setting, but restart is needed for changes to take effect', 3)
 	_help_settings_announce : !->
 		content	= """
 			<p>Announcement is a process of publishing own contact information to the network, so that contacts can find and connect to you.</p>
@@ -132,7 +132,7 @@ Polymer(
 				return
 			# TODO: Check if object structure is valid
 			@state.set_settings_bootstrap_nodes(settings_bootstrap_nodes)
-			detox_chat_app.notify_success('Saved changes to bootstrap nodes setting', 3)
+			detox_chat_app.notify_success('Saved changes to bootstrap nodes setting, but restart is needed for changes to take effect', 3)
 		catch
 			detox_chat_app.notify_error('Bootstrap nodes syntax error, changes were not saved', 3)
 	_help_settings_bootstrap_nodes : !->
@@ -147,7 +147,7 @@ Polymer(
 		value	= parseInt(value)
 		if value != @state.get_settings_bucket_size()
 			@state.set_settings_bucket_size(value)
-			detox_chat_app.notify_success('Saved changes to bucket size setting', 3)
+			detox_chat_app.notify_success('Saved changes to bucket size setting, but restart is needed for changes to take effect', 3)
 	_help_settings_bucket_size : !->
 		content	= """
 			<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>
@@ -184,7 +184,7 @@ Polymer(
 				return
 			# TODO: Check if object structure is valid
 			@state.set_settings_ice_servers(settings_ice_servers)
-			detox_chat_app.notify_success('Saved changes to ICE servers setting', 3)
+			detox_chat_app.notify_success('Saved changes to ICE servers setting, but restart is needed for changes to take effect', 3)
 		catch
 			detox_chat_app.notify_error('ICE servers syntax error, changes were not saved', 3)
 	_help_settings_ice_servers : !->
@@ -201,7 +201,7 @@ Polymer(
 		value	= parseInt(value)
 		if value != @state.get_settings_max_pending_segments()
 			@state.set_settings_max_pending_segments(value)
-			detox_chat_app.notify_success('Saved changes to max pending segments setting', 3)
+			detox_chat_app.notify_success('Saved changes to max pending segments setting, but restart is needed for changes to take effect', 3)
 	_help_settings_max_pending_segments : !->
 		content	= """
 			<p>Pending segments is a low-level state of segments from transport layer of Detox network implementation that appear during routing paths construction.</p>
@@ -212,7 +212,7 @@ Polymer(
 		value	= parseInt(value)
 		if value != @state.get_settings_number_of_intermediate_nodes()
 			@state.set_settings_number_of_intermediate_nodes(value)
-			detox_chat_app.notify_success('Saved changes to number of intermediate nodes setting', 3)
+			detox_chat_app.notify_success('Saved changes to number of intermediate nodes setting, but restart is needed for changes to take effect', 3)
 	_help_settings_number_of_intermediate_nodes : !->
 		content	= """
 			<p>Intermediate nodes are nodes between this node and interested target node, used for routing paths creation in transport layer of Detox network implementation.</p>
@@ -224,7 +224,7 @@ Polymer(
 		value	= parseInt(value)
 		if value != @state.get_settings_number_of_introduction_nodes()
 			@state.set_settings_number_of_introduction_nodes(value)
-			detox_chat_app.notify_success('Saved changes to number of introduction nodes setting', 3)
+			detox_chat_app.notify_success('Saved changes to number of introduction nodes setting, but restart is needed for changes to take effect', 3)
 	_help_settings_number_of_introduction_nodes : !->
 		content	= """
 			<p>Introduction nodes are nodes to which announcement is made.</p>
@@ -235,7 +235,7 @@ Polymer(
 	_settings_online_changed : !->
 		if @settings_online != @_bool_to_string(@state.get_settings_online())
 			@state.set_settings_online(@settings_online == '1')
-			detox_chat_app.notify_success('Saved changes to online setting', 3)
+			detox_chat_app.notify_success('Saved changes to online setting, but restart is needed for changes to take effect', 3)
 	_help_settings_online : !->
 		content	= """
 			<p>If not online then on next start application will not try to connect to Detox network and related functionality will not work properly.</p>
@@ -245,7 +245,7 @@ Polymer(
 		value	= parseInt(value)
 		if value != @state.get_settings_packets_per_second()
 			@state.set_settings_packets_per_second(value)
-			detox_chat_app.notify_success('Saved changes to packets per second setting', 3)
+			detox_chat_app.notify_success('Saved changes to packets per second setting, but restart is needed for changes to take effect', 3)
 	_help_settings_packets_per_second : !->
 		content	= """
 			<p>Detox network sends data at fixed rate on each opened connection regardless of how much bandwidth is actually utilized, this option specifies how may packets of 512 bytes will be sent on each link during one second.</p>

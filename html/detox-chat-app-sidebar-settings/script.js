@@ -129,7 +129,7 @@
       _settings_announce_changed: function(){
         if (this.settings_announce !== this._bool_to_string(this.state.get_settings_announce())) {
           this.state.set_settings_announce(this.settings_announce === '1');
-          detox_chat_app.notify_success('Saved changes to announcement setting', 3);
+          detox_chat_app.notify_success('Saved changes to announcement setting, but restart is needed for changes to take effect', 3);
         }
       },
       _help_settings_announce: function(){
@@ -161,7 +161,7 @@
             return;
           }
           this.state.set_settings_bootstrap_nodes(settings_bootstrap_nodes);
-          detox_chat_app.notify_success('Saved changes to bootstrap nodes setting', 3);
+          detox_chat_app.notify_success('Saved changes to bootstrap nodes setting, but restart is needed for changes to take effect', 3);
         } catch (e$) {
           e = e$;
           detox_chat_app.notify_error('Bootstrap nodes syntax error, changes were not saved', 3);
@@ -176,7 +176,7 @@
         value = parseInt(value);
         if (value !== this.state.get_settings_bucket_size()) {
           this.state.set_settings_bucket_size(value);
-          detox_chat_app.notify_success('Saved changes to bucket size setting', 3);
+          detox_chat_app.notify_success('Saved changes to bucket size setting, but restart is needed for changes to take effect', 3);
         }
       },
       _help_settings_bucket_size: function(){
@@ -218,7 +218,7 @@
             return;
           }
           this.state.set_settings_ice_servers(settings_ice_servers);
-          detox_chat_app.notify_success('Saved changes to ICE servers setting', 3);
+          detox_chat_app.notify_success('Saved changes to ICE servers setting, but restart is needed for changes to take effect', 3);
         } catch (e$) {
           e = e$;
           detox_chat_app.notify_error('ICE servers syntax error, changes were not saved', 3);
@@ -233,7 +233,7 @@
         value = parseInt(value);
         if (value !== this.state.get_settings_max_pending_segments()) {
           this.state.set_settings_max_pending_segments(value);
-          detox_chat_app.notify_success('Saved changes to max pending segments setting', 3);
+          detox_chat_app.notify_success('Saved changes to max pending segments setting, but restart is needed for changes to take effect', 3);
         }
       },
       _help_settings_max_pending_segments: function(){
@@ -245,7 +245,7 @@
         value = parseInt(value);
         if (value !== this.state.get_settings_number_of_intermediate_nodes()) {
           this.state.set_settings_number_of_intermediate_nodes(value);
-          detox_chat_app.notify_success('Saved changes to number of intermediate nodes setting', 3);
+          detox_chat_app.notify_success('Saved changes to number of intermediate nodes setting, but restart is needed for changes to take effect', 3);
         }
       },
       _help_settings_number_of_intermediate_nodes: function(){
@@ -257,7 +257,7 @@
         value = parseInt(value);
         if (value !== this.state.get_settings_number_of_introduction_nodes()) {
           this.state.set_settings_number_of_introduction_nodes(value);
-          detox_chat_app.notify_success('Saved changes to number of introduction nodes setting', 3);
+          detox_chat_app.notify_success('Saved changes to number of introduction nodes setting, but restart is needed for changes to take effect', 3);
         }
       },
       _help_settings_number_of_introduction_nodes: function(){
@@ -268,7 +268,7 @@
       _settings_online_changed: function(){
         if (this.settings_online !== this._bool_to_string(this.state.get_settings_online())) {
           this.state.set_settings_online(this.settings_online === '1');
-          detox_chat_app.notify_success('Saved changes to online setting', 3);
+          detox_chat_app.notify_success('Saved changes to online setting, but restart is needed for changes to take effect', 3);
         }
       },
       _help_settings_online: function(){
@@ -280,7 +280,7 @@
         value = parseInt(value);
         if (value !== this.state.get_settings_packets_per_second()) {
           this.state.set_settings_packets_per_second(value);
-          detox_chat_app.notify_success('Saved changes to packets per second setting', 3);
+          detox_chat_app.notify_success('Saved changes to packets per second setting, but restart is needed for changes to take effect', 3);
         }
       },
       _help_settings_packets_per_second: function(){
