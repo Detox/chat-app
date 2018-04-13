@@ -91,5 +91,9 @@ dom-module(id="detox-chat-app-sidebar-settings")
 				div Reconnects intervals:
 				detox-chat-icon-button(icon="question" tooltip="What are reconnects intervals?" hidden="[[!help]]"): button(type="button" on-click="_help_settings_reconnects_intervals")
 			csw-textarea(hidden="[[!developer]]"): textarea(rows="10" wrap="off" value="{{settings_reconnects_intervals_string}}" on-blur="_settings_reconnects_intervals_blur")
+			label
+				div.dangerous Remove all of the data
+				detox-chat-icon-button.dangerous(icon="question" tooltip="What will be removed?" hidden="[[!help]]"): button(type="button" on-click="_help_remove_all_of_the_data")
+			csw-button: button.dangerous(type="button" on-click="_remove_all_of_the_data") Remove
 		p.restart-warning * Changing these settings require application restart in order to take effect
 	script(src="script.js")

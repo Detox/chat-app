@@ -41,3 +41,7 @@ csw-textarea {
 	color         : var(--text-color-base-disabled);
 	margin-bottom : 0;
 }
+
+.dangerous {
+	color : var(--text-color-error);
+}

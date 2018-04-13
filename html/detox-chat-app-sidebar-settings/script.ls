@@ -282,4 +282,33 @@ Polymer(
 			<p>Either send message with Ctrl+Enter and use Enter for new line or use Enter to send message and Shift+Enter for new line.</p>
 		"""
 		csw.functions.simple_modal(content)
+	_remove_all_of_the_data : !->
+		content	= """
+			<p>Are really, REALLY sure you want to proceed with deletion?</p>
+			<p>WARNING: This operation can't be undone!</p>
+		"""
+		csw.functions.confirm(content, !~>
+			localStorage.removeItem(@chat-id)
+			indexedDB.deleteDatabase(@chat-id)
+			if window.detox_service_worker_registration
+				caches.keys()
+					.then (keys) ->
+						Promise.all(
+							for key in keys
+								caches.delete(key)
+						)
+					.then ->
+						detox_service_worker_registration.unregister()
+					.then ->
+						window.close()
+			else
+				window.close()
+		)
+	_help_remove_all_of_the_data : !->
+		content	= """
+			<p>WARNING: This operation can't be undone!</p>
+			<p>This will remove all of the contacts, messages history, settings and any other data stored by this application (including unregistering Service Worker and cleaning its caches), after which application will close itself.</p>
+			<p>Make sure to backup any useful data stored in this application before you proceed with deletion!</p>
+		"""
+		csw.functions.simple_modal(content)
 )

@@ -45,6 +45,7 @@
               }
             };
           };
+          window.detox_service_worker_registration = registration;
         })['catch'](function(e){
           console.error('Error during service worker registration:', e);
         });

@@ -35,6 +35,7 @@ if ('serviceWorker' of navigator) && window.detox_sw_path
 									detox_chat_app.notify_success('Website is ready to work offline', 10)
 						case 'redundant'
 							console.error('The installing service worker became redundant')
+			window.detox_service_worker_registration = registration
 		.catch (e) !->
 			console.error('Error during service worker registration:', e)
 /**

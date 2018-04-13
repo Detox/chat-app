@@ -320,6 +320,38 @@
         var content;
         content = "<p>Either send message with Ctrl+Enter and use Enter for new line or use Enter to send message and Shift+Enter for new line.</p>";
         csw.functions.simple_modal(content);
+      },
+      _remove_all_of_the_data: function(){
+        var content, this$ = this;
+        content = "<p>Are really, REALLY sure you want to proceed with deletion?</p>\n<p>WARNING: This operation can't be undone!</p>";
+        csw.functions.confirm(content, function(){
+          localStorage.removeItem(this$.chatId);
+          indexedDB.deleteDatabase(this$.chatId);
+          if (window.detox_service_worker_registration) {
+            caches.keys().then(function(keys){
+              var key;
+              return Promise.all((function(){
+                var i$, ref$, len$, results$ = [];
+                for (i$ = 0, len$ = (ref$ = keys).length; i$ < len$; ++i$) {
+                  key = ref$[i$];
+                  results$.push(caches['delete'](key));
+                }
+                return results$;
+              }()));
+            }).then(function(){
+              return detox_service_worker_registration.unregister();
+            }).then(function(){
+              return window.close();
+            });
+          } else {
+            window.close();
+          }
+        });
+      },
+      _help_remove_all_of_the_data: function(){
+        var content;
+        content = "<p>WARNING: This operation can't be undone!</p>\n<p>This will remove all of the contacts, messages history, settings and any other data stored by this application (including unregistering Service Worker and cleaning its caches), after which application will close itself.</p>\n<p>Make sure to backup any useful data stored in this application before you proceed with deletion!</p>";
+        csw.functions.simple_modal(content);
       }
     });
   });
