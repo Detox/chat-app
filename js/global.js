@@ -72,13 +72,14 @@
   }
   desktop_notification_permission_requested = false;
   /**
-   * @param {string}	status
-   * @param {string}	title
-   * @param {string=}	details
-   * @param {string=}	timeout
+   * @param {string}		status
+   * @param {string}		title
+   * @param {string=}		details
+   * @param {number=}		timeout
+   * @param {!Function}	onclick
    */
-  function page_notification(status, title, details, timeout){
-    var body;
+  function page_notification(status, title, details, timeout, onclick){
+    var body, notification;
     body = document.createElement('div');
     if (details) {
       body.innerHTML = '<b></b><br>';
@@ -87,18 +88,25 @@
     } else {
       body.insertAdjacentText('beforeend', title);
     }
-    csw.functions.notify(body, status, 'right', timeout);
+    notification = csw.functions.notify(body, status, 'right', timeout);
+    if (onclick) {
+      notification.addEventListener('click', onclick);
+    }
   }
   /**
-   * @param {string}	title
-   * @param {string=}	details
-   * @param {string=}	timeout
+   * @param {string}		title
+   * @param {string=}		details
+   * @param {number=}		timeout
+   * @param {!Function}	onclick
    */
-  function desktop_notification(title, details, timeout){
+  function desktop_notification(title, details, timeout, onclick){
     var notification;
     notification = new Notification(title, {
       body: details
     });
+    if (onclick) {
+      notification.addEventListener('click', onclick);
+    }
     if (timeout) {
       setTimeout(function(){
         notification.close();
@@ -110,54 +118,56 @@
    * @param {string}	title
    * @param {string=}	details
    * @param {string=}	timeout
+   *
+   * @return {!Promise}
    */
   function notify(status, title, details, timeout){
-    var desktop_notification_permission_requested, message, x$;
-    if (typeof details === 'number') {
-      timeout = details;
-      details = '';
-    }
-    if (!document.hidden || !Notification || Notification.permission === 'denied') {
-      page_notification(status, title, details, timeout);
-    } else if (Notification.permission === 'default') {
-      if (!desktop_notification_permission_requested) {
-        desktop_notification_permission_requested = true;
-        if (IN_APP) {
-          message = "Application tried to show you a system notification while was inactive, but you have to grant permission for that first, do that after clicking on this notification";
-        } else {
-          message = "Website tried to show you a desktop notification while was inactive, but you have to grant permission for that first, do that after clicking on this notification";
-        }
-        x$ = csw.functions.notify(message, 'warning', 'right');
-        x$.addEventListener('click', function(){
-          Notification.requestPermission().then(function(permission){
-            switch (permission) {
-            case 'granted':
-              csw.functions.notify('You will no longer miss important notifications 😉', 'success', 'right', 3);
-              break;
-            case 'denied':
-              csw.functions.notify('In case you change your mind, desktop notifications can be re-enabled in browser settings 😉', 'success', 'right', 5);
-            }
-          });
-        }, {
-          once: true
-        });
+    return new Promise(function(resolve){
+      var desktop_notification_permission_requested, message, x$;
+      if (typeof details === 'number') {
+        timeout = details;
+        details = '';
       }
-      page_notification(status, title, details, timeout);
-    } else {
-      desktop_notification(title, details, timeout);
-    }
+      if (!document.hidden || !Notification || Notification.permission === 'denied') {
+        page_notification(status, title, details, timeout, resolve);
+      } else if (Notification.permission === 'default') {
+        if (!desktop_notification_permission_requested) {
+          desktop_notification_permission_requested = true;
+          if (IN_APP) {
+            message = "Application tried to show you a system notification while was inactive, but you have to grant permission for that first, do that after clicking on this notification";
+          } else {
+            message = "Website tried to show you a desktop notification while was inactive, but you have to grant permission for that first, do that after clicking on this notification";
+          }
+          x$ = csw.functions.notify(message, 'warning', 'right');
+          x$.addEventListener('click', function(){
+            Notification.requestPermission().then(function(permission){
+              switch (permission) {
+              case 'granted':
+                csw.functions.notify('You will no longer miss important notifications 😉', 'success', 'right', 3);
+                break;
+              case 'denied':
+                csw.functions.notify('In case you change your mind, desktop notifications can be re-enabled in browser settings 😉', 'success', 'right', 5);
+              }
+            });
+          });
+        }
+        page_notification(status, title, details, timeout, resolve);
+      } else {
+        desktop_notification(title, details, timeout, resolve);
+      }
+    });
   }
   x$ = window.detox_chat_app || (window.detox_chat_app = {});
   x$.notify_error = function(){
-    notify.apply(null, ['error'].concat(arrayFrom$(arguments)));
+    return notify.apply(null, ['error'].concat(arrayFrom$(arguments)));
   };
   x$.notify = function(){
-    notify.apply(null, [''].concat(arrayFrom$(arguments)));
+    return notify.apply(null, [''].concat(arrayFrom$(arguments)));
   };
   x$.notify_success = function(){
-    notify.apply(null, ['success'].concat(arrayFrom$(arguments)));
+    return notify.apply(null, ['success'].concat(arrayFrom$(arguments)));
   };
   x$.notify_warning = function(){
-    notify.apply(null, ['warning'].concat(arrayFrom$(arguments)));
+    return notify.apply(null, ['warning'].concat(arrayFrom$(arguments)));
   };
 }).call(this);

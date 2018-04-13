@@ -54,12 +54,13 @@ else
 
 desktop_notification_permission_requested	= false
 /**
- * @param {string}	status
- * @param {string}	title
- * @param {string=}	details
- * @param {string=}	timeout
+ * @param {string}		status
+ * @param {string}		title
+ * @param {string=}		details
+ * @param {number=}		timeout
+ * @param {!Function}	onclick
  */
-!function page_notification (status, title, details, timeout)
+!function page_notification (status, title, details, timeout, onclick)
 	body	= document.createElement('div')
 	if details
 		body.innerHTML						= '<b></b><br>'
@@ -67,16 +68,21 @@ desktop_notification_permission_requested	= false
 		body.insertAdjacentText('beforeend', details)
 	else
 		body.insertAdjacentText('beforeend', title)
-	csw.functions.notify(body, status, 'right', timeout)
+	notification	= csw.functions.notify(body, status, 'right', timeout)
+	if onclick
+		notification.addEventListener('click', onclick)
 /**
- * @param {string}	title
- * @param {string=}	details
- * @param {string=}	timeout
+ * @param {string}		title
+ * @param {string=}		details
+ * @param {number=}		timeout
+ * @param {!Function}	onclick
  */
-!function desktop_notification (title, details, timeout)
+!function desktop_notification (title, details, timeout, onclick)
 	notification	= new Notification(title, {
 		body	: details
 	})
+	if onclick
+		notification.addEventListener('click', onclick)
 	if timeout
 		setTimeout (!->
 			notification.close()
@@ -86,42 +92,44 @@ desktop_notification_permission_requested	= false
  * @param {string}	title
  * @param {string=}	details
  * @param {string=}	timeout
+ *
+ * @return {!Promise}
  */
-!function notify (status, title, details, timeout)
-	if typeof details == 'number'
-		timeout	= details
-		details	= ''
-	if !document.hidden || !Notification || Notification.permission == 'denied'
-		page_notification(status, title, details, timeout)
-	else if Notification.permission == 'default'
-		if !desktop_notification_permission_requested
-			desktop_notification_permission_requested	= true
-			if IN_APP
-				message	= "Application tried to show you a system notification while was inactive, but you have to grant permission for that first, do that after clicking on this notification"
-			else
-				message	= "Website tried to show you a desktop notification while was inactive, but you have to grant permission for that first, do that after clicking on this notification"
-			csw.functions.notify(message, 'warning', 'right')
-				..addEventListener(
-					'click'
-					!->
-						Notification.requestPermission().then (permission) !->
-							switch permission
-								case 'granted'
-									csw.functions.notify('You will no longer miss important notifications 😉', 'success', 'right', 3)
-								case 'denied'
-									csw.functions.notify('In case you change your mind, desktop notifications can be re-enabled in browser settings 😉', 'success', 'right', 5)
-					{once: true}
-				)
-		page_notification(status, title, details, timeout)
-	else
-		desktop_notification(title, details, timeout)
+function notify (status, title, details, timeout)
+	new Promise (resolve) !->
+		if typeof details == 'number'
+			timeout	:= details
+			details	:= ''
+		if !document.hidden || !Notification || Notification.permission == 'denied'
+			page_notification(status, title, details, timeout, resolve)
+		else if Notification.permission == 'default'
+			if !desktop_notification_permission_requested
+				desktop_notification_permission_requested	= true
+				if IN_APP
+					message	= "Application tried to show you a system notification while was inactive, but you have to grant permission for that first, do that after clicking on this notification"
+				else
+					message	= "Website tried to show you a desktop notification while was inactive, but you have to grant permission for that first, do that after clicking on this notification"
+				csw.functions.notify(message, 'warning', 'right')
+					..addEventListener(
+						'click'
+						!->
+							Notification.requestPermission().then (permission) !->
+								switch permission
+									case 'granted'
+										csw.functions.notify('You will no longer miss important notifications 😉', 'success', 'right', 3)
+									case 'denied'
+										csw.functions.notify('In case you change your mind, desktop notifications can be re-enabled in browser settings 😉', 'success', 'right', 5)
+					)
+			page_notification(status, title, details, timeout, resolve)
+		else
+			desktop_notification(title, details, timeout, resolve)
 
 window.{}detox_chat_app
-	..notify_error		= !->
+	..notify_error		= ->
 		notify('error', ...&)
-	..notify			= !->
+	..notify			= ->
 		notify('', ...&)
-	..notify_success	= !->
+	..notify_success	= ->
 		notify('success', ...&)
-	..notify_warning	= !->
+	..notify_warning	= ->
 		notify('warning', ...&)
