@@ -188,6 +188,11 @@
         case this.state.MESSAGE_ORIGIN_SERVICE:
           return 'service';
         }
+      },
+      _help_insecure: function(){
+        var content;
+        content = "<p>Don't get this message wrong, Detox Chat in particular and Detox network in general are built with security and anonymity in mind from the beginning.</p>\n<p>However, until independent security audit is conducted and proves that the application is indeed secure, you shouldn't trust it critical data.</p>";
+        csw.functions.simple_modal(content);
       }
     });
   });

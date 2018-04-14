@@ -172,4 +172,10 @@ Polymer(
 				'received'
 			case @state.MESSAGE_ORIGIN_SERVICE
 				'service'
+	_help_insecure : !->
+		content	= """
+			<p>Don't get this message wrong, Detox Chat in particular and Detox network in general are built with security and anonymity in mind from the beginning.</p>
+			<p>However, until independent security audit is conducted and proves that the application is indeed secure, you shouldn't trust it critical data.</p>
+		"""
+		csw.functions.simple_modal(content)
 )
