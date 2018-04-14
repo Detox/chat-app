@@ -18,7 +18,7 @@
 	flex-shrink   : 0;
 	line-height   : var(--form-element-height);
 
-	csw-button {
+	.open-sidebar {
 		display : none;
 
 		&[unread] {
@@ -28,7 +28,7 @@
 		}
 	}
 
-	div {
+	.nickname {
 		flex-grow : 1;
 		padding   : 0 var(--block-padding);
 	}
@@ -169,8 +169,12 @@
 // Would be nice to have this value in CSS property, but it is not working:(
 @media (max-width : 768px) {
 	#contact-details {
-		csw-button {
+		.open-sidebar {
 			display : inline-block;
+
+			& + * {
+				border-left : var(--border-base);
+			}
 		}
 	}
 
@@ -182,6 +186,20 @@
 	#send-form {
 		csw-button {
 			display : inline-block;
+		}
+	}
+}
+
+// Would be nice to have this value in CSS property, but it is not working:(
+@media (max-width : 600px) {
+	#contact-details {
+		flex-wrap  : wrap;
+		height     : auto;
+		max-height : calc(var(--form-element-height) * 2 + var(--border-width-base));
+
+		.nickname {
+			border-top : var(--border-base);
+			width      : 100%;
 		}
 	}
 }

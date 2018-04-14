@@ -156,7 +156,7 @@ html {
 	--dialog-message-width-max                 : 80%;
 	--dialog-message-pending-corner            : linear-gradient(var(--sidebar-contact-corner-bottom-right), var(--sidebar-contact-pending-color) var(--dialog-message-corner-start), transparent var(--dialog-message-corner-end));
 	--dialog-send-textarea-max                 : 40vh;
-	--dialog-send-textarea-min                 : 20vh;
+	--dialog-send-textarea-min                 : 2em;
 
 	/* Global content styling */
 

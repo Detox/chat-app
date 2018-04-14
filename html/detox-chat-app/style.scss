@@ -43,11 +43,11 @@
 			csw-button:last-of-type {
 				margin-left : auto;
 			}
+		}
 
-			& + csw-button {
-				border-bottom : var(--tabs-border);
-				display       : none;
-			}
+		.hide-sidebar {
+			border-bottom : var(--tabs-border);
+			display       : none;
 		}
 	}
 
@@ -98,8 +98,9 @@ detox-chat-app-dialogs {
 		}
 
 		#header {
-			csw-tabs + csw-button {
-				display : inline-block;
+			.hide-sidebar {
+				border-left : var(--border-base);
+				display     : inline-block;
 			}
 		}
 	}

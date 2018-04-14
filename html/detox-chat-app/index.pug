@@ -7,7 +7,7 @@ dom-module(id="detox-chat-app")
 					csw-button: button(type="button") Contacts
 					csw-button: button(type="button") Profile
 					csw-button(icon="cogs" tooltip="Settings"): button(type="button")
-				csw-button(icon="times"): button(type="button" on-click="_hide_sidebar")
+				csw-button.hide-sidebar(icon="times"): button(type="button" on-click="_hide_sidebar")
 			csw-switcher(selected="[[selected_tab]]")
 				detox-chat-app-sidebar-contacts(chat-id="[[chat-id]]")
 				detox-chat-app-sidebar-profile(chat-id="[[chat-id]]")
