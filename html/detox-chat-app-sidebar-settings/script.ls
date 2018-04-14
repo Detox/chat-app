@@ -293,7 +293,13 @@ Polymer(
 				..click()
 	_restore : !->
 		# TODO: Probably restart into offline mode and then do restoration
-		csw.functions.alert('Not implemented yet')
+		document.createElement('input')
+			..type		= 'file'
+			..accept	= '.bin'
+			..addEventListener('change', (e) !~>
+				@state.set_from_blob(e.target.files[0])
+			)
+			..click()
 	_help_backup_restore_data : !->
 		content	= """
 			<p>This will backup your contacts, settings and messages history.</p>
@@ -320,9 +326,9 @@ Polymer(
 					.then ->
 						detox_service_worker_registration.unregister()
 					.then !->
-						window.close()
+						detox_chat_app.notify_success('All of the data removed successfully, you can exit now')
 			else
-				window.close()
+				detox_chat_app.notify_success('All of the data removed successfully, you can exit now')
 		)
 	_help_remove_all_of_the_data : !->
 		content	= """

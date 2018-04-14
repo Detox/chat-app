@@ -333,7 +333,14 @@
         });
       },
       _restore: function(){
-        csw.functions.alert('Not implemented yet');
+        var x$, this$ = this;
+        x$ = document.createElement('input');
+        x$.type = 'file';
+        x$.accept = '.bin';
+        x$.addEventListener('change', function(e){
+          this$.state.set_from_blob(e.target.files[0]);
+        });
+        x$.click();
       },
       _help_backup_restore_data: function(){
         var content;
@@ -360,10 +367,10 @@
             }).then(function(){
               return detox_service_worker_registration.unregister();
             }).then(function(){
-              window.close();
+              detox_chat_app.notify_success('All of the data removed successfully, you can exit now');
             });
           } else {
-            window.close();
+            detox_chat_app.notify_success('All of the data removed successfully, you can exit now');
           }
         });
       },

@@ -26,6 +26,29 @@ function create_array_object (properties_list)
 				@'array'[array_index]	= value
 		)
 	ArrayObject
+/**
+ * @param {!Blob}	blob
+ * @param {number}	start
+ * @param {number}	length
+ * @param {string}	as		Either `string` or `buffer` (for `ArrayBuffer`)
+ *
+ * @return {!Promise} Will resolve with requested data
+ *
+ * @throws {Error}
+ */
+function read_blob_slice (blob, start, length, as)
+	if blob.size < (start + length)
+		throw new Error
+	blob	= blob.slice(start, start + length)
+	new Promise (resolve) !->
+		reader			= new FileReader
+		reader.onload	= !->
+			resolve(reader.result)
+		switch as
+			case 'buffer'
+				reader.readAsArrayBuffer(blob)
+			case 'string'
+				reader.readAsText(blob)
 
 function Wrapper (detox-chat, detox-utils, async-eventer)
 	id_encode			= detox-chat['id_encode']
@@ -45,9 +68,16 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		@_chat_id = chat_id
 		# TODO: contacts secrets history archive in IndexedDB
 
+		backup_chat_id	= chat_id + '-backup'
+		backup_present	= false
+
 		# State that is preserved across restarts
-		@_state = do
+		@_state = do ->
 			# Synchronous localStorage for contacts, settings and other data
+			backup_state	= localStorage.getItem(backup_chat_id)
+			if backup_state
+				backup_present	:= true
+				return JSON.parse(backup_state)
 			initial_state	= localStorage.getItem(chat_id)
 			if initial_state
 				JSON.parse(initial_state)
@@ -70,24 +100,58 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			contacts_with_pending_messages	: ArraySet()
 			contacts_with_unread_messages	: ArraySet()
 
-		@_database_ready = new Promise (resolve) !~>
-			indexedDB.open(chat_id, STATE_VERSION)
-				..onsuccess = (e) !~>
-					@_database	= e.target.result
-					resolve()
-				..onerror = (e) !->
-					console.error('Opening messages database failed', e)
-					detox_chat_app.notify_error('An error happened during opening messages database')
-				..onupgradeneeded = (e) !~>
-					@_database		= e.target.result
-					messages_store	= @_database.createObjectStore('messages', {
-						keyPath			: 'message_id'
-						autoIncrement	: true
-					})
-					messages_store.createIndex('contact_id', 'contact_id')
-					# TODO: This is just for demo purposes
-					@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_RECEIVED'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
-					@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_SENT'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
+		if backup_present
+			backup_db_ready	= new Promise (resolve) !~>
+				indexedDB.open(backup_chat_id, STATE_VERSION)
+					..onsuccess = (e) !~>
+						@_backup_database	= e.target.result
+						resolve()
+					..onerror = (e) !->
+						console.error('Opening backup messages database failed', e)
+						detox_chat_app.notify_error('An error happened during opening backup messages database, restoring from backup canceled, please restart')
+						localStorage.removeItem(backup_chat_id)
+						indexedDB.deleteDatabase(backup_chat_id)
+		else
+			backup_db_ready	= Promise.resolve()
+
+		@_database_ready = backup_db_ready
+			.then ~>
+				new Promise (resolve) !~>
+					if backup_present
+						# Remove existing database, we'll restore data from backup
+						indexedDB.deleteDatabase(chat_id)
+					indexedDB.open(chat_id, STATE_VERSION)
+						..onsuccess = (e) !~>
+							@_database	= e.target.result
+							resolve()
+						..onerror = (e) !->
+							console.error('Opening messages database failed', e)
+							detox_chat_app.notify_error('An error happened during opening messages database')
+						..onupgradeneeded = (e) !~>
+							@_database		= e.target.result
+							messages_store	= @_database.createObjectStore('messages', {
+								keyPath			: 'message_id'
+								autoIncrement	: true
+							})
+							messages_store.createIndex('contact_id', 'contact_id')
+			.then ~>
+				if backup_present
+					new Promise (resolve) !~>
+						# Restore data from backup
+						tx	= @_backup_database.transaction('messages', 'readwrite')
+							..oncomplete	= !~>
+								@_backup_database.close()
+								resolve()
+							..onerror		= (e) !->
+								console.error('Messages transaction failed', e)
+						tx.objectStore('messages').openCursor()
+							.onsuccess	= (e) !~>
+								cursor = e.target.result
+								if cursor
+									message	= cursor.value
+									@_messages_transaction (messages_store) !->
+										messages_store.put(message)
+									cursor.continue()
 
 		@_messages_transactions = @_database_ready
 
@@ -122,6 +186,10 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				..'contacts_requests'			= []
 				..'contacts_requests_blocked'	= []
 				..'secrets'						= []
+			# TODO: This is just for demo purposes
+			setTimeout !~>
+				@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_RECEIVED'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
+				@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_SENT'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
 
 		# Denormalize state after deserialization
 		if @_state['seed']
@@ -136,6 +204,12 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				else
 					@_ready_resolve	= resolve
 		])
+
+		if backup_present
+			@_ready.then !->
+				localStorage.removeItem(backup_chat_id)
+				indexedDB.deleteDatabase(backup_chat_id)
+				detox_chat_app.notify_success('Restoration from backup finished successfully!', 5)
 
 		@_state['contacts']						= ArrayMap(
 			for contact in @_state['contacts']
@@ -187,9 +261,9 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		'get_as_blob' : ->
 			Promise.all(
 				for let contact in @'get_contacts'()
-					@_messages_transaction((messages_store, payload_callback) !~>
+					@_messages_transaction((messages_store, payload_callback) !->
 						messages_store.index('contact_id').getAll(IDBKeyRange.only(contact.id))
-							..onsuccess	= (e) !~>
+							..onsuccess	= (e) !->
 								messages	= e.target.result
 								messages	= messages.map (message) ->
 									[message['message_id'], message['origin'], message['date_written'], message['date_sent'], message['text']]
@@ -206,7 +280,82 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 					header_length		= new ArrayBuffer(4)
 					view				= new DataView(header_length)
 					view.setUint32(0, header.length, false)
+					# TODO: Probably compress with pako
 					new Blob([header_length, header, serialized_state].concat(messages_blobs))
+		/**
+		 * @param {!Blob} blob
+		 */
+		'set_from_blob' : (blob) !->
+			var backup_state
+			backup_chat_id	= @_chat_id + '-backup'
+			# Delete potential existing backup data first
+			localStorage.removeItem(backup_chat_id)
+			indexedDB.deleteDatabase(backup_chat_id)
+			# TODO: Probably decompress with pako
+			# Now read header length
+			read_blob_slice(blob, 0, 4, 'buffer')
+				.then (buffer) ->
+					view			= new DataView(buffer)
+					header_length	= view.getUint32(0, false)
+					# Read header
+					read_blob_slice(blob, 4, header_length, 'string')
+				.then (header) ->
+					header_length	= header.length
+					header			= JSON.parse(header)
+					data_length		= header.reduce (a, b) ->
+						a + b
+					# Check if Blob size corresponds to header contents
+					if blob.size != (4 + header_length + data_length)
+						throw Error
+					/**
+					 * Header is an array of numbers, each number is a length of corresponding part.
+					 * First part if JSON-encoded state, each next part corresponds to JSON-encoded messages for once contact in the order of stored contacts.
+					 */
+					read_blob_slice(blob, 4 + header_length, header[0], 'string')
+						.then (serialized_state) ->
+							state	= JSON.parse(serialized_state)
+							if state['version'] > STATE_VERSION
+								detox_chat_app.notify_error('Restoration from backup created by newer version is not supported, upgrade first', 5)
+								throw new Error
+							localStorage.setItem(backup_chat_id, serialized_state)
+						.then ->
+							backup_state		:= State(backup_chat_id)
+							start_offset		= 4 + header_length + header[0]
+							contacts_messages	= backup_state['get_contacts']().map (contact, index) ->
+								start			= start_offset
+								length			= header[index + 1]
+								start_offset	+= length
+								[contact.id, start, length]
+							function restore_contact_messages
+								contact_messages	= contacts_messages.shift()
+								if !contact_messages
+									return
+								[contact_id, start, length]	= contact_messages
+								read_blob_slice(blob, start, length, 'string')
+									.then (messages) ->
+										backup_state._messages_transaction (messages_store) !->
+											for message in JSON.parse(messages)
+												messages_store.put({
+													'contact_id'	: contact_id,
+													'message_id'	: message[0],
+													'origin'		: message[1],
+													'date_written'	: message[2],
+													'date_sent'		: message[3],
+													'text'			: message[4]
+												})
+									.then ->
+										# Recursively restore messages for all contacts
+										restore_contact_messages()
+							restore_contact_messages()
+				.then !->
+					detox_chat_app.notify_warning('Restoration from backup is almost done, restart is needed to finish the process')
+				.catch !->
+					console.error ...&
+					localStorage.removeItem(backup_chat_id)
+					if backup_state
+						backup_state._database?.close()
+					indexedDB.deleteDatabase(backup_chat_id)
+					detox_chat_app.notify_error('Restoration from backup failed, make sure you have selected correct backup file and try again', 5)
 		/**
 		 * @return {string} JSON string
 		 */
@@ -779,26 +928,27 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 * @return {!Promise} Resolves with `Array<Message>`
 		 */
 		'get_contact_messages' : (contact_id) ->
-			messages	= @_local_state.messages.get(contact_id)
-			if messages
-				Promise.resolve(messages)
-			else
-				@_messages_transaction((messages_store, payload_callback) !~>
-					messages_store.index('contact_id').getAll(IDBKeyRange.only(contact_id))
-						..onsuccess	= (e) !~>
-							payload_callback(e.target.result)
-				)
-					.then (messages) ~>
-						messages	= messages.map (message) ->
-							Message([
-								message['message_id']
-								message['origin']
-								message['date_written']
-								message['date_sent']
-								message['text']
-							])
-						@_local_state.messages.set(contact_id, messages)
-						messages
+			@_messages_transactions.then ~>
+				messages	= @_local_state.messages.get(contact_id)
+				if messages
+					messages
+				else
+					@_messages_transaction((messages_store, payload_callback) !~>
+						messages_store.index('contact_id').getAll(IDBKeyRange.only(contact_id))
+							..onsuccess	= (e) !~>
+								payload_callback(e.target.result)
+					)
+						.then (messages) ~>
+							messages	= messages.map (message) ->
+								Message([
+									message['message_id']
+									message['origin']
+									message['date_written']
+									message['date_sent']
+									message['text']
+								])
+							@_local_state.messages.set(contact_id, messages)
+							messages
 		/**
 		 * @param {!Uint8Array} contact_id
 		 *
@@ -857,7 +1007,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			for message in messages by -1 # Should be faster to start from the end
 				if message['id'] == message_id
 					message['date_sent']	= date
-					@_messages_transaction((messages_store) !~>
+					@_messages_transaction((messages_store) !->
 						messages_store.put({
 							'message_id'	: message_id
 							'contact_id'	: contact_id,
@@ -879,7 +1029,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		'del_contact_messages' : (contact_id) ->
 			@_messages_transaction((messages_store) !~>
 				messages_store.index('contact_id').openCursor(IDBKeyRange.only(contact_id))
-					..onsuccess	= (e) !~>
+					.onsuccess	= (e) !->
 						cursor = e.target.result
 						if cursor
 							cursor.delete()
@@ -904,7 +1054,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 								resolve(value)
 							..onerror		= (e) !->
 								console.error('Messages transaction failed', e)
-								reject
+								reject()
 						# Call function from second argument if you want promise to resolve with some value in it
 						callback(tx.objectStore('messages'), (result) !->
 							value	:= result

@@ -36,6 +36,36 @@
       });
     }
   }
+  /**
+   * @param {!Blob}	blob
+   * @param {number}	start
+   * @param {number}	length
+   * @param {string}	as		Either `string` or `buffer` (for `ArrayBuffer`)
+   *
+   * @return {!Promise} Will resolve with requested data
+   *
+   * @throws {Error}
+   */
+  function read_blob_slice(blob, start, length, as){
+    if (blob.size < start + length) {
+      throw new Error;
+    }
+    blob = blob.slice(start, start + length);
+    return new Promise(function(resolve){
+      var reader;
+      reader = new FileReader;
+      reader.onload = function(){
+        resolve(reader.result);
+      };
+      switch (as) {
+      case 'buffer':
+        reader.readAsArrayBuffer(blob);
+        break;
+      case 'string':
+        reader.readAsText(blob);
+      }
+    });
+  }
   function Wrapper(detoxChat, detoxUtils, asyncEventer){
     var id_encode, are_arrays_equal, ArrayMap, ArraySet, global_state, constants, Contact, ContactRequest, ContactRequestBlocked, Message, Secret;
     id_encode = detoxChat['id_encode'];
@@ -47,15 +77,28 @@
      * @constructor
      */
     function State(chat_id){
-      var initial_state, x$, contact, current_date, secret, i$, ref$, len$, contact_id, this$ = this;
+      var backup_chat_id, backup_present, backup_db_ready, x$, contact, current_date, secret, i$, ref$, len$, contact_id, this$ = this;
       if (!(this instanceof State)) {
         return new State(chat_id);
       }
       asyncEventer.call(this);
       this._chat_id = chat_id;
-      this._state = (initial_state = localStorage.getItem(chat_id), initial_state
-        ? JSON.parse(initial_state)
-        : Object.create(null));
+      backup_chat_id = chat_id + '-backup';
+      backup_present = false;
+      this._state = function(){
+        var backup_state, initial_state;
+        backup_state = localStorage.getItem(backup_chat_id);
+        if (backup_state) {
+          backup_present = true;
+          return JSON.parse(backup_state);
+        }
+        initial_state = localStorage.getItem(chat_id);
+        if (initial_state) {
+          return JSON.parse(initial_state);
+        } else {
+          return Object.create(null);
+        }
+      }();
       this._local_state = {
         online: false,
         announced: false,
@@ -72,28 +115,74 @@
         contacts_with_pending_messages: ArraySet(),
         contacts_with_unread_messages: ArraySet()
       };
-      this._database_ready = new Promise(function(resolve){
-        var x$;
-        x$ = indexedDB.open(chat_id, STATE_VERSION);
-        x$.onsuccess = function(e){
-          this$._database = e.target.result;
-          resolve();
-        };
-        x$.onerror = function(e){
-          console.error('Opening messages database failed', e);
-          detox_chat_app.notify_error('An error happened during opening messages database');
-        };
-        x$.onupgradeneeded = function(e){
-          var messages_store;
-          this$._database = e.target.result;
-          messages_store = this$._database.createObjectStore('messages', {
-            keyPath: 'message_id',
-            autoIncrement: true
+      if (backup_present) {
+        backup_db_ready = new Promise(function(resolve){
+          var x$;
+          x$ = indexedDB.open(backup_chat_id, STATE_VERSION);
+          x$.onsuccess = function(e){
+            this$._backup_database = e.target.result;
+            resolve();
+          };
+          x$.onerror = function(e){
+            console.error('Opening backup messages database failed', e);
+            detox_chat_app.notify_error('An error happened during opening backup messages database, restoring from backup canceled, please restart');
+            localStorage.removeItem(backup_chat_id);
+            indexedDB.deleteDatabase(backup_chat_id);
+          };
+        });
+      } else {
+        backup_db_ready = Promise.resolve();
+      }
+      this._database_ready = backup_db_ready.then(function(){
+        return new Promise(function(resolve){
+          var x$;
+          if (backup_present) {
+            indexedDB.deleteDatabase(chat_id);
+          }
+          x$ = indexedDB.open(chat_id, STATE_VERSION);
+          x$.onsuccess = function(e){
+            this$._database = e.target.result;
+            resolve();
+          };
+          x$.onerror = function(e){
+            console.error('Opening messages database failed', e);
+            detox_chat_app.notify_error('An error happened during opening messages database');
+          };
+          x$.onupgradeneeded = function(e){
+            var messages_store;
+            this$._database = e.target.result;
+            messages_store = this$._database.createObjectStore('messages', {
+              keyPath: 'message_id',
+              autoIncrement: true
+            });
+            messages_store.createIndex('contact_id', 'contact_id');
+          };
+        });
+      }).then(function(){
+        if (backup_present) {
+          return new Promise(function(resolve){
+            var x$, tx;
+            x$ = tx = this$._backup_database.transaction('messages', 'readwrite');
+            x$.oncomplete = function(){
+              this$._backup_database.close();
+              resolve();
+            };
+            x$.onerror = function(e){
+              console.error('Messages transaction failed', e);
+            };
+            tx.objectStore('messages').openCursor().onsuccess = function(e){
+              var cursor, message;
+              cursor = e.target.result;
+              if (cursor) {
+                message = cursor.value;
+                this$._messages_transaction(function(messages_store){
+                  messages_store.put(message);
+                });
+                cursor['continue']();
+              }
+            };
           });
-          messages_store.createIndex('contact_id', 'contact_id');
-          this$['add_contact_message'](this$['get_contacts']()[0]['id'], State['MESSAGE_ORIGIN_RECEIVED'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
-          this$['add_contact_message'](this$['get_contacts']()[0]['id'], State['MESSAGE_ORIGIN_SENT'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
-        };
+        }
       });
       this._messages_transactions = this._database_ready;
       if (!('version' in this._state)) {
@@ -106,6 +195,10 @@
         x$['contacts_requests'] = [];
         x$['contacts_requests_blocked'] = [];
         x$['secrets'] = [];
+        setTimeout(function(){
+          this$['add_contact_message'](this$['get_contacts']()[0]['id'], State['MESSAGE_ORIGIN_RECEIVED'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
+          this$['add_contact_message'](this$['get_contacts']()[0]['id'], State['MESSAGE_ORIGIN_SENT'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
+        });
       }
       if (this._state['seed']) {
         this._state['seed'] = Uint8Array.from(this._state['seed']);
@@ -119,6 +212,13 @@
           }
         })
       ]);
+      if (backup_present) {
+        this._ready.then(function(){
+          localStorage.removeItem(backup_chat_id);
+          indexedDB.deleteDatabase(backup_chat_id);
+          detox_chat_app.notify_success('Restoration from backup finished successfully!', 5);
+        });
+      }
       this._state['contacts'] = ArrayMap((function(){
         var i$, ref$, len$, results$ = [];
         for (i$ = 0, len$ = (ref$ = this._state['contacts']).length; i$ < len$; ++i$) {
@@ -195,7 +295,6 @@
           }
           return results$;
           function fn$(contact){
-            var this$ = this;
             return this._messages_transaction(function(messages_store, payload_callback){
               var x$;
               x$ = messages_store.index('contact_id').getAll(IDBKeyRange.only(contact.id));
@@ -219,6 +318,95 @@
           view = new DataView(header_length);
           view.setUint32(0, header.length, false);
           return new Blob([header_length, header, serialized_state].concat(messages_blobs));
+        });
+      }
+      /**
+       * @param {!Blob} blob
+       */,
+      'set_from_blob': function(blob){
+        var backup_state, backup_chat_id;
+        backup_chat_id = this._chat_id + '-backup';
+        localStorage.removeItem(backup_chat_id);
+        indexedDB.deleteDatabase(backup_chat_id);
+        read_blob_slice(blob, 0, 4, 'buffer').then(function(buffer){
+          var view, header_length;
+          view = new DataView(buffer);
+          header_length = view.getUint32(0, false);
+          return read_blob_slice(blob, 4, header_length, 'string');
+        }).then(function(header){
+          var header_length, data_length;
+          header_length = header.length;
+          header = JSON.parse(header);
+          data_length = header.reduce(function(a, b){
+            return a + b;
+          });
+          if (blob.size !== 4 + header_length + data_length) {
+            throw Error;
+          }
+          /**
+           * Header is an array of numbers, each number is a length of corresponding part.
+           * First part if JSON-encoded state, each next part corresponds to JSON-encoded messages for once contact in the order of stored contacts.
+           */
+          return read_blob_slice(blob, 4 + header_length, header[0], 'string').then(function(serialized_state){
+            var state;
+            state = JSON.parse(serialized_state);
+            if (state['version'] > STATE_VERSION) {
+              detox_chat_app.notify_error('Restoration from backup created by newer version is not supported, upgrade first', 5);
+              throw new Error;
+            }
+            return localStorage.setItem(backup_chat_id, serialized_state);
+          }).then(function(){
+            var start_offset, contacts_messages;
+            backup_state = State(backup_chat_id);
+            start_offset = 4 + header_length + header[0];
+            contacts_messages = backup_state['get_contacts']().map(function(contact, index){
+              var start, length;
+              start = start_offset;
+              length = header[index + 1];
+              start_offset += length;
+              return [contact.id, start, length];
+            });
+            function restore_contact_messages(){
+              var contact_messages, contact_id, start, length;
+              contact_messages = contacts_messages.shift();
+              if (!contact_messages) {
+                return;
+              }
+              contact_id = contact_messages[0], start = contact_messages[1], length = contact_messages[2];
+              return read_blob_slice(blob, start, length, 'string').then(function(messages){
+                return backup_state._messages_transaction(function(messages_store){
+                  var i$, ref$, len$, message;
+                  for (i$ = 0, len$ = (ref$ = JSON.parse(messages)).length; i$ < len$; ++i$) {
+                    message = ref$[i$];
+                    messages_store.put({
+                      'contact_id': contact_id,
+                      'message_id': message[0],
+                      'origin': message[1],
+                      'date_written': message[2],
+                      'date_sent': message[3],
+                      'text': message[4]
+                    });
+                  }
+                });
+              }).then(function(){
+                return restore_contact_messages();
+              });
+            }
+            return restore_contact_messages();
+          });
+        }).then(function(){
+          detox_chat_app.notify_warning('Restoration from backup is almost done, restart is needed to finish the process');
+        })['catch'](function(){
+          var ref$;
+          console.error.apply(console, arguments);
+          localStorage.removeItem(backup_chat_id);
+          if (backup_state) {
+            if ((ref$ = backup_state._database) != null) {
+              ref$.close();
+            }
+          }
+          indexedDB.deleteDatabase(backup_chat_id);
+          detox_chat_app.notify_error('Restoration from backup failed, make sure you have selected correct backup file and try again', 5);
         });
       }
       /**
@@ -942,25 +1130,28 @@
        * @return {!Promise} Resolves with `Array<Message>`
        */,
       'get_contact_messages': function(contact_id){
-        var messages, this$ = this;
-        messages = this._local_state.messages.get(contact_id);
-        if (messages) {
-          return Promise.resolve(messages);
-        } else {
-          return this._messages_transaction(function(messages_store, payload_callback){
-            var x$;
-            x$ = messages_store.index('contact_id').getAll(IDBKeyRange.only(contact_id));
-            x$.onsuccess = function(e){
-              payload_callback(e.target.result);
-            };
-          }).then(function(messages){
-            messages = messages.map(function(message){
-              return Message([message['message_id'], message['origin'], message['date_written'], message['date_sent'], message['text']]);
-            });
-            this$._local_state.messages.set(contact_id, messages);
+        var this$ = this;
+        return this._messages_transactions.then(function(){
+          var messages;
+          messages = this$._local_state.messages.get(contact_id);
+          if (messages) {
             return messages;
-          });
-        }
+          } else {
+            return this$._messages_transaction(function(messages_store, payload_callback){
+              var x$;
+              x$ = messages_store.index('contact_id').getAll(IDBKeyRange.only(contact_id));
+              x$.onsuccess = function(e){
+                payload_callback(e.target.result);
+              };
+            }).then(function(messages){
+              messages = messages.map(function(message){
+                return Message([message['message_id'], message['origin'], message['date_written'], message['date_sent'], message['text']]);
+              });
+              this$._local_state.messages.set(contact_id, messages);
+              return messages;
+            });
+          }
+        });
       }
       /**
        * @param {!Uint8Array} contact_id
@@ -1058,9 +1249,7 @@
       'del_contact_messages': function(contact_id){
         var this$ = this;
         return this._messages_transaction(function(messages_store){
-          var x$;
-          x$ = messages_store.index('contact_id').openCursor(IDBKeyRange.only(contact_id));
-          x$.onsuccess = function(e){
+          messages_store.index('contact_id').openCursor(IDBKeyRange.only(contact_id)).onsuccess = function(e){
             var cursor;
             cursor = e.target.result;
             if (cursor) {
@@ -1089,7 +1278,7 @@
             };
             x$.onerror = function(e){
               console.error('Messages transaction failed', e);
-              reject;
+              reject();
             };
             callback(tx.objectStore('messages'), function(result){
               value = result;

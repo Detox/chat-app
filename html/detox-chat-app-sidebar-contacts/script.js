@@ -104,11 +104,11 @@
             }
             existing_contact = this$.state.get_contact(public_key);
             if (existing_contact) {
-              detox_chat_app.notify_warning("Not added: this contact is already in contacts list under nickname <i>" + existing_contact.nickname + "</i>", 3);
+              detox_chat_app.notify_warning("Not added: this contact is already in contacts list under nickname \"" + existing_contact.nickname + "\"", 3);
               return;
             }
             this$.state.add_contact(public_key, this$.new_contact_name || this$.new_contact_id, remote_secret);
-            detox_chat_app.notify_success("Contact added.<br>You can already send messages and they will be delivered when/if contact request is accepted.", 5);
+            detox_chat_app.notify_success("Contact added. You can already send messages and they will be delivered when/if contact request is accepted.", 5);
             this$.add_contact = false;
             this$.new_contact_id = '';
             this$.new_contact_name = '';
