@@ -104,7 +104,7 @@ Polymer(
 				detox_chat_app.notify_warning("Not added: this contact is already in contacts list under nickname \"#{existing_contact.nickname}\"", 3)
 				return
 			@state.add_contact(public_key, @new_contact_name || @new_contact_id, remote_secret)
-			detox_chat_app.notify_success("Contact added. You can already send messages and they will be delivered when/if contact request is accepted.", 5)
+			detox_chat_app.notify_success('Contact added', 'You can already send messages and they will be delivered when/if contact request is accepted', 5)
 			@add_contact		= false
 			@new_contact_id		= ''
 			@new_contact_name	= ''

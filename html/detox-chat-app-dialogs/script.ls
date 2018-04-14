@@ -5,6 +5,20 @@
  */
 ([detox-utils, hotkeys-js, behaviors, markdown]) <-! require(['@detox/utils', 'hotkeys-js', 'js/behaviors', 'js/markdown']).then
 
+function node_to_string (node)
+	nodes	= node.childNodes
+	if nodes.length
+		(
+			for node in nodes
+				node_to_string(node)
+		)
+			.map (node) ->
+				node.trim()
+			.filter(Boolean)
+			.join(' ')
+	else
+		node.textContent.trim()
+
 Polymer(
 	is			: 'detox-chat-app-dialogs'
 	behaviors	: [
@@ -35,6 +49,26 @@ Polymer(
 		@send_ctrl_enter	= state.get_settings_send_ctrl_enter()
 		@_update_unread_messages()
 		state
+			.on('contact_message_added', (contact_id, message) !~>
+				active_contact	= state.get_ui_active_contact()
+				if (
+					message.origin == state.MESSAGE_ORIGIN_RECEIVED &&
+					!(
+						document.hasFocus() &&
+						active_contact &&
+						are_arrays_equal(contact_id, active_contact)
+					)
+				)
+					contact		= state.get_contact(contact_id)
+					tmp_node	= document.createElement('div')
+						..innerHTML	= message.text
+					text		= node_to_string(tmp_node)
+					detox_chat_app.notify(
+						contact.nickname
+						if text.length > 60 then text.substr(0, 60) + '...' else text
+						3
+					)
+			)
 			.on('contact_messages_changed', (contact_id) !~>
 				active_contact	= state.get_ui_active_contact()
 				if active_contact && are_arrays_equal(contact_id, active_contact)
