@@ -314,8 +314,7 @@ Polymer(
 			<p>WARNING: This operation can't be undone!</p>
 		"""
 		csw.functions.confirm(content, !~>
-			localStorage.removeItem(@chat-id)
-			indexedDB.deleteDatabase(@chat-id)
+			@state.delete_data()
 			if window.detox_service_worker_registration
 				caches.keys()
 					.then (keys) ->

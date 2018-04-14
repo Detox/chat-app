@@ -351,8 +351,7 @@
         var content, this$ = this;
         content = "<p>Are really, REALLY sure you want to proceed with deletion?</p>\n<p>WARNING: This operation can't be undone!</p>";
         csw.functions.confirm(content, function(){
-          localStorage.removeItem(this$.chatId);
-          indexedDB.deleteDatabase(this$.chatId);
+          this$.state.delete_data();
           if (window.detox_service_worker_registration) {
             caches.keys().then(function(keys){
               var key;

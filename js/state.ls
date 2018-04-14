@@ -356,6 +356,13 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 						backup_state._database?.close()
 					indexedDB.deleteDatabase(backup_chat_id)
 					detox_chat_app.notify_error('Restoration from backup failed, make sure you have selected correct backup file and try again', 5)
+		'delete_data' : !->
+			if @_deleted
+				return
+			localStorage.removeItem(@_chat_id)
+			@_database.close()
+			indexedDB.deleteDatabase(@_chat_id)
+			@_deleted = true
 		/**
 		 * @return {string} JSON string
 		 */
@@ -377,6 +384,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 						prepared_state[key]	= value
 			JSON.stringify(prepared_state)
 		_save_state : !->
+			if @_deleted
+				return
 			localStorage.setItem(@_chat_id, @_serialize_state())
 		/**
 		 * @return {Uint8Array} Seed if configured or `null` otherwise

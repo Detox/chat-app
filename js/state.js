@@ -408,6 +408,15 @@
           indexedDB.deleteDatabase(backup_chat_id);
           detox_chat_app.notify_error('Restoration from backup failed, make sure you have selected correct backup file and try again', 5);
         });
+      },
+      'delete_data': function(){
+        if (this._deleted) {
+          return;
+        }
+        localStorage.removeItem(this._chat_id);
+        this._database.close();
+        indexedDB.deleteDatabase(this._chat_id);
+        this._deleted = true;
       }
       /**
        * @return {string} JSON string
@@ -447,6 +456,9 @@
         return JSON.stringify(prepared_state);
       },
       _save_state: function(){
+        if (this._deleted) {
+          return;
+        }
         localStorage.setItem(this._chat_id, this._serialize_state());
       }
       /**
