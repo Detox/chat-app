@@ -5,7 +5,7 @@ dom-module(id="detox-chat-app-sidebar-profile")
 			label(hidden="[[!advanced_user]]") Plain ID (no secret):
 			csw-textarea(hidden="[[!advanced_user]]"): textarea(readonly on-click="_id_click" rows="3" value="[[id_base58]]")
 			label(hidden="[[advanced_user]]")
-				div ID:
+				div Your ID:
 				detox-chat-icon-button(icon="question" tooltip="What is ID?" hidden="[[!help]]"): button(type="button" on-click="_help_id")
 			csw-textarea(hidden="[[advanced_user]]"): textarea(readonly on-click="_id_click" rows="3" value="[[id_default_secret]]")
 			label Nickname:
