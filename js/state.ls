@@ -978,23 +978,21 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 * @return {!Promise} Resolves with `message_id`
 		 */
 		'add_contact_message' : (contact_id, origin, date_written, date_sent, text) ->
-			Promise.all([
-				@'get_contact_messages'(contact_id)
-				@_messages_transaction((messages_store, payload_callback) !~>
-					messages_store.add({
-						'contact_id'	: contact_id,
-						'origin'		: origin,
-						'date_written'	: date_written,
-						'date_sent'		: date_sent,
-						'text'			: text
-					})
-						.onsuccess = (e) !->
-							payload_callback(e.target.result)
-				)
-			])
-				.then ([messages, id]) ~>
+			@_messages_transaction((messages_store, payload_callback) !~>
+				messages_store.add({
+					'contact_id'	: contact_id,
+					'origin'		: origin,
+					'date_written'	: date_written,
+					'date_sent'		: date_sent,
+					'text'			: text
+				})
+					.onsuccess = (e) !->
+						payload_callback(e.target.result)
+			)
+				.then (id) ~>
 					message	= Message([id, origin, date_written, date_sent, text])
-					messages.push(message)
+					# Delete messages from local state, they will be fetched next time from database
+					@_local_state.messages.delete(contact_id)
 					if origin == State['MESSAGE_ORIGIN_RECEIVED']
 						@_update_contact_last_active(contact_id)
 						if !are_arrays_equal(@'get_ui_active_contact'() || new Uint8Array(0), contact_id)

@@ -1188,23 +1188,20 @@
        */,
       'add_contact_message': function(contact_id, origin, date_written, date_sent, text){
         var this$ = this;
-        return Promise.all([
-          this['get_contact_messages'](contact_id), this._messages_transaction(function(messages_store, payload_callback){
-            messages_store.add({
-              'contact_id': contact_id,
-              'origin': origin,
-              'date_written': date_written,
-              'date_sent': date_sent,
-              'text': text
-            }).onsuccess = function(e){
-              payload_callback(e.target.result);
-            };
-          })
-        ]).then(function(arg$){
-          var messages, id, message;
-          messages = arg$[0], id = arg$[1];
+        return this._messages_transaction(function(messages_store, payload_callback){
+          messages_store.add({
+            'contact_id': contact_id,
+            'origin': origin,
+            'date_written': date_written,
+            'date_sent': date_sent,
+            'text': text
+          }).onsuccess = function(e){
+            payload_callback(e.target.result);
+          };
+        }).then(function(id){
+          var message;
           message = Message([id, origin, date_written, date_sent, text]);
-          messages.push(message);
+          this$._local_state.messages['delete'](contact_id);
           if (origin === State['MESSAGE_ORIGIN_RECEIVED']) {
             this$._update_contact_last_active(contact_id);
             if (!are_arrays_equal(this$['get_ui_active_contact']() || new Uint8Array(0), contact_id)) {
