@@ -172,8 +172,7 @@
       _format_date: function(date){
         if (!date) {
           return 'Not yet';
-        }
-        if (date - new Date < 24 * 60 * 60 * 1000) {
+        } else if (date - new Date < 24 * 60 * 60 * 1000) {
           return new Date(date).toLocaleTimeString();
         } else {
           return new Date(date).toLocaleString();

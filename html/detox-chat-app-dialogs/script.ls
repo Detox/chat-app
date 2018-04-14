@@ -158,9 +158,9 @@ Polymer(
 		markdown(markdown_text)
 	_format_date : (date) ->
 		if !date
-			return 'Not yet'
+			'Not yet'
 		# If message older than 24 hours, we'll use full date and time, otherwise time only
-		if date - (new Date) < 24 * 60 * 60 * 1000
+		else if date - (new Date) < 24 * 60 * 60 * 1000
 			(new Date(date)).toLocaleTimeString()
 		else
 			(new Date(date)).toLocaleString()
