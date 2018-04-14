@@ -93,7 +93,7 @@ dom-module(id="detox-chat-app-sidebar-settings")
 			csw-textarea(hidden="[[!developer]]"): textarea(rows="10" wrap="off" value="{{settings_reconnects_intervals_string}}" on-blur="_settings_reconnects_intervals_blur")
 			label
 				div.recommended Backup and restore data
-				detox-chat-icon-button.recommended(icon="question" tooltip="What can be backed up and restored?" hidden="[[!help]]"): button(type="button" on-click="_help_backup_restore_data")
+				detox-chat-icon-button.recommended(icon="question" tooltip="What data can be backed up and restored?" hidden="[[!help]]"): button(type="button" on-click="_help_backup_restore_data")
 			div
 				csw-button: button.recommended(type="button" on-click="_backup") Backup
 				csw-button: button.recommended(type="button" on-click="_restore") Restore

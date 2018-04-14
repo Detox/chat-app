@@ -337,7 +337,7 @@
       },
       _help_backup_restore_data: function(){
         var content;
-        content = "<p>This will backup your contacts, settings and messages history.</p>\n<p>If you're migrating from one browser to another or one machine to another, this will allow you to backup your data here and restore them somewhere else.</p>";
+        content = "<p>This will backup your contacts, settings and messages history.</p>\n<p>If you're migrating from one browser to another or one machine to another, this will allow you to backup your data here and restore them somewhere else.</p>\n<p>NOTE: You can't have the same account on 2 machines/browsers yet (this will not work properly or at all, don't try or you'll be very disappointed with consequences).</p>\n<p>Always have only one instance and always use fresh backup or you're risking not being able to connect with some of your contacts.</p>";
         csw.functions.simple_modal(content);
       },
       _remove_all_of_the_data: function(){
