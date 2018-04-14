@@ -151,12 +151,13 @@ html {
 	/* Main dialog panel */
 
 	--menu-button-unread-corner                : var(--sidebar-contact-unread-corner);
+	--dialog-edge-shadow                       : 0 0 var(--block-padding) var(--block-padding) var(--background-color-sidebar);
 	--dialog-message-corner-end                : var(--block-padding);
 	--dialog-message-corner-start              : 0%;
 	--dialog-message-width-max                 : 80%;
 	--dialog-message-pending-corner            : linear-gradient(var(--sidebar-contact-corner-bottom-right), var(--sidebar-contact-pending-color) var(--dialog-message-corner-start), transparent var(--dialog-message-corner-end));
 	--dialog-send-textarea-max                 : 40vh;
-	--dialog-send-textarea-min                 : 2em;
+	--dialog-send-textarea-min                 : 5em;
 
 	/* Global content styling */
 
