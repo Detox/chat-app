@@ -30,7 +30,7 @@
 	},
 	"dependencies"    : {
 		"@detox/chat"                    : "^0.13.0",
-		"@detox/core"                    : "^0.16.0",
+		"@detox/core"                    : "^0.16.1",
 		"@detox/utils"                   : "^1.6.0",
 		"@polymer/polymer"               : "^2.6.0",
 		"@webcomponents/shadycss"        : "^1.1.3",
