@@ -59,11 +59,12 @@
 	flex-grow  : 1;
 	overflow-x : hidden;
 	overflow-y : auto;
-	padding    : var(--block-padding);
+	padding    : 0 var(--block-padding);
 
 	.inner {
 		display        : flex;
 		flex-direction : column;
+		padding        : var(--block-padding) 0;
 
 		.message {
 			background-color : var(--background-color-highlight);
