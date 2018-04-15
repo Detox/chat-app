@@ -1132,19 +1132,41 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		# Block request from contact we've already rejected for 30 days
 		'block_contact_requests_for'	: 30 * 24 * 60 * 60
 		'bootstrap_nodes'				: [
-			# TODO: This is just for demo purposes, in future must change to real bootstrap node(s)
+#			{
+#				'node_id'	: '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29'
+#				'host'		: '127.0.0.1'
+#				'port'		: 16882
+#			}
+			# Testnet bootstrap nodes
 			{
-				'node_id'	: '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29'
-				'host'		: '127.0.0.1'
-				'port'		: 16882
+				'node_id'	: '50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651',
+				'host'		: '0-testnet-bootstrap.detox.technology',
+				'port'		: 443
 			}
+			{
+				'node_id'	: '252223a2ae1d325578d8cd2f0d65dada5d342927cfbbf8dbfd9edc3e247b5a0b',
+				'host'		: '1-testnet-bootstrap.detox.technology',
+				'port'		: 443
+			}
+			{
+				'node_id'	: 'e9a374b6aa204a48c40a9679a636319b029fa4e68ee29dbd7da9326ea681b91d',
+				'host'		: '2-testnet-bootstrap.detox.technology',
+				'port'		: 443
+			}
+
 		]
 		'bucket_size'					: 2
 		'experience'					: State.EXPERIENCE_REGULAR
 		'help'							: true
 		'ice_servers'					: [
-			{urls: 'stun:stun.l.google.com:19302'}
-			{urls: 'stun:global.stun.twilio.com:3478?transport=udp'}
+			{'urls': 'stun:stun.l.google.com:19302'}
+#			{'urls': 'stun:global.stun.twilio.com:3478?transport=udp'}
+			# Testnet turn server
+			{
+				'urls'			: 'turn:0-testnet-turn.detox.technology'
+				'username'		: 'detox-user'
+				'credential'	: 'pwd'
+			}
 		]
 		'max_pending_segments'			: 10
 		'number_of_intermediate_nodes'	: 3
