@@ -149,10 +149,6 @@
 		border-top  : var(--border-base);
 		display     : flex;
 
-		&[hidden] {
-			display : none;
-		}
-
 		csw-textarea {
 			flex-grow : 1;
 
