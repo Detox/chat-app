@@ -77,7 +77,7 @@
      * @constructor
      */
     function State(chat_id){
-      var backup_chat_id, backup_present, backup_db_ready, x$, contact, current_date, secret, i$, ref$, len$, contact_id, this$ = this;
+      var backup_chat_id, backup_present, first_start, backup_db_ready, x$, contact, current_date, secret, i$, ref$, len$, contact_id, this$ = this;
       if (!(this instanceof State)) {
         return new State(chat_id);
       }
@@ -85,8 +85,9 @@
       this._chat_id = chat_id;
       backup_chat_id = chat_id + '-backup';
       backup_present = false;
+      first_start = false;
       this._state = function(){
-        var backup_state, initial_state;
+        var backup_state, initial_state, first_start;
         backup_state = localStorage.getItem(backup_chat_id);
         if (backup_state) {
           backup_present = true;
@@ -96,6 +97,7 @@
         if (initial_state) {
           return JSON.parse(initial_state);
         } else {
+          first_start = true;
           return Object.create(null);
         }
       }();
@@ -109,7 +111,7 @@
         messages: ArrayMap(),
         ui: {
           active_contact: null,
-          sidebar_shown: false
+          sidebar_shown: !first_start
         },
         online_contacts: ArraySet(),
         contacts_with_pending_messages: ArraySet(),

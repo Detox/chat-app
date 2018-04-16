@@ -70,6 +70,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 
 		backup_chat_id	= chat_id + '-backup'
 		backup_present	= false
+		first_start		= false
 
 		# State that is preserved across restarts
 		@_state = do ->
@@ -82,6 +83,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			if initial_state
 				JSON.parse(initial_state)
 			else
+				first_start	= true
 				Object.create(null)
 
 		# State that is only valid for current session
@@ -95,7 +97,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			messages						: ArrayMap()
 			ui								:
 				active_contact	: null
-				sidebar_shown	: false
+				sidebar_shown	: !first_start
 			online_contacts					: ArraySet()
 			contacts_with_pending_messages	: ArraySet()
 			contacts_with_unread_messages	: ArraySet()
