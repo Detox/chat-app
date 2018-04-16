@@ -286,19 +286,22 @@
 
 			--csw-notify: {
 				-webkit-tap-highlight-color : transparent;
+				left                        : 0;
 				padding                     : var(--block-padding) var(--block-padding) 0 var(--block-padding);
 				transition                  : all var(--notify-transition-duration) cubic-bezier(0.47, 0, 0.75, 0.72); /* In - Sine */
 				will-change                 : transform;
 			};
 
 			--csw-notify-content: {
-				background : var(--background-color-element);
-				border     : var(--form-element-border);
-				max-height : var(--notify-translate);
-				max-width  : var(--notify-content-max-width);
-				overflow   : hidden;
-				padding    : var(--block-padding);
-				transition : all var(--transition-duration) var(--transition-duration-short);
+				background  : var(--background-color-element);
+				border      : var(--form-element-border);
+				left        : calc(50vw - 50% - var(--block-padding));
+				margin-left : 0;
+				max-height  : var(--notify-translate);
+				max-width   : var(--notify-content-max-width);
+				overflow    : hidden;
+				padding     : var(--block-padding);
+				transition  : all var(--transition-duration) var(--transition-duration-short);
 			};
 
 			--csw-notify-content-icon-hover: {
@@ -338,12 +341,21 @@
 			};
 
 			--csw-notify-bottom: {
-				padding   : 0 var(--block-padding) var(--block-padding) var(--block-padding);
-				transform : translateY(var(--notify-translate));
+				padding-bottom : var(--block-padding);
+				transform      : translateY(var(--notify-translate));
+			};
+
+			--csw-notify-right: {
+				padding-right : var(--block-padding);
+			};
+
+			--csw-notify-content-right: {
+				left : auto;
 			};
 
 			--csw-notify-top: {
-				transform : translateY(calc(-1 * var(--notify-translate)));
+				padding-top : var(--block-padding);
+				transform   : translateY(calc(-1 * var(--notify-translate)));
 			};
 
 			--csw-notify-show: {
