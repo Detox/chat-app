@@ -64,7 +64,9 @@
             x$ = tmp_node = document.createElement('div');
             x$.innerHTML = message.text;
             text = node_to_string(tmp_node);
-            detox_chat_app.notify(contact.nickname, text.length > 60 ? text.substr(0, 60) + '...' : text, 7);
+            detox_chat_app.notify(contact.nickname, text.length > 60 ? text.substr(0, 60) + '...' : text, 7).then(function(){
+              state.set_ui_active_contact(contact_id);
+            });
           }
         }).on('contact_messages_changed', function(contact_id){
           var active_contact, messages_list, need_to_update_scroll;

@@ -67,7 +67,8 @@ Polymer(
 						contact.nickname
 						if text.length > 60 then text.substr(0, 60) + '...' else text
 						7
-					)
+					).then !->
+						state.set_ui_active_contact(contact_id)
 			)
 			.on('contact_messages_changed', (contact_id) !~>
 				active_contact	= state.get_ui_active_contact()
