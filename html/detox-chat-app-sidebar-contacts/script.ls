@@ -53,7 +53,7 @@ Polymer(
 				@online_contacts	= ArraySet(state.get_online_contacts())
 			)
 			.on('contact_request_added', !~>
-				detox_chat_app.notify_warning('Incoming contact request received', 3)
+				detox_chat_app.notify_warning('Incoming contact request received', 7)
 			)
 			.on('contacts_requests_changed', !~>
 				# TODO: Sort contacts

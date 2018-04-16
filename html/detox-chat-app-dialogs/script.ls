@@ -66,7 +66,7 @@ Polymer(
 					detox_chat_app.notify(
 						contact.nickname
 						if text.length > 60 then text.substr(0, 60) + '...' else text
-						3
+						7
 					)
 			)
 			.on('contact_messages_changed', (contact_id) !~>
