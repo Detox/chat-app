@@ -128,7 +128,7 @@
         } else {
           content = "<p>You need to add contact using their ID in order to communicate.</p>\n<p>Your ID can be found in <i>Profile</i> tab.</p>\n<p>Each contact in the list might have some of the corners highlighted, which indicates some information about its state.</p>\n<p>Top left corner is highlighted when there is an active connection to contact right now.<br>\nBottom left corner is highlighted means that there was never an active connection, for instance you've added someone to contacts, but they didn't accept request (yet).<br>\nTop right corner is highlighted when there are unread messages from that contact.<br>\nBottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>";
         }
-        csw.functions.simple_modal(content);
+        detox_chat_app.simple_modal(content);
       },
       _set_active_contact: function(e){
         var x$;

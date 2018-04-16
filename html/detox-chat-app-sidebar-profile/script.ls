@@ -79,7 +79,7 @@ Polymer(
 			<p>ID is an identifier that represents you in the network.<br>
 			If you share this ID with someone, they'll be able to send contact request to you.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_help_secrets : !->
 		content	= """
 			<p>Secrets are used as anti-spam system. You can create different secrets for different purposes.<br>
@@ -89,7 +89,7 @@ Polymer(
 			<p>For contact requests you need to share ID with secret.<br>
 			Plain ID without secret will not result in visible contact request, but if you and your interlocutor add each other to contacts list explicitly, you'll be connected and able to communicate.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_rename_secret : (e) !->
 		modal	= csw.functions.prompt("New secret name:", (new_secret_name) !~>
 			new_secret_name	= new_secret_name.trim()

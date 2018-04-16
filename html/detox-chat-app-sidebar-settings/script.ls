@@ -109,7 +109,7 @@ Polymer(
 			<p>Announcement is a process of publishing own contact information to the network, so that contacts can find and connect to you.</p>
 			<p>When turned off, you'll be in stealth mode, meaning that no one will be able to see if you're online, send messages or interact in any other way unless you initiate such interaction first.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_block_contact_requests_for_changed : !->
 		settings_block_contact_requests_for	= @settings_block_contact_requests_for * 60 * 60 * 24 # In days
 		if settings_block_contact_requests_for != @state.get_settings_block_contact_requests_for()
@@ -122,7 +122,7 @@ Polymer(
 			<p>This option makes your life better by blocking subsequent contacts requests after first rejection for some time, so that you're not annoyed by the same contact request all the time.<br>
 			Changing this option will not affect already blocked contacts requests.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_bootstrap_nodes_changed : (settings_bootstrap_nodes) !->
 		@settings_bootstrap_nodes_string	= JSON.stringify(settings_bootstrap_nodes, null, '  ')
 	_settings_bootstrap_nodes_blur : !->
@@ -142,7 +142,7 @@ Polymer(
 			Bootstrap nodes that return misleading information cause anything from drastic reduction of anonymity to being unable to communicate with other nodes in the network.<br>
 			Do not change this setting unless you know what you're doing.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_bucket_size_changed : (value) !->
 		value	= parseInt(value)
 		if value != @state.get_settings_bucket_size()
@@ -154,7 +154,7 @@ Polymer(
 			<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>
 			Do not change this setting unless you know what you're doing.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_experience_changed : (value) !->
 		value	= parseInt(value)
 		if value != @state.get_settings_experience()
@@ -164,7 +164,7 @@ Polymer(
 		content	= """
 			<p>Regular makes UI as simple as possible. Advanced enables more features and settings. Developer mode gives most control.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_help_changed : !->
 		if @settings_help != @_bool_to_string(@state.get_settings_help())
 			@state.set_settings_help(@settings_help == '1')
@@ -174,7 +174,7 @@ Polymer(
 			<p>Help buttons, one of which you've just clicked, are useful when you just started using Detox Chat, but may annoy later.<br>
 			Use this option to hide them if needed.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_ice_servers_changed : (settings_ice_servers) !->
 		@settings_ice_servers_string	= JSON.stringify(settings_ice_servers, null, '  ')
 	_settings_ice_servers_blur : !->
@@ -196,7 +196,7 @@ Polymer(
 			<p>Most of the time ICE servers are crucial for operation and should be selected carefully.<br>
 			Do not change this setting unless you know what you're doing.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_max_pending_segments_changed : (value) !->
 		value	= parseInt(value)
 		if value != @state.get_settings_max_pending_segments()
@@ -207,7 +207,7 @@ Polymer(
 			<p>Pending segments is a low-level state of segments from transport layer of Detox network implementation that appear during routing paths construction.</p>
 			<p>Do not change this setting unless you know what you're doing.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_number_of_intermediate_nodes_changed : (value) !->
 		value	= parseInt(value)
 		if value != @state.get_settings_number_of_intermediate_nodes()
@@ -219,7 +219,7 @@ Polymer(
 			<p>More intermediate nodes means longer routing path and slower its creation. Lower numbers decrease anonymity, numbers higher than 3 are generally considered to be redundant.<br>
 			Do not change this setting unless you know what you're doing.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_number_of_introduction_nodes_changed : (value) !->
 		value	= parseInt(value)
 		if value != @state.get_settings_number_of_introduction_nodes()
@@ -231,7 +231,7 @@ Polymer(
 			<p>More than one node is recommended to ensure good reliability of incoming connections, but very high numbers are redundant.<br>
 			Do not change this setting unless you know what you're doing.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_online_changed : !->
 		if @settings_online != @_bool_to_string(@state.get_settings_online())
 			@state.set_settings_online(@settings_online == '1')
@@ -240,7 +240,7 @@ Polymer(
 		content	= """
 			<p>If not online then on next start application will not try to connect to Detox network and related functionality will not work properly.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_packets_per_second_changed : (value) !->
 		value	= parseInt(value)
 		if value != @state.get_settings_packets_per_second()
@@ -252,7 +252,7 @@ Polymer(
 			<p>Bigger number means higher peak throughput and lower latencies (to some degree, as these can be bottlenecked by other nodes in particular routing path), but significantly increases requirements to Internet connection.<br>
 			You may increase or decrease this option slightly, but don't go too far unless you know what you're doing.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_reconnects_intervals_changed : (settings_reconnects_intervals) !->
 		@settings_reconnects_intervals_string	= JSON.stringify(settings_reconnects_intervals, null, '  ')
 	_settings_reconnects_intervals_blur : !->
@@ -272,7 +272,7 @@ Polymer(
 			<p>First number is max number of attempts and second is number is delay for it. More attempts is made, larger delays become.<br>
 			Do not change this setting unless you know what you're doing.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_settings_send_ctrl_enter_changed : !->
 		if @settings_send_ctrl_enter != @_bool_to_string(@state.get_settings_send_ctrl_enter())
 			@state.set_settings_send_ctrl_enter(@settings_send_ctrl_enter == '1')
@@ -281,7 +281,7 @@ Polymer(
 		content	= """
 			<p>Either send message with Ctrl+Enter and use Enter for new line or use Enter to send message and Shift+Enter for new line.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_backup : !->
 		# TODO: Probably restart into offline mode and then do backup
 		@state.get_as_blob().then (blob) !->
@@ -307,7 +307,7 @@ Polymer(
 			<p>NOTE: You can't have the same account on 2 machines/browsers yet (this will not work properly or at all, don't try or you'll be very disappointed with consequences).</p>
 			<p>Always have only one instance and always use fresh backup or you're risking not being able to connect with some of your contacts.</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_remove_all_of_the_data : !->
 		content	= """
 			<p>Are really, REALLY sure you want to proceed with deletion?</p>
@@ -335,5 +335,5 @@ Polymer(
 			<p>This will remove all of the contacts, messages history, settings and any other data stored by this application (including unregistering Service Worker and cleaning its caches), after which application will close itself.</p>
 			<p>Make sure to backup any useful data stored in this application before you proceed with deletion!</p>
 		"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 )

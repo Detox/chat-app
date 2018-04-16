@@ -134,3 +134,18 @@ window.{}detox_chat_app
 		notify('success', ...&)
 	..notify_warning	= ->
 		notify('warning', ...&)
+	..simple_modal		= (content) ->
+		current_time	= +(new Date)
+		modal			= csw.functions.simple_modal(content)
+			..addEventListener('close', !->
+				if history.state === current_time
+					history.back()
+			)
+		history.pushState(current_time, '', '#modal')
+		window.addEventListener(
+			'popstate'
+			!->
+				modal.close()
+			{once: true}
+		)
+		modal

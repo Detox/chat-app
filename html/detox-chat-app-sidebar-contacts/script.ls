@@ -133,7 +133,7 @@ Polymer(
 				Top right corner is highlighted when there are unread messages from that contact.<br>
 				Bottom right corner is highlighted when your last message to contact was not yet received (just received, there is no indication if it was read by contact).</p>
 			"""
-		csw.functions.simple_modal(content)
+		detox_chat_app.simple_modal(content)
 	_set_active_contact : (e) !->
 		@state
 			..set_ui_active_contact(e.model.item.id)
