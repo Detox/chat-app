@@ -138,14 +138,25 @@ window.{}detox_chat_app
 		current_time	= +(new Date)
 		modal			= csw.functions.simple_modal(content)
 			..addEventListener('close', !->
-				if history.state === current_time
+				if history.state == current_time
 					history.back()
 			)
-		history.pushState(current_time, '', '#modal')
-		window.addEventListener(
-			'popstate'
-			!->
-				modal.close()
-			{once: true}
-		)
+		if IN_APP
+			history.pushState(current_time, '', '#modal')
+			window.addEventListener(
+				'popstate'
+				!->
+					modal.close()
+				{once: true}
+			)
 		modal
+# Handle back hardware button in application mode, allow 2 seconds to press back button or leave application open
+if IN_APP
+	history.pushState({loaded: true}, '')
+	addEventListener('popstate', !->
+		if !history.state?.loaded
+			csw.functions.notify('Press one more time to exit', 'bottom', 2)
+			setTimeout (!->
+				history.pushState({loaded: true}, '')
+			), 2000
+	)
