@@ -990,6 +990,8 @@
         this['del_contact_messages'](contact_id).then(function(){
           this$._state['contacts']['delete'](contact_id);
           this$['fire']('contact_deleted', old_contact);
+          this$._update_contact_with_pending_messages();
+          this$._update_contact_with_unread_messages();
           this$['fire']('contacts_changed');
           this$._save_state();
         });

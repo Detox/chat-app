@@ -820,6 +820,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			<~! @'del_contact_messages'(contact_id).then
 			@_state['contacts'].delete(contact_id)
 			@'fire'('contact_deleted', old_contact)
+			@_update_contact_with_pending_messages()
+			@_update_contact_with_unread_messages()
 			@'fire'('contacts_changed')
 			@_save_state()
 		/**
