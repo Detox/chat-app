@@ -323,13 +323,13 @@
       },
       _backup: function(){
         this.state.get_as_blob().then(function(blob){
-          var date, x$;
+          var date, url, file_name, content;
           date = new Date;
           date = [date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()].join('-');
-          x$ = document.createElement('a');
-          x$.href = URL.createObjectURL(blob);
-          x$.download = "detox-chat-backup-" + date + ".bin";
-          x$.click();
+          url = URL.createObjectURL(blob);
+          file_name = "detox-chat-backup-" + date + ".bin";
+          content = "<p>Your backup is ready: <a href=\"" + url + "\" download=\"" + file_name + "\">Download</a></p>";
+          detox_chat_app.simple_modal(content);
         });
       },
       _restore: function(){

@@ -285,12 +285,14 @@ Polymer(
 	_backup : !->
 		# TODO: Probably restart into offline mode and then do backup
 		@state.get_as_blob().then (blob) !->
-			date	= new Date
-			date	= [date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()].join('-')
-			document.createElement('a')
-				..href		= URL.createObjectURL(blob)
-				..download	= "detox-chat-backup-#date.bin"
-				..click()
+			date		= new Date
+			date		= [date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()].join('-')
+			url			= URL.createObjectURL(blob)
+			file_name	= "detox-chat-backup-#date.bin"
+			content		= """
+				<p>Your backup is ready: <a href="#url" download="#file_name">Download</a></p>
+			"""
+			detox_chat_app.simple_modal(content)
 	_restore : !->
 		# TODO: Probably restart into offline mode and then do restoration
 		document.createElement('input')

@@ -9,6 +9,14 @@ html {
 	font-size                                  : var(--font-size-base);
 	line-height                                : 1.2;
 
+	a {
+		color : var(--content-link-color);
+
+		&:visited {
+			color : var(--content-link-color-visited);
+		}
+	}
+
 	/* Application container */
 	--app-height                               : 100vh;
 	--app-width                                : 100vw;
