@@ -38,8 +38,10 @@
 	}
 
 	.nickname {
-		flex-grow : 1;
-		padding   : 0 var(--block-padding);
+		flex-grow     : 1;
+		overflow      : hidden;
+		padding       : 0 var(--block-padding);
+		text-overflow : ellipsis;
 	}
 }
 

@@ -61,6 +61,7 @@
 	detox-chat-sidebar-status {
 		border-top  : var(--border-base);
 		flex-shrink : 0;
+		overflow    : hidden;
 	}
 }
 
@@ -103,5 +104,9 @@ detox-chat-app-dialogs {
 				display     : inline-block;
 			}
 		}
+	}
+
+	detox-chat-app-dialogs {
+		width : var(--app-width);
 	}
 }
