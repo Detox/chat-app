@@ -1012,8 +1012,8 @@
         this['del_contact_messages'](contact_id).then(function(){
           this$._state['contacts']['delete'](contact_id);
           this$['fire']('contact_deleted', old_contact);
-          this$._update_contact_with_pending_messages();
-          this$._update_contact_with_unread_messages();
+          this$._update_contact_with_pending_messages(contact_id);
+          this$._update_contact_with_unread_messages(contact_id);
           this$['fire']('contacts_changed');
           this$._save_state();
         });
@@ -1122,6 +1122,10 @@
        */,
       _update_contact_with_pending_messages: function(contact_id){
         var this$ = this;
+        if (!this['get_contact'](contact_id)) {
+          this._local_state.contacts_with_pending_messages['delete'](contact_id);
+          return;
+        }
         this['get_contact_messages'](contact_id).then(function(messages){
           var i$, message;
           for (i$ = messages.length - 1; i$ >= 0; --i$) {
@@ -1142,8 +1146,13 @@
        * @param {!Uint8Array} contact_id
        */,
       _update_contact_with_unread_messages: function(contact_id){
-        var last_read_message, this$ = this;
-        last_read_message = this['get_contact'](contact_id)['last_read_message'];
+        var contact, last_read_message, this$ = this;
+        contact = this['get_contact'](contact_id);
+        if (!contact) {
+          this._local_state.contacts_with_unread_messages['delete'](contact_id);
+          return;
+        }
+        last_read_message = contact['last_read_message'];
         this['get_contact_messages'](contact_id).then(function(messages){
           var i$, len$, message;
           for (i$ = 0, len$ = messages.length; i$ < len$; ++i$) {

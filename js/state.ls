@@ -841,8 +841,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			<~! @'del_contact_messages'(contact_id).then
 			@_state['contacts'].delete(contact_id)
 			@'fire'('contact_deleted', old_contact)
-			@_update_contact_with_pending_messages()
-			@_update_contact_with_unread_messages()
+			@_update_contact_with_pending_messages(contact_id)
+			@_update_contact_with_unread_messages(contact_id)
 			@'fire'('contacts_changed')
 			@_save_state()
 		/**
@@ -931,6 +931,9 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 * @param {!Uint8Array} contact_id
 		 */
 		_update_contact_with_pending_messages : (contact_id) !->
+			if !@'get_contact'(contact_id)
+				@_local_state.contacts_with_pending_messages.delete(contact_id)
+				return
 			(messages) <~! @'get_contact_messages'(contact_id).then
 			for message in messages by -1
 				if message['origin'] == State['MESSAGE_ORIGIN_SENT'] && !message['date_sent']
@@ -944,7 +947,11 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		 * @param {!Uint8Array} contact_id
 		 */
 		_update_contact_with_unread_messages : (contact_id) !->
-			last_read_message	= @'get_contact'(contact_id)['last_read_message']
+			contact				= @'get_contact'(contact_id)
+			if !contact
+				@_local_state.contacts_with_unread_messages.delete(contact_id)
+				return
+			last_read_message	= contact['last_read_message']
 			(messages)			<~! @'get_contact_messages'(contact_id).then
 			for message in messages
 				if message['origin'] == State['MESSAGE_ORIGIN_RECEIVED'] && message['date_sent'] > last_read_message
