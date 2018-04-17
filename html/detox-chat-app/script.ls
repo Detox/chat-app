@@ -190,9 +190,15 @@ Polymer(
 				check_and_add_to_online(contact_id)
 			)
 			.on('nickname', (contact_id, nickname) !->
-				nickname	= nickname.trimLeft()
-				if nickname
-					state.set_contact_nickname(contact_id, nickname)
+				contact		= state.get_contact(contact_id)
+				# If custom name is already used, do not change it automatically anymore
+				try
+					public_key	= detox-chat.id_decode(contact.nickname)[0]
+					if !are_arrays_equal(contact.id, public_key)
+						return
+					nickname	= nickname.trimLeft()
+					if nickname
+						state.set_contact_nickname(contact_id, nickname)
 			)
 			.on('text_message', (contact_id, date_written, date_sent, text_message) !->
 				text_message	= text_message.trim()
