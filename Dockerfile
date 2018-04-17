@@ -1,6 +1,7 @@
 FROM node as builder
 LABEL maintainer="Nazar Mokrynskyi <nazar@mokrynskyi.com>"
 
+COPY audio /code/audio
 COPY css /code/css
 COPY html /code/html
 COPY img /code/img
