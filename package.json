@@ -37,7 +37,7 @@
 		"@webcomponents/webcomponentsjs" : "^1.2.0",
 		"alameda"                        : "^1.2.1",
 		"autosize"                       : "^4.0.1",
-		"cleverstyle-widgets"            : "^0.10.2",
+		"cleverstyle-widgets"            : "^0.10.3",
 		"hotkeys-js"                     : "^3.1.1",
 		"marked"                         : "^0.3.19",
 		"swipe-listener"                 : "^1.0.6"
