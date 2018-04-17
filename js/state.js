@@ -202,6 +202,9 @@
           this$['add_contact_message'](this$['get_contacts']()[0]['id'], State['MESSAGE_ORIGIN_SENT'], +new Date, +new Date, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
         });
       }
+      if (!('audio_notifications' in this._state['settings'])) {
+        this._state['settings']['audio_notifications'] = true;
+      }
       if (this._state['seed']) {
         this._state['seed'] = Uint8Array.from(this._state['seed']);
       }
@@ -633,6 +636,23 @@
         new_announce = !!announce;
         this._state['settings']['announce'] = new_announce;
         this['fire']('settings_announce_changed', new_announce, old_announce);
+        this._save_state();
+      }
+      /**
+       * @return {boolean}
+       */,
+      'get_settings_audio_notifications': function(){
+        return this._state['settings']['audio_notifications'];
+      }
+      /**
+       * @param {boolean} audio_notifications
+       */,
+      'set_settings_audio_notifications': function(audio_notifications){
+        var old_audio_notifications, new_audio_notifications;
+        old_audio_notifications = this._state['settings']['audio_notifications'];
+        new_audio_notifications = !!audio_notifications;
+        this._state['settings']['audio_notifications'] = new_audio_notifications;
+        this['fire']('settings_audio_notifications_changed', new_audio_notifications, old_audio_notifications);
         this._save_state();
       }
       /**
@@ -1369,6 +1389,7 @@
     Object.assign(State.prototype, constants);
     State.DEFAULT_SETTINGS = {
       'announce': true,
+      'audio_notifications': true,
       'block_contact_requests_for': 30 * 24 * 60 * 60,
       'bootstrap_nodes': [
         {

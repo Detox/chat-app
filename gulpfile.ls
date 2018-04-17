@@ -37,6 +37,7 @@ file_hash	= (file) ->
 	file_contents	= fs.readFileSync(file)
 	crypto.createHash('md5').update(file_contents).digest('hex').substr(0, 5)
 
+const AUDIO_REGEXP		= /'audio\/[^']+\.mp3'/g
 const FONTS_REGEXP		= /url\(.+?\.woff2.+?\)/g
 const IMAGES_REGEXP		= /url\(\.\.\/img\/.+?\)/g
 const SCRIPTS_REGEXP	= /<script>[^]+?<\/script>\n*/g
@@ -277,6 +278,17 @@ gulp
 	.task('clean', ->
 		del("#DESTINATION/*")
 	)
+	.task('copy-audio', ['bundle-js'], !->
+		js		= fs.readFileSync("#DESTINATION/#BUNDLED_JS", {encoding: 'utf8'})
+		audios	= js.match(AUDIO_REGEXP)
+		for audio in audios
+			audio_path	= audio.substring(1, audio.length - 1)
+			base_name	= audio_path.split('/').pop()
+			hash		= file_hash(audio_path)
+			js			= js.replace(audio, "\"#DESTINATION/#base_name?#hash\"")
+			fs.copyFileSync(audio_path, "#DESTINATION/#base_name")
+		fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
+	)
 	.task('copy-favicon', !->
 		fs.copyFileSync('favicon.ico', "#DESTINATION/favicon.ico")
 	)
@@ -340,7 +352,7 @@ gulp
 			]
 		)
 	)
-	.task('main-build', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-font', 'minify-js'])
+	.task('main-build', ['copy-audio', 'copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-font', 'minify-js'])
 	.task('minify-css', ['bundle-css'], !->
 		css	= fs.readFileSync("#DESTINATION/#BUNDLED_CSS", {encoding: 'utf8'})
 		fs.writeFileSync("#DESTINATION/#MINIFIED_CSS", minify_css(css))

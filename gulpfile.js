@@ -5,7 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, workboxBuild, minify_css, instance, minify_js, file_hash, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BLACKLISTED_FONTS, FA_FONT, BUNDLED_CSS, BUNDLED_HTML, BUNDLED_JS, BUNDLED_MANIFEST, BUNDLED_SW, DESTINATION, MINIFIED_CSS, MINIFIED_HTML, MINIFIED_JS, MINIFIED_SW, SOURCE_CSS, SOURCE_HTML, SOURCE_MANIFEST, requirejs_config;
+  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, workboxBuild, minify_css, instance, minify_js, file_hash, AUDIO_REGEXP, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BLACKLISTED_FONTS, FA_FONT, BUNDLED_CSS, BUNDLED_HTML, BUNDLED_JS, BUNDLED_MANIFEST, BUNDLED_SW, DESTINATION, MINIFIED_CSS, MINIFIED_HTML, MINIFIED_JS, MINIFIED_SW, SOURCE_CSS, SOURCE_HTML, SOURCE_MANIFEST, requirejs_config;
   cleanCss = require('clean-css');
   crypto = require('crypto');
   del = require('del');
@@ -46,6 +46,7 @@
     file_contents = fs.readFileSync(file);
     return crypto.createHash('md5').update(file_contents).digest('hex').substr(0, 5);
   };
+  AUDIO_REGEXP = /'audio\/[^']+\.mp3'/g;
   FONTS_REGEXP = /url\(.+?\.woff2.+?\)/g;
   IMAGES_REGEXP = /url\(\.\.\/img\/.+?\)/g;
   SCRIPTS_REGEXP = /<script>[^]+?<\/script>\n*/g;
@@ -191,6 +192,21 @@
     fs.writeFileSync(BUNDLED_SW, sw);
   }).task('clean', function(){
     return del(DESTINATION + "/*");
+  }).task('copy-audio', ['bundle-js'], function(){
+    var js, audios, i$, len$, audio, audio_path, base_name, hash;
+    js = fs.readFileSync(DESTINATION + "/" + BUNDLED_JS, {
+      encoding: 'utf8'
+    });
+    audios = js.match(AUDIO_REGEXP);
+    for (i$ = 0, len$ = audios.length; i$ < len$; ++i$) {
+      audio = audios[i$];
+      audio_path = audio.substring(1, audio.length - 1);
+      base_name = audio_path.split('/').pop();
+      hash = file_hash(audio_path);
+      js = js.replace(audio, "\"" + DESTINATION + "/" + base_name + "?" + hash + "\"");
+      fs.copyFileSync(audio_path, DESTINATION + "/" + base_name);
+    }
+    fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
   }).task('copy-favicon', function(){
     fs.copyFileSync('favicon.ico', DESTINATION + "/favicon.ico");
   }).task('copy-js', function(){
@@ -265,7 +281,7 @@
         };
       }]
     });
-  }).task('main-build', ['copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-font', 'minify-js']).task('minify-css', ['bundle-css'], function(){
+  }).task('main-build', ['copy-audio', 'copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-font', 'minify-js']).task('minify-css', ['bundle-css'], function(){
     var css;
     css = fs.readFileSync(DESTINATION + "/" + BUNDLED_CSS, {
       encoding: 'utf8'

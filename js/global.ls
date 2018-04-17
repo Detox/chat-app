@@ -134,6 +134,9 @@ window.{}detox_chat_app
 		notify('success', ...&)
 	..notify_warning	= ->
 		notify('warning', ...&)
+	..play_sound		= (file) !->
+		new Audio(file)
+			..play()
 	..simple_modal		= (content) ->
 		current_time	= +(new Date)
 		modal			= csw.functions.simple_modal(content)

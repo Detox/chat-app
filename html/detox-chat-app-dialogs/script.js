@@ -59,7 +59,13 @@
         state.on('contact_message_added', function(contact_id, message){
           var active_contact, contact, x$, tmp_node, text;
           active_contact = state.get_ui_active_contact();
-          if (message.origin === state.MESSAGE_ORIGIN_RECEIVED && !(document.hasFocus() && active_contact && are_arrays_equal(contact_id, active_contact))) {
+          if (message.origin !== state.MESSAGE_ORIGIN_RECEIVED) {
+            return;
+          }
+          if (state.get_settings_audio_notifications()) {
+            detox_chat_app.play_sound('audio/definite.mp3');
+          }
+          if (!(document.hasFocus() && active_contact && are_arrays_equal(contact_id, active_contact))) {
             contact = state.get_contact(contact_id);
             x$ = tmp_node = document.createElement('div');
             x$.innerHTML = message.text;
@@ -167,6 +173,9 @@
         state = this.state;
         contact_id = state.get_ui_active_contact();
         state.add_contact_message(contact_id, state.MESSAGE_ORIGIN_SENT, +new Date, 0, text_message);
+        if (state.get_settings_audio_notifications()) {
+          detox_chat_app.play_sound('audio/knob.mp3');
+        }
       },
       _markdown_renderer: function(markdown_text){
         return markdown(markdown_text);

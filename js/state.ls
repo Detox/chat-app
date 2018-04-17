@@ -193,6 +193,11 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_RECEIVED'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
 				@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_SENT'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
 
+		# State upgrade
+		if !('audio_notifications' of @_state['settings'])
+			@_state['settings']['audio_notifications']	= true
+
+
 		# Denormalize state after deserialization
 		if @_state['seed']
 			@_state['seed']	= Uint8Array.from(@_state['seed'])
@@ -529,6 +534,20 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			new_announce					= !!announce
 			@_state['settings']['announce']	= new_announce
 			@'fire'('settings_announce_changed', new_announce, old_announce)
+			@_save_state()
+		/**
+		 * @return {boolean}
+		 */
+		'get_settings_audio_notifications' : ->
+			@_state['settings']['audio_notifications']
+		/**
+		 * @param {boolean} audio_notifications
+		 */
+		'set_settings_audio_notifications' : (audio_notifications) !->
+			old_audio_notifications					= @_state['settings']['audio_notifications']
+			new_audio_notifications					= !!audio_notifications
+			@_state['settings']['audio_notifications']	= new_audio_notifications
+			@'fire'('settings_audio_notifications_changed', new_audio_notifications, old_audio_notifications)
 			@_save_state()
 		/**
 		 * @return {number} In seconds
@@ -1133,6 +1152,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 	# Default settings, potentially can be relatively easily customized
 	State.DEFAULT_SETTINGS	=
 		'announce'						: true
+		'audio_notifications'			: true
 		# Block request from contact we've already rejected for 30 days
 		'block_contact_requests_for'	: 30 * 24 * 60 * 60
 		'bootstrap_nodes'				: [

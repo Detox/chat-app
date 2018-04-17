@@ -15,6 +15,9 @@ Polymer(
 		settings_announce						:
 			observer	: '_settings_announce_changed'
 			type		: String
+		settings_audio_notifications						:
+			observer	: '_settings_audio_notifications_changed'
+			type		: String
 		settings_block_contact_requests_for		:
 			observer	: '_settings_block_contact_requests_for_changed'
 			type		: Number
@@ -60,6 +63,7 @@ Polymer(
 	ready : !->
 		state									= @state
 		@settings_announce						= @_bool_to_string(state.get_settings_announce())
+		@settings_audio_notifications			= @_bool_to_string(state.get_settings_audio_notifications())
 		@settings_block_contact_requests_for	= state.get_settings_block_contact_requests_for() / 60 / 60 / 24 # In days
 		@settings_bootstrap_nodes				= state.get_settings_bootstrap_nodes()
 		@settings_bucket_size					= state.get_settings_bucket_size()
@@ -76,6 +80,9 @@ Polymer(
 		state
 			.on('settings_announce_changed', (new_settings_announce) !~>
 				new_settings_announce	= @_bool_to_string(new_settings_announce)
+			)
+			.on('settings_audio_notifications_changed', (new_settings_audio_notifications) !~>
+				new_settings_audio_notifications	= @_bool_to_string(new_settings_audio_notifications)
 			)
 			.on('settings_block_contact_requests_for_changed', (block_contact_requests_for) !~>
 				@block_contact_requests_for	= block_contact_requests_for / 60 / 60 / 24 # In days
@@ -108,6 +115,15 @@ Polymer(
 		content	= """
 			<p>Announcement is a process of publishing own contact information to the network, so that contacts can find and connect to you.</p>
 			<p>When turned off, you'll be in stealth mode, meaning that no one will be able to see if you're online, send messages or interact in any other way unless you initiate such interaction first.</p>
+		"""
+		detox_chat_app.simple_modal(content)
+	_settings_audio_notifications_changed : !->
+		if @settings_audio_notifications != @_bool_to_string(@state.get_settings_audio_notifications())
+			@state.set_settings_audio_notifications(@settings_audio_notifications == '1')
+			detox_chat_app.notify_success('Saved changes to audio notifications setting', 3)
+	_help_settings_audio_notifications : !->
+		content	= """
+			<p>Notifications like sending and receiving messages might be accompanied with short sound. Turn of if you don't like it.</p>
 		"""
 		detox_chat_app.simple_modal(content)
 	_settings_block_contact_requests_for_changed : !->

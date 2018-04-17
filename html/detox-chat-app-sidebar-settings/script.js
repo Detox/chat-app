@@ -16,6 +16,10 @@
           observer: '_settings_announce_changed',
           type: String
         },
+        settings_audio_notifications: {
+          observer: '_settings_audio_notifications_changed',
+          type: String
+        },
         settings_block_contact_requests_for: {
           observer: '_settings_block_contact_requests_for_changed',
           type: Number
@@ -76,6 +80,7 @@
         var state, this$ = this;
         state = this.state;
         this.settings_announce = this._bool_to_string(state.get_settings_announce());
+        this.settings_audio_notifications = this._bool_to_string(state.get_settings_audio_notifications());
         this.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
         this.settings_bootstrap_nodes = state.get_settings_bootstrap_nodes();
         this.settings_bucket_size = state.get_settings_bucket_size();
@@ -91,6 +96,8 @@
         this.settings_send_ctrl_enter = this._bool_to_string(state.get_settings_send_ctrl_enter());
         state.on('settings_announce_changed', function(new_settings_announce){
           new_settings_announce = this$._bool_to_string(new_settings_announce);
+        }).on('settings_audio_notifications_changed', function(new_settings_audio_notifications){
+          new_settings_audio_notifications = this$._bool_to_string(new_settings_audio_notifications);
         }).on('settings_block_contact_requests_for_changed', function(block_contact_requests_for){
           this$.block_contact_requests_for = block_contact_requests_for / 60 / 60 / 24;
         }).on('settings_bootstrap_nodes_changed', function(settings_bootstrap_nodes){
@@ -135,6 +142,17 @@
       _help_settings_announce: function(){
         var content;
         content = "<p>Announcement is a process of publishing own contact information to the network, so that contacts can find and connect to you.</p>\n<p>When turned off, you'll be in stealth mode, meaning that no one will be able to see if you're online, send messages or interact in any other way unless you initiate such interaction first.</p>";
+        detox_chat_app.simple_modal(content);
+      },
+      _settings_audio_notifications_changed: function(){
+        if (this.settings_audio_notifications !== this._bool_to_string(this.state.get_settings_audio_notifications())) {
+          this.state.set_settings_audio_notifications(this.settings_audio_notifications === '1');
+          detox_chat_app.notify_success('Saved changes to audio notifications setting', 3);
+        }
+      },
+      _help_settings_audio_notifications: function(){
+        var content;
+        content = "<p>Notifications like sending and receiving messages might be accompanied with short sound. Turn of if you don't like it.</p>";
         detox_chat_app.simple_modal(content);
       },
       _settings_block_contact_requests_for_changed: function(){

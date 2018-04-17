@@ -26,6 +26,16 @@ dom-module(id="detox-chat-app-sidebar-settings")
 					input(type="radio" value="1")
 					| Ctrl+Enter
 			label
+				div Audio notifications:
+				detox-chat-icon-button(icon="question" tooltip="What notifications?" hidden="[[!help]]"): button(type="button" on-click="_help_settings_audio_notifications")
+			csw-group
+				csw-label-button(value="{{settings_audio_notifications}}"): label
+					input(type="radio" value="0")
+					| No
+				csw-label-button: label
+					input(type="radio" value="1")
+					| Yes
+			label
 				div Help buttons:
 				detox-chat-icon-button(icon="question" tooltip="Help buttons?" hidden="[[!help]]"): button(type="button" on-click="_help_settings_help")
 			csw-group

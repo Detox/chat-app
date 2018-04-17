@@ -171,6 +171,11 @@
   x$.notify_warning = function(){
     return notify.apply(null, ['warning'].concat(arrayFrom$(arguments)));
   };
+  x$.play_sound = function(file){
+    var x$;
+    x$ = new Audio(file);
+    x$.play();
+  };
   x$.simple_modal = function(content){
     var current_time, x$, modal;
     current_time = +new Date;
