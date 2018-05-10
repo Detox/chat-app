@@ -165,6 +165,7 @@ requirejs_config	=
 		# TODO: Closure Compiler replaces array of dependencies with '...'.split(' ') and causes build to fail when using minified version of @detox/transport
 		'@detox/transport'			: 'node_modules/@detox/transport/src/index'
 		'@detox/utils'				: 'node_modules/@detox/utils/src/index.min'
+		'array-map-set'				: 'node_modules/array-map-set/src/index.min'
 		'async-eventer'				: 'node_modules/async-eventer/src/index.min'
 		'autosize'					: 'node_modules/autosize/dist/autosize.min'
 		'fixed-size-multiplexer'	: 'node_modules/fixed-size-multiplexer/src/index.min'
@@ -172,6 +173,7 @@ requirejs_config	=
 		'marked'					: 'node_modules/marked/marked.min'
 		'pako'						: 'node_modules/pako/dist/pako.min'
 		'ronion'					: 'node_modules/ronion/src/index.min'
+		'random-bytes-numbers'		: 'node_modules/random-bytes-numbers/src/index.min'
 		'swipe-listener'			: 'node_modules/swipe-listener/dist/swipe-listener.min'
 	'packages'	: [
 		{
