@@ -105,7 +105,7 @@ function notify (status, title, details, timeout)
 			page_notification(status, title, details, timeout, resolve)
 		else if Notification.permission == 'default'
 			if !desktop_notification_permission_requested
-				desktop_notification_permission_requested	= true
+				desktop_notification_permission_requested	:= true
 				if IN_APP
 					message	= "Application tried to show you a system notification while was inactive, but you have to grant permission for that first, do that after clicking on this notification"
 				else
@@ -135,8 +135,10 @@ window.{}detox_chat_app
 	..notify_warning	= ->
 		notify('warning', ...&)
 	..play_sound		= (file) !->
-		new Audio(file)
-			..play()
+		# Song will not play until user interacts, but we may try to play it, so let's not throw an error
+		try
+			new Audio(file)
+				..play()
 	..simple_modal		= (content) ->
 		current_time	= +(new Date)
 		modal			= csw.functions.simple_modal(content)

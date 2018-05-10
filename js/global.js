@@ -124,7 +124,7 @@
    */
   function notify(status, title, details, timeout){
     return new Promise(function(resolve){
-      var desktop_notification_permission_requested, message, x$;
+      var message, x$;
       if (typeof details === 'number') {
         timeout = details;
         details = '';
@@ -173,8 +173,10 @@
   };
   x$.play_sound = function(file){
     var x$;
-    x$ = new Audio(file);
-    x$.play();
+    try {
+      x$ = new Audio(file);
+      x$.play();
+    } catch (e$) {}
   };
   x$.simple_modal = function(content){
     var current_time, x$, modal;
