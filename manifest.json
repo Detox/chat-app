@@ -26,5 +26,6 @@
 	"name"             : "Detox Chat",
 	"short_name"       : "Detox Chat",
 	"start_url"        : "index.html?home",
-	"theme_color"      : "#181818"
+	"theme_color"      : "#181818",
+	"scope"            : "/"
 }
