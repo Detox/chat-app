@@ -196,6 +196,10 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		# State upgrade
 		if !('audio_notifications' of @_state['settings'])
 			@_state['settings']['audio_notifications']	= true
+		if @_state['settings']['bootstrap_nodes'][0]?['node_id']?
+			@_state['settings']['bootstrap_nodes']	=
+				for bootstrap_node in @_state['settings']['bootstrap_nodes']
+					bootstrap_node['node_id'] + ':' + bootstrap_node['host'] + ':' + bootstrap_node['port']
 
 
 		# Denormalize state after deserialization
@@ -1163,27 +1167,11 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		# Block request from contact we've already rejected for 30 days
 		'block_contact_requests_for'	: 30 * 24 * 60 * 60
 		'bootstrap_nodes'				: [
-#			{
-#				'node_id'	: '3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29'
-#				'host'		: '127.0.0.1'
-#				'port'		: 16882
-#			}
+#			'3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29:127.0.0.1:16882'
 			# Testnet bootstrap nodes
-			{
-				'node_id'	: '50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651',
-				'host'		: '0-testnet-bootstrap.detox.technology',
-				'port'		: 443
-			}
-			{
-				'node_id'	: '252223a2ae1d325578d8cd2f0d65dada5d342927cfbbf8dbfd9edc3e247b5a0b',
-				'host'		: '1-testnet-bootstrap.detox.technology',
-				'port'		: 443
-			}
-			{
-				'node_id'	: 'e9a374b6aa204a48c40a9679a636319b029fa4e68ee29dbd7da9326ea681b91d',
-				'host'		: '2-testnet-bootstrap.detox.technology',
-				'port'		: 443
-			}
+			'50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651:0-testnet-bootstrap.detox.technology:443'
+			'252223a2ae1d325578d8cd2f0d65dada5d342927cfbbf8dbfd9edc3e247b5a0b:1-testnet-bootstrap.detox.technology:443'
+			'e9a374b6aa204a48c40a9679a636319b029fa4e68ee29dbd7da9326ea681b91d:2-testnet-bootstrap.detox.technology:443'
 
 		]
 		'bucket_size'					: 2

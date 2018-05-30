@@ -77,7 +77,7 @@
      * @constructor
      */
     function State(chat_id){
-      var backup_chat_id, backup_present, first_start, backup_db_ready, x$, contact, current_date, secret, i$, ref$, len$, contact_id, this$ = this;
+      var backup_chat_id, backup_present, first_start, backup_db_ready, x$, ref$, bootstrap_node, contact, current_date, secret, i$, ref1$, len$, contact_id, this$ = this;
       if (!(this instanceof State)) {
         return new State(chat_id);
       }
@@ -205,6 +205,16 @@
       if (!('audio_notifications' in this._state['settings'])) {
         this._state['settings']['audio_notifications'] = true;
       }
+      if (((ref$ = this._state['settings']['bootstrap_nodes'][0]) != null ? ref$['node_id'] : void 8) != null) {
+        this._state['settings']['bootstrap_nodes'] = (function(){
+          var i$, ref$, len$, results$ = [];
+          for (i$ = 0, len$ = (ref$ = this._state['settings']['bootstrap_nodes']).length; i$ < len$; ++i$) {
+            bootstrap_node = ref$[i$];
+            results$.push(bootstrap_node['node_id'] + ':' + bootstrap_node['host'] + ':' + bootstrap_node['port']);
+          }
+          return results$;
+        }.call(this));
+      }
       if (this._state['seed']) {
         this._state['seed'] = Uint8Array.from(this._state['seed']);
       }
@@ -270,8 +280,8 @@
         }
         return results$;
       }.call(this)));
-      for (i$ = 0, len$ = (ref$ = Array.from(this._state['contacts'].keys())).length; i$ < len$; ++i$) {
-        contact_id = ref$[i$];
+      for (i$ = 0, len$ = (ref1$ = Array.from(this._state['contacts'].keys())).length; i$ < len$; ++i$) {
+        contact_id = ref1$[i$];
         this._update_contact_with_pending_messages(contact_id);
         this._update_contact_with_unread_messages(contact_id);
       }
@@ -1400,21 +1410,7 @@
       'announce': true,
       'audio_notifications': true,
       'block_contact_requests_for': 30 * 24 * 60 * 60,
-      'bootstrap_nodes': [
-        {
-          'node_id': '50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651',
-          'host': '0-testnet-bootstrap.detox.technology',
-          'port': 443
-        }, {
-          'node_id': '252223a2ae1d325578d8cd2f0d65dada5d342927cfbbf8dbfd9edc3e247b5a0b',
-          'host': '1-testnet-bootstrap.detox.technology',
-          'port': 443
-        }, {
-          'node_id': 'e9a374b6aa204a48c40a9679a636319b029fa4e68ee29dbd7da9326ea681b91d',
-          'host': '2-testnet-bootstrap.detox.technology',
-          'port': 443
-        }
-      ],
+      'bootstrap_nodes': ['50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651:0-testnet-bootstrap.detox.technology:443', '252223a2ae1d325578d8cd2f0d65dada5d342927cfbbf8dbfd9edc3e247b5a0b:1-testnet-bootstrap.detox.technology:443', 'e9a374b6aa204a48c40a9679a636319b029fa4e68ee29dbd7da9326ea681b91d:2-testnet-bootstrap.detox.technology:443'],
       'bucket_size': 2,
       'experience': State.EXPERIENCE_REGULAR,
       'help': true,

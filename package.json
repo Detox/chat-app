@@ -29,17 +29,17 @@
 		"demo-http-server" : "http-server"
 	},
 	"dependencies"    : {
-		"@detox/chat"                    : "^0.13.0",
-		"@detox/core"                    : "^0.16.5",
-		"@detox/utils"                   : "^1.9.0",
+		"@detox/chat"                    : "^0.14.0",
+		"@detox/core"                    : "^0.18.1",
+		"@detox/utils"                   : "^1.10.0",
 		"@polymer/polymer"               : "^2.6.0",
-		"@webcomponents/shadycss"        : "^1.1.3",
+		"@webcomponents/shadycss"        : "^1.2.1",
 		"@webcomponents/webcomponentsjs" : "^1.2.0",
 		"alameda"                        : "^1.2.1",
-		"autosize"                       : "^4.0.1",
+		"autosize"                       : "^4.0.2",
 		"cleverstyle-widgets"            : "^0.10.3",
-		"hotkeys-js"                     : "^3.1.1",
-		"marked"                         : "^0.3.19",
+		"hotkeys-js"                     : "^3.3.2",
+		"marked"                         : "^0.4.0",
 		"swipe-listener"                 : "^1.0.6"
 	},
 	"devDependencies" : {
@@ -47,7 +47,7 @@
 		"del"                     : "^3.0.0",
 		"gulp"                    : "^3.9.1",
 		"gulp-htmlmin"            : "^4.0.0",
-		"gulp-rename"             : "^1.2.2",
+		"gulp-rename"             : "^1.2.3",
 		"gulp-requirejs-optimize" : "^1.3.0",
 		"gulp-uglify"             : "^3.0.0",
 		"http-server"             : "^0.11.1",

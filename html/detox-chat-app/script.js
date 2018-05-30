@@ -53,7 +53,7 @@
           sent_messages_map = ArrayMap();
           reconnects_pending = ArrayMap();
           state = this$.state;
-          core = detoxCore.Core(detoxCore.generate_seed(), state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_settings_packets_per_second(), state.get_settings_bucket_size());
+          core = detoxCore.Core(state.get_settings_bootstrap_nodes(), state.get_settings_ice_servers(), state.get_settings_packets_per_second(), state.get_settings_bucket_size());
           chat = detoxChat.Chat(core, state.get_seed(), state.get_settings_number_of_introduction_nodes(), state.get_settings_number_of_intermediate_nodes());
           /**
            * @param {!Uint8Array} contact_id

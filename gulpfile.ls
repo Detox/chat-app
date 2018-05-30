@@ -160,15 +160,18 @@ requirejs_config	=
 		'@detox/chat'				: 'node_modules/@detox/chat/src/index.min'
 		'@detox/core'				: 'node_modules/@detox/core/src/index.min'
 		'@detox/crypto'				: 'node_modules/@detox/crypto/src/index.min'
-		'@detox/dht'				: 'node_modules/@detox/dht/dist/detox-dht.browser.min'
+		'@detox/dht'				: 'node_modules/@detox/dht/src/index.min'
+		'@detox/routing'			: 'node_modules/@detox/routing/src/index.min'
 		'@detox/simple-peer'		: 'node_modules/@detox/simple-peer/simplepeer.min'
-		# TODO: Closure Compiler replaces array of dependencies with '...'.split(' ') and causes build to fail when using minified version of @detox/transport
-		'@detox/transport'			: 'node_modules/@detox/transport/src/index'
+		'@detox/transport'			: 'node_modules/@detox/transport/src/index.min'
 		'@detox/utils'				: 'node_modules/@detox/utils/src/index.min'
 		'array-map-set'				: 'node_modules/array-map-set/src/index.min'
 		'async-eventer'				: 'node_modules/async-eventer/src/index.min'
+		'es-dht'					: 'node_modules/es-dht/src/index.min'
 		'autosize'					: 'node_modules/autosize/dist/autosize.min'
 		'fixed-size-multiplexer'	: 'node_modules/fixed-size-multiplexer/src/index.min'
+		'k-bucket-sync'				: 'node_modules/k-bucket-sync/src/index.min'
+		'merkle-tree-binary'		: 'node_modules/merkle-tree-binary/src/index.min'
 		'hotkeys-js'				: 'node_modules/hotkeys-js/dist/hotkeys.min'
 		'marked'					: 'node_modules/marked/marked.min'
 		'pako'						: 'node_modules/pako/dist/pako.min'
@@ -263,6 +266,11 @@ gulp
 		config	= Object.assign({
 			name		: "#DESTINATION/#BUNDLED_JS"
 			optimize	: 'none'
+			onBuildRead	: (, , contents) ->
+				# Hack: Workaround for https://github.com/google/closure-compiler/issues/2953
+				contents.replace(/define\("([^"]+)".split\(" "\)/, (, dependencies) ->
+					'define(' + JSON.stringify(dependencies.split(' '))
+				)
 		}, requirejs_config)
 		gulp.src("#DESTINATION/#BUNDLED_JS")
 			.pipe(gulp-requirejs-optimize(config))
