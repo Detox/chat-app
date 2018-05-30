@@ -65,15 +65,6 @@
   SOURCE_CSS = 'css/style.css';
   SOURCE_HTML = 'html/index.html';
   SOURCE_MANIFEST = 'manifest.json';
-  /**
-   * Wrapper:
-   * 1) provides simplified require/define implementation that replaces alameda and should be enough for bundled modules
-   * 2) ensures that code is only running when HTML imports were loaded
-   * 3) forces async stylesheet loading and actually apply it by setting `media` property to empty string
-   */
-  function js_shell(js){
-    return "let require, requirejs, define;\n(callback => {\n	let defined_modules = {}, current_module = {exports: null}, wait_for = {};\n	function get_defined_module (name, base_name) {\n		if (name == 'exports') {\n			return {};\n		} else if (name == 'module') {\n			return current_module;\n		} else {\n			if (name.startsWith('./')) {\n				name	= base_name.split('/').slice(0, -1).join('/') + '/' + name.substr(2);\n			}\n			return defined_modules[name];\n		}\n	}\n	function load_dependencies (dependencies, base_name, fail_callback) {\n		const loaded_dependencies = [];\n		return dependencies.every(dependency => {\n			const loaded_dependency = get_defined_module(dependency, base_name);\n			if (!loaded_dependency) {\n				if (fail_callback) {\n					fail_callback(dependency);\n				}\n				return false;\n			}\n			loaded_dependencies.push(loaded_dependency);\n			return true;\n		}) && loaded_dependencies;\n	}\n	function add_wait_for (name, callback) {\n		(wait_for[name] = wait_for[name] || []).push(callback);\n	}\n	require = requirejs = (dependencies, callback) => {\n		return new Promise(resolve => {\n			const loaded_dependencies = load_dependencies(\n				dependencies,\n				'',\n				dependency => add_wait_for(\n					dependency,\n					require.bind(null, dependencies, (...loaded_dependencies) => {\n						if (callback) {\n							callback(...loaded_dependencies);\n						}\n						resolve(loaded_dependencies);\n					})\n				)\n			);\n			if (loaded_dependencies) {\n				if (callback) {\n					callback(...loaded_dependencies);\n				}\n				resolve(loaded_dependencies);\n			}\n		});\n	};\n	define = (name, dependencies, wrapper) => {\n		if (!wrapper) {\n			wrapper			= dependencies;\n			dependencies	= [];\n		}\n		const loaded_dependencies = load_dependencies(\n			dependencies,\n			name,\n			dependency => add_wait_for(dependency, define.bind(null, name, dependencies, wrapper))\n		);\n		if (loaded_dependencies) {\n			defined_modules[name] = wrapper(...loaded_dependencies) || current_module.exports;\n			if (wait_for[name]) {\n				wait_for[name].forEach(resolve => resolve());\n				delete wait_for[name];\n			}\n		}\n	};\n	define.amd = {};\n	document.head.querySelector('[media=async]').removeAttribute('media');\n	if (window.WebComponents && window.WebComponents.ready) {\n		callback();\n	} else {\n		document.addEventListener('WebComponentsReady', callback, {once: true});\n	}\n})(() => {" + js + "})";
-  }
   requirejs_config = {
     'baseUrl': '.',
     'paths': {
@@ -177,7 +168,6 @@
       string = string.trim();
       return string.substring(8, string.length - 9);
     }).join('');
-    js = js_shell(js);
     html = html.replace(/assetpath=".+?"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
     fs.writeFileSync(DESTINATION + "/" + BUNDLED_HTML, html);
     fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
@@ -190,6 +180,10 @@
         return contents.replace(/define\("([^"]+)".split\(" "\)/, function(arg$, dependencies){
           return 'define(' + JSON.stringify(dependencies.split(' '));
         });
+      },
+      wrap: {
+        startFile: ['js/a.require.js', 'js/b.webcomponentsready-wrap-before.js'],
+        endFile: 'js/b.webcomponentsready-wrap-after.js'
       }
     }, requirejs_config);
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(gulpRequirejsOptimize(config)).pipe(gulp.dest(DESTINATION));
@@ -329,6 +323,12 @@
       removeComments: true
     })).pipe(gulpRename(MINIFIED_HTML)).pipe(gulp.dest(DESTINATION));
   }).task('minify-js', ['bundle-js', 'copy-wasm'], function(){
+    var js;
+    js = fs.readFileSync(DESTINATION + "/" + BUNDLED_JS, {
+      encoding: 'utf8'
+    });
+    js = js.replace("typeof requirejs === 'function'", 'false').replace(/"function"===?typeof define&&define.amd/g, 'true');
+    fs.writeFileSync(DESTINATION + "/" + BUNDLED_JS, js);
     return gulp.src(DESTINATION + "/" + BUNDLED_JS).pipe(uglify()).pipe(gulpRename(MINIFIED_JS)).pipe(gulp.dest(DESTINATION));
   }).task('minify-service-worker', ['bundle-service-worker'], function(){
     return gulp.src(BUNDLED_SW).pipe(uglify()).pipe(gulpRename(MINIFIED_SW)).pipe(gulp.dest('.'));

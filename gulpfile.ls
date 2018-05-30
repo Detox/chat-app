@@ -62,97 +62,6 @@ const SOURCE_CSS		= 'css/style.css'
 const SOURCE_HTML		= 'html/index.html'
 const SOURCE_MANIFEST	= 'manifest.json'
 
-/**
- * Wrapper:
- * 1) provides simplified require/define implementation that replaces alameda and should be enough for bundled modules
- * 2) ensures that code is only running when HTML imports were loaded
- * 3) forces async stylesheet loading and actually apply it by setting `media` property to empty string
- */
-function js_shell (js)
-	"""
-let require, requirejs, define;
-(callback => {
-	let defined_modules = {}, current_module = {exports: null}, wait_for = {};
-	function get_defined_module (name, base_name) {
-		if (name == 'exports') {
-			return {};
-		} else if (name == 'module') {
-			return current_module;
-		} else {
-			if (name.startsWith('./')) {
-				name	= base_name.split('/').slice(0, -1).join('/') + '/' + name.substr(2);
-			}
-			return defined_modules[name];
-		}
-	}
-	function load_dependencies (dependencies, base_name, fail_callback) {
-		const loaded_dependencies = [];
-		return dependencies.every(dependency => {
-			const loaded_dependency = get_defined_module(dependency, base_name);
-			if (!loaded_dependency) {
-				if (fail_callback) {
-					fail_callback(dependency);
-				}
-				return false;
-			}
-			loaded_dependencies.push(loaded_dependency);
-			return true;
-		}) && loaded_dependencies;
-	}
-	function add_wait_for (name, callback) {
-		(wait_for[name] = wait_for[name] || []).push(callback);
-	}
-	require = requirejs = (dependencies, callback) => {
-		return new Promise(resolve => {
-			const loaded_dependencies = load_dependencies(
-				dependencies,
-				'',
-				dependency => add_wait_for(
-					dependency,
-					require.bind(null, dependencies, (...loaded_dependencies) => {
-						if (callback) {
-							callback(...loaded_dependencies);
-						}
-						resolve(loaded_dependencies);
-					})
-				)
-			);
-			if (loaded_dependencies) {
-				if (callback) {
-					callback(...loaded_dependencies);
-				}
-				resolve(loaded_dependencies);
-			}
-		});
-	};
-	define = (name, dependencies, wrapper) => {
-		if (!wrapper) {
-			wrapper			= dependencies;
-			dependencies	= [];
-		}
-		const loaded_dependencies = load_dependencies(
-			dependencies,
-			name,
-			dependency => add_wait_for(dependency, define.bind(null, name, dependencies, wrapper))
-		);
-		if (loaded_dependencies) {
-			defined_modules[name] = wrapper(...loaded_dependencies) || current_module.exports;
-			if (wait_for[name]) {
-				wait_for[name].forEach(resolve => resolve());
-				delete wait_for[name];
-			}
-		}
-	};
-	define.amd = {};
-	document.head.querySelector('[media=async]').removeAttribute('media');
-	if (window.WebComponents && window.WebComponents.ready) {
-		callback();
-	} else {
-		document.addEventListener('WebComponentsReady', callback, {once: true});
-	}
-})(() => {#js})
-"""
-
 requirejs_config	=
 	'baseUrl'	: '.'
 	'paths'		:
@@ -245,12 +154,11 @@ gulp
 		# Remove unused icons definitions
 		for definition in unused_fa_icons
 			html	= html.replace(definition, '')
-		js = html.match(SCRIPTS_REGEXP)
+		js		= html.match(SCRIPTS_REGEXP)
 			.map (string) ->
 				string	= string.trim()
 				string.substring(8, string.length - 9) # Remove script tag
 			.join('')
-		js		= js_shell(js)
 		html	= html
 			# Useless (in our case) arguments
 			.replace(/assetpath=".+?"/g, '')
@@ -264,13 +172,16 @@ gulp
 	)
 	.task('bundle-js', ['bundle-html'], ->
 		config	= Object.assign({
-			name		: "#DESTINATION/#BUNDLED_JS"
-			optimize	: 'none'
-			onBuildRead	: (, , contents) ->
+			name					: "#DESTINATION/#BUNDLED_JS"
+			optimize				: 'none'
+			onBuildRead				: (, , contents) ->
 				# Hack: Workaround for https://github.com/google/closure-compiler/issues/2953
 				contents.replace(/define\("([^"]+)".split\(" "\)/, (, dependencies) ->
 					'define(' + JSON.stringify(dependencies.split(' '))
 				)
+			wrap					:
+				startFile	: ['js/a.require.js', 'js/b.webcomponentsready-wrap-before.js']
+				endFile		: 'js/b.webcomponentsready-wrap-after.js'
 		}, requirejs_config)
 		gulp.src("#DESTINATION/#BUNDLED_JS")
 			.pipe(gulp-requirejs-optimize(config))
@@ -410,6 +321,12 @@ gulp
 			.pipe(gulp.dest(DESTINATION))
 	)
 	.task('minify-js', ['bundle-js', 'copy-wasm'], ->
+		# First couple of manual optimizations
+		js	= fs.readFileSync("#DESTINATION/#BUNDLED_JS", {encoding: 'utf8'})
+		js	= js
+			.replace("typeof requirejs === 'function'", 'false')
+			.replace(/"function"===?typeof define&&define.amd/g, 'true')
+		fs.writeFileSync("#DESTINATION/#BUNDLED_JS", js)
 		gulp.src("#DESTINATION/#BUNDLED_JS")
 			.pipe(uglify())
 			.pipe(gulp-rename(MINIFIED_JS))
