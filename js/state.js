@@ -215,6 +215,20 @@
           return results$;
         }.call(this));
       }
+      this._state['settings']['bootstrap_nodes'] = (function(){
+        var i$, ref$, len$, results$ = [];
+        for (i$ = 0, len$ = (ref$ = this._state['settings']['bootstrap_nodes']).length; i$ < len$; ++i$) {
+          bootstrap_node = ref$[i$];
+          if (bootstrap_node === '252223a2ae1d325578d8cd2f0d65dada5d342927cfbbf8dbfd9edc3e247b5a0b:1-testnet-bootstrap.detox.technology:443' || bootstrap_node === 'e9a374b6aa204a48c40a9679a636319b029fa4e68ee29dbd7da9326ea681b91d:2-testnet-bootstrap.detox.technology:443') {
+            continue;
+          } else if (bootstrap_node === '50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651:0-testnet-bootstrap.detox.technology:443') {
+            results$.push('50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651:testnet-bootstrap.detox.technology:443');
+          } else {
+            results$.push(bootstrap_node);
+          }
+        }
+        return results$;
+      }.call(this));
       if (this._state['seed']) {
         this._state['seed'] = Uint8Array.from(this._state['seed']);
       }
@@ -1410,7 +1424,7 @@
       'announce': true,
       'audio_notifications': true,
       'block_contact_requests_for': 30 * 24 * 60 * 60,
-      'bootstrap_nodes': ['50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651:0-testnet-bootstrap.detox.technology:443', '252223a2ae1d325578d8cd2f0d65dada5d342927cfbbf8dbfd9edc3e247b5a0b:1-testnet-bootstrap.detox.technology:443', 'e9a374b6aa204a48c40a9679a636319b029fa4e68ee29dbd7da9326ea681b91d:2-testnet-bootstrap.detox.technology:443'],
+      'bootstrap_nodes': ['50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651:testnet-bootstrap.detox.technology:443'],
       'bucket_size': 2,
       'experience': State.EXPERIENCE_REGULAR,
       'help': true,
