@@ -165,8 +165,7 @@ gulp
 					'define(' + JSON.stringify(dependencies.split(' '))
 				)
 			wrap					:
-				startFile	: ['js/a.require.js', 'js/b.webcomponentsready-wrap-before.js']
-				endFile		: 'js/b.webcomponentsready-wrap-after.js'
+				startFile	: ['js/a.async-styles.js', 'js/a.require.js']
 		}, requirejs_config)
 		gulp.src('dist/script.js')
 			.pipe(gulp-requirejs-optimize(config))
