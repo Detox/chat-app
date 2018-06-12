@@ -15,6 +15,7 @@
         '@detox/core': 'node_modules/@detox/core/src/index',
         '@detox/crypto': 'node_modules/@detox/crypto/src/index',
         '@detox/dht': 'node_modules/@detox/dht/src/index',
+        '@detox/nodes-manager': 'node_modules/@detox/nodes-manager/src/index',
         '@detox/routing': 'node_modules/@detox/routing/src/index',
         '@detox/simple-peer': 'node_modules/@detox/simple-peer/simplepeer.min',
         '@detox/transport': 'node_modules/@detox/transport/src/index',
