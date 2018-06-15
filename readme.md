@@ -6,12 +6,12 @@ WARNING: INSECURE UNTIL PROVEN THE OPPOSITE!!!
 ## Browser support
 First of all, only 2 latest stable versions of any browser are supported! Don't ever ask to support older ones.
 
-| Browser  | Support level                                         |
-|----------|-------------------------------------------------------|
-| Chromium | Flaky, bugs reported, should be better soon           |
-| Firefox  | Fully supported                                       |
-| Safari   | WebRTC support is not good enough yet, hopefully soon |
-| Edge     | RTCDataChannel not supported at all, hopefully soon   |
+| Browser  | Support level                                       |
+|----------|-----------------------------------------------------|
+| Chromium | Fully supported                                     |
+| Firefox  | Fully supported                                     |
+| Safari   | Should work, but was not tested                     |
+| Edge     | RTCDataChannel not supported at all, hopefully soon |
 
 ## Alpha testing
 Currently application is at alpha quality and only recommended for developers, not really suitable for early adopters yet.
@@ -20,7 +20,7 @@ Builds directly from master branch are available at [detox.github.io/chat-app](h
 
 WARNING: Alpha version can eat all of your CPU, RAM, network bandwidth, battery on mobile device or all at the same time. It may event eat pizza from your fridge. Don't blame me if it does.
 
-If you want to run debugging build from sources, do:
+If you want to run debugging version from sources, do:
 ```bash
 git clone https://github.com/Detox/chat-app.git detox-chat-app
 cd detox-chat-app
