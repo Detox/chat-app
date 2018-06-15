@@ -164,34 +164,10 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				..'nickname'					= ''
 				..'seed'						= null
 				..'settings'					= JSON.parse(JSON.stringify(State.DEFAULT_SETTINGS))
-				..'contacts'					= [
-					# TODO: This is just for demo purposes
-					[
-						[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 125]
-						'Fake contact #1'
-						0
-						0
-						null
-						null
-						null
-					]
-					[
-						[6, 148, 79, 1, 76, 156, 177, 211, 195, 184, 108, 220, 189, 121, 140, 15, 134, 174, 141, 222, 146, 77, 20, 115, 211, 253, 148, 149, 128, 147, 190, 126]
-						'Fake contact #2'
-						0
-						0
-						null
-						null
-						null
-					]
-				]
+				..'contacts'					= []
 				..'contacts_requests'			= []
 				..'contacts_requests_blocked'	= []
 				..'secrets'						= []
-			# TODO: This is just for demo purposes
-			setTimeout !~>
-				@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_RECEIVED'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
-				@'add_contact_message'(@'get_contacts'()[0]['id'], State['MESSAGE_ORIGIN_SENT'], +(new Date), +(new Date), 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')
 
 		# State upgrade
 		if !('audio_notifications' of @_state['settings'])
