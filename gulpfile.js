@@ -5,7 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, runSequence, uglifyEs, uglify, workboxBuild, minify_css, instance, minify_js, file_hash, AUDIO_REGEXP, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BLACKLISTED_FONTS, requirejs_config;
+  var cleanCss, crypto, del, exec, fs, gulp, gulpHtmlmin, gulpRename, gulpRequirejsOptimize, uglifyEs, uglify, workboxBuild, minify_css, instance, minify_js, file_hash, AUDIO_REGEXP, FONTS_REGEXP, IMAGES_REGEXP, SCRIPTS_REGEXP, BLACKLISTED_FONTS, requirejs_config, x$;
   cleanCss = require('clean-css');
   crypto = require('crypto');
   del = require('del');
@@ -15,7 +15,6 @@
   gulpHtmlmin = require('gulp-htmlmin');
   gulpRename = require('gulp-rename');
   gulpRequirejsOptimize = require('gulp-requirejs-optimize');
-  runSequence = require('run-sequence');
   uglifyEs = require('uglify-es');
   uglify = require('gulp-uglify/composer')(uglifyEs, console);
   workboxBuild = require('workbox-build');
@@ -102,9 +101,12 @@
       }
     ]
   };
-  gulp.task('bundle-clean', function(){
-    return del(['dist/style.css', 'dist/index.html', 'dist/script.js', 'sw.js']);
-  }).task('bundle-css', function(){
+  function bundleClean(done){
+    del(['dist/style.css', 'dist/index.html', 'dist/script.js', 'sw.js']).then(function(){
+      done();
+    });
+  }
+  function bundleCss(done){
     var css, images, i$, len$, image, image_path, base_name, hash;
     css = fs.readFileSync('css/style.css', {
       encoding: 'utf8'
@@ -119,7 +121,9 @@
       fs.copyFileSync(image_path, "dist/" + base_name);
     }
     fs.writeFileSync('dist/style.css', css);
-  }).task('bundle-html', ['generate-html'], function(){
+    done();
+  }
+  function bundleHtml(done){
     var html, fonts, i$, len$, font, font_path, base_name, hash, r, used_fa_icons, m, unused_fa_icons, definition, icon, glyph, js;
     html = fs.readFileSync('dist/index.html', {
       encoding: 'utf8'
@@ -158,7 +162,9 @@
     html = html.replace(/assetpath=".+?"/g, '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/apply-shim.html">', '').replace('<link rel="import" href="../node_modules/@polymer/shadycss/custom-style-interface.html">', '').replace(SCRIPTS_REGEXP, '');
     fs.writeFileSync('dist/index.html', html);
     fs.writeFileSync('dist/script.js', js);
-  }).task('bundle-js', ['bundle-html'], function(){
+    done();
+  }
+  function bundleJs(){
     var config;
     config = Object.assign({
       name: 'dist/script.js',
@@ -173,7 +179,8 @@
       }
     }, requirejs_config);
     return gulp.src('dist/script.js').pipe(gulpRequirejsOptimize(config)).pipe(gulp.dest('dist'));
-  }).task('bundle-service-worker', ['generate-service-worker'], function(){
+  }
+  function bundleServiceWorker(done){
     var sw;
     fs.renameSync('dist/sw.js', 'sw.js');
     sw = fs.readFileSync('sw.js', {
@@ -181,9 +188,14 @@
     });
     sw = sw.replace(/importScripts\("/, "$&dist/").replace(/modulePathPrefix:\s*?"/, "$&dist/");
     fs.writeFileSync('sw.js', sw);
-  }).task('clean', function(){
-    return del('dist/*');
-  }).task('copy-audio', ['bundle-js'], function(){
+    done();
+  }
+  function clean(done){
+    del('dist/*').then(function(){
+      done();
+    });
+  }
+  function copyAudio(done){
     var js, audios, i$, len$, audio, audio_path, base_name, hash;
     js = fs.readFileSync('dist/script.js', {
       encoding: 'utf8'
@@ -198,15 +210,21 @@
       fs.copyFileSync(audio_path, "dist/" + base_name);
     }
     fs.writeFileSync('dist/script.js', js);
-  }).task('copy-favicon', function(){
+    done();
+  }
+  function copyFavicon(done){
     fs.copyFileSync('favicon.ico', "dist/favicon.ico");
-  }).task('copy-js', function(){
+    done();
+  }
+  function copyJs(done){
     var webcomponents;
     webcomponents = fs.readFileSync('node_modules/@webcomponents/webcomponentsjs/webcomponents-hi-sd-ce.js', {
       encoding: 'utf8'
     });
     fs.writeFileSync("dist/webcomponents.min.js", minify_js(webcomponents));
-  }).task('copy-manifest', function(){
+    done();
+  }
+  function copyManifest(done){
     var manifest, i$, ref$, len$, icon, base_name, hash;
     manifest = JSON.parse(fs.readFileSync('manifest.json', {
       encoding: 'utf8'
@@ -220,7 +238,9 @@
       icon.src = base_name + "?" + hash;
     }
     fs.writeFileSync('dist/manifest.json', JSON.stringify(manifest));
-  }).task('copy-wasm', ['bundle-js'], function(){
+    done();
+  }
+  function copyWasm(done){
     var js, i$, ref$, len$, ref1$, name, location, main, hash;
     js = fs.readFileSync('dist/script.js', {
       encoding: 'utf8'
@@ -234,9 +254,9 @@
       }
     }
     fs.writeFileSync('dist/script.js', js);
-  }).task('default', function(callback){
-    runSequence('clean', 'main-build', 'bundle-clean', 'minify-service-worker', 'bundle-clean', 'update-index', callback);
-  }).task('generate-html', function(callback){
+    done();
+  }
+  function generateHtml(done){
     var command;
     command = "node_modules/.bin/polymer-bundler --strip-comments --rewrite-urls-in-templates --inline-css --inline-scripts --out-html dist/index.html html/index.html";
     exec(command, function(error, stdout, stderr){
@@ -246,9 +266,10 @@
       if (stderr) {
         console.error(stderr);
       }
-      callback(error);
+      done(error);
     });
-  }).task('generate-service-worker', function(){
+  }
+  function generateServiceWorker(){
     return workboxBuild.generateSW({
       cacheId: 'detox-chat-app',
       clientsClaim: true,
@@ -272,13 +293,16 @@
         };
       }]
     });
-  }).task('main-build', ['copy-audio', 'copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-font', 'minify-js']).task('minify-css', ['bundle-css'], function(){
+  }
+  function minifyCss(done){
     var css;
     css = fs.readFileSync('dist/style.css', {
       encoding: 'utf8'
     });
     fs.writeFileSync('dist/style.min.css', minify_css(css));
-  }).task('minify-font', ['bundle-html'], function(callback){
+    done();
+  }
+  function minifyFont(done){
     var font, css, command;
     font = __dirname + '/dist/fa-solid-900.woff2';
     css = __dirname + '/dist/index.html';
@@ -300,15 +324,17 @@
       if (stderr) {
         console.error(stderr);
       }
-      callback();
+      done();
     });
-  }).task('minify-html', ['bundle-html', 'minify-font'], function(){
+  }
+  function minifyHtml(){
     return gulp.src('dist/index.html').pipe(gulpHtmlmin({
       decodeEntities: true,
       minifyCSS: minify_css,
       removeComments: true
     })).pipe(gulpRename('index.min.html')).pipe(gulp.dest('dist'));
-  }).task('minify-js', ['bundle-js', 'copy-wasm'], function(){
+  }
+  function minifyJs(){
     var js;
     js = fs.readFileSync('dist/script.js', {
       encoding: 'utf8'
@@ -316,9 +342,11 @@
     js = js.replace("typeof requirejs === 'function'", 'false').replace(/"function"===?typeof define&&define.amd/g, 'true');
     fs.writeFileSync('dist/script.js', js);
     return gulp.src('dist/script.js').pipe(uglify()).pipe(gulpRename('script.min.js')).pipe(gulp.dest('dist'));
-  }).task('minify-service-worker', ['bundle-service-worker'], function(){
+  }
+  function minifyServiceWorker(){
     return gulp.src('sw.js').pipe(uglify()).pipe(gulpRename('sw.min.js')).pipe(gulp.dest('.'));
-  }).task('update-index', function(){
+  }
+  function updateIndex(done){
     var index, critical_css, files_for_hash_update, i$, len$, file, hash;
     index = fs.readFileSync('index.html', {
       encoding: 'utf8'
@@ -334,5 +362,28 @@
       index = index.replace(new RegExp(file + "[^\"]*", 'g'), file + "?" + hash);
     }
     fs.writeFileSync('index.html', index);
-  });
+    done();
+  }
+  x$ = gulp;
+  x$.task('bundle-clean', bundleClean);
+  x$.task('bundle-css', bundleCss);
+  x$.task('bundle-html', bundleHtml);
+  x$.task('bundle-js', bundleJs);
+  x$.task('bundle-service-worker', bundleServiceWorker);
+  x$.task('clean', clean);
+  x$.task('copy-audio', copyAudio);
+  x$.task('copy-favicon', copyFavicon);
+  x$.task('copy-js', copyJs);
+  x$.task('copy-manifest', copyManifest);
+  x$.task('copy-wasm', copyWasm);
+  x$.task('generate-html', generateHtml);
+  x$.task('generate-service-worker', generateServiceWorker);
+  x$.task('minify-css', minifyCss);
+  x$.task('minify-font', minifyFont);
+  x$.task('minify-html', minifyHtml);
+  x$.task('minify-js', minifyJs);
+  x$.task('minify-service-worker', minifyServiceWorker);
+  x$.task('update-index', updateIndex);
+  x$.task('main-build', gulp.series('generate-html', 'bundle-html', 'bundle-js', 'bundle-css', 'copy-audio', 'copy-favicon', 'copy-js', 'copy-manifest', 'copy-wasm', 'minify-css', 'minify-html', 'minify-font', 'minify-js'));
+  x$.task('default', gulp.series('clean', 'main-build', 'bundle-clean', 'generate-service-worker', 'bundle-service-worker', 'minify-service-worker', 'bundle-clean', 'update-index'));
 }).call(this);
