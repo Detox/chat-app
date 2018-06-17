@@ -198,6 +198,9 @@
     return modal;
   };
   x$.installation_prompt = function(){
+    if (IN_APP) {
+      return;
+    }
     if (localStorage.installation_prompt_timeout) {
       if (+localStorage.installation_prompt_timeout > +new Date) {
         return;

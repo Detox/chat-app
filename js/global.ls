@@ -156,6 +156,8 @@ window.{}detox_chat_app
 			)
 		modal
 	..installation_prompt = ->
+		if IN_APP
+			return
 		if localStorage.installation_prompt_timeout
 			if +localStorage.installation_prompt_timeout > +(new Date)
 				# Do not annoy user with this prompt
