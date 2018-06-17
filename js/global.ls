@@ -155,6 +155,25 @@ window.{}detox_chat_app
 				{once: true}
 			)
 		modal
+	..installation_prompt = ->
+		if localStorage.installation_prompt_timeout
+			if +localStorage.installation_prompt_timeout > +(new Date)
+				# Do not annoy user with this prompt
+				return
+			# Do not show prompt for one month when called subsequent times
+			localStorage.installation_prompt_timeout	= +(new Date) + 60 * 60 * 24 * 30
+		else
+			# Do not show prompt for one week when called first time
+			localStorage.installation_prompt_timeout	= +(new Date) + 60 * 60 * 24 * 7
+		installation_prompt_event.then (event) !->
+			csw.functions.notify("""
+				If you use this application often, consider to install it for easy access:<br><br>
+				<csw-group><csw-button primary><button>Install</button></csw-button><csw-button><button>Ignore</button></csw-button></csw-group>
+			""", 'right')
+				.querySelector('csw-button[primary]>button')
+					.addEventListener('click', !->
+						event.prompt()
+					)
 # Handle back hardware button in application mode, allow 2 seconds to press back button or leave application open
 if IN_APP
 	history.pushState({loaded: true}, '')
@@ -165,3 +184,11 @@ if IN_APP
 				history.pushState({loaded: true}, '')
 			), 2000
 	)
+else
+	installation_prompt_event	= new Promise (resolve) !->
+		window.addEventListener('beforeinstallprompt', (event) !->
+			# Prevent Chromium <= 67 from automatically showing the prompt
+			event.preventDefault()
+			# Resolve promise with event so that it can be used later if needed
+			resolve(event)
+		)

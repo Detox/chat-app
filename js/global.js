@@ -5,7 +5,7 @@
  * @license 0BSD
  */
 (function(){
-  var IN_APP, ref$, desktop_notification_permission_requested, x$, slice$ = [].slice, arrayFrom$ = Array.from || function(x){return slice$.call(x);};
+  var IN_APP, ref$, desktop_notification_permission_requested, x$, installation_prompt_event, slice$ = [].slice, arrayFrom$ = Array.from || function(x){return slice$.call(x);};
   IN_APP = location.search === '?home';
   /**
    * Force passive listeners on in Polymer
@@ -197,6 +197,21 @@
     }
     return modal;
   };
+  x$.installation_prompt = function(){
+    if (localStorage.installation_prompt_timeout) {
+      if (+localStorage.installation_prompt_timeout > +new Date) {
+        return;
+      }
+      localStorage.installation_prompt_timeout = +new Date + 60 * 60 * 24 * 30;
+    } else {
+      localStorage.installation_prompt_timeout = +new Date + 60 * 60 * 24 * 7;
+    }
+    return installation_prompt_event.then(function(event){
+      csw.functions.notify("If you use this application often, consider to install it for easy access:<br><br>\n<csw-group><csw-button primary><button>Install</button></csw-button><csw-button><button>Ignore</button></csw-button></csw-group>", 'right').querySelector('csw-button[primary]>button').addEventListener('click', function(){
+        event.prompt();
+      });
+    });
+  };
   if (IN_APP) {
     history.pushState({
       loaded: true
@@ -211,6 +226,13 @@
           }, '');
         }, 2000);
       }
+    });
+  } else {
+    installation_prompt_event = new Promise(function(resolve){
+      window.addEventListener('beforeinstallprompt', function(event){
+        event.preventDefault();
+        resolve(event);
+      });
     });
   }
 }).call(this);

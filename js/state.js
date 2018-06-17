@@ -295,6 +295,9 @@
         this._update_contact_with_pending_messages(contact_id);
         this._update_contact_with_unread_messages(contact_id);
       }
+      if (!first_start) {
+        detox_chat_app.installation_prompt();
+      }
     }
     State.prototype = {
       /**

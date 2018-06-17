@@ -240,6 +240,9 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_update_contact_with_pending_messages(contact_id)
 			@_update_contact_with_unread_messages(contact_id)
 
+		if !first_start
+			detox_chat_app.installation_prompt()
+
 	State:: =
 		/**
 		 * @param {Function} callback Callback to be executed once state is ready
