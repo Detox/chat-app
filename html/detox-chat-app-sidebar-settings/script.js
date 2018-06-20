@@ -12,6 +12,14 @@
       is: 'detox-chat-app-sidebar-settings',
       behaviors: [behaviors.experience_level, behaviors.help, behaviors.state_instance],
       properties: {
+        desired_anonymity: {
+          observer: '_desired_anonymity_changed',
+          type: Number
+        },
+        desired_anonymity_custom: {
+          computed: '_desired_anonymity_custom(desired_anonymity)',
+          type: Boolean
+        },
         settings_additional_options: {
           observer: '_settings_additional_options_changed',
           type: Object
@@ -37,6 +45,10 @@
         settings_bucket_size: {
           observer: '_settings_bucket_size_changed',
           type: Number
+        },
+        settings_direct_connections: {
+          type: Number,
+          value: 1
         },
         settings_experience: {
           observer: '_settings_experience_changed',
@@ -100,6 +112,7 @@
         this.settings_packets_per_second = state.get_settings_packets_per_second();
         this.settings_reconnects_intervals = state.get_settings_reconnects_intervals();
         this.settings_send_ctrl_enter = this._bool_to_string(state.get_settings_send_ctrl_enter());
+        this._update_desired_anonymity();
         state.on('settings_additional_options_changed', function(settings_additional_options){
           this$.settings_additional_options = settings_additional_options;
         }).on('settings_announce_changed', function(new_settings_announce){
@@ -122,6 +135,7 @@
           this$.settings_max_pending_segments = settings_max_pending_segments;
         }).on('settings_number_of_intermediate_nodes_changed', function(settings_number_of_intermediate_nodes){
           this$.settings_number_of_intermediate_nodes = settings_number_of_intermediate_nodes;
+          this$._update_desired_anonymity();
         }).on('settings_number_of_introduction_nodes_changed', function(settings_number_of_introduction_nodes){
           this$.settings_number_of_introduction_nodes = settings_number_of_introduction_nodes;
         }).on('settings_online_changed', function(new_settings_online){
@@ -140,6 +154,57 @@
         } else {
           return '0';
         }
+      },
+      _update_desired_anonymity: function(){
+        var settings_direct_connections, settings_number_of_intermediate_nodes;
+        if (this.settings_number_of_intermediate_nodes === undefined) {
+          return;
+        }
+        settings_direct_connections = parseInt(this.settings_direct_connections);
+        settings_number_of_intermediate_nodes = parseInt(this.settings_number_of_intermediate_nodes);
+        if (settings_number_of_intermediate_nodes === 0) {
+          this.desired_anonymity = 2;
+        } else if (settings_number_of_intermediate_nodes !== this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']) {
+          this.desired_anonymity = 3;
+        } else if (!settings_direct_connections) {
+          this.desired_anonymity = 0;
+        } else {
+          this.desired_anonymity = 1;
+        }
+      },
+      _desired_anonymity_changed: function(desired_anonymity){
+        var changed;
+        changed = false;
+        switch (parseInt(desired_anonymity)) {
+        case 0:
+          if (this.state.get_settings_number_of_intermediate_nodes() !== this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']) {
+            this.state.set_settings_number_of_intermediate_nodes(this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']);
+            changed = true;
+          }
+          break;
+        case 1:
+          if (this.state.get_settings_number_of_intermediate_nodes() !== this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']) {
+            this.state.set_settings_number_of_intermediate_nodes(this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']);
+            changed = true;
+          }
+          break;
+        case 2:
+          if (this.state.get_settings_number_of_intermediate_nodes() !== 0) {
+            this.state.set_settings_number_of_intermediate_nodes(0);
+            changed = true;
+          }
+        }
+        if (changed) {
+          detox_chat_app.notify_success('Saved changes to desired anonymity setting, but restart is needed for changes to take effect', 3);
+        }
+      },
+      _help_desired_anonymity: function(){
+        var content;
+        content = "<p>This option allows easy configuration of Detox network parameters that impact anonymity.</p>\n<p>High is the default option, it uses recommended parameters that should result in high anonymity, while still supporting direct connections (which are not anonymous) for audio and video calls as well as file transfers.</p>\n<p>Strict is the same as High, but disables any non-anonymous communications and removes relevant elements from application UI.</p>\n<p>Low will try to make as little work as possible while still following Detox protocol, this drastically reduces anonymity, but makes connections and data transfers faster, also direct connections (which are not anonymous) for audio and video calls as well as file transfers will no longer require explicit confirmation before establishing.</p>\n<p>Custom would only be be present if any of advanced settings that impact anonymity were changed manually.</p>";
+        detox_chat_app.simple_modal(content);
+      },
+      _desired_anonymity_custom: function(desired_anonymity){
+        return desired_anonymity === 3;
       },
       _settings_additional_options_changed: function(settings_additional_options){
         this.settings_additional_options_string = JSON.stringify(settings_additional_options, null, '  ');

@@ -12,6 +12,12 @@ Polymer(
 		behaviors.state_instance
 	]
 	properties	:
+		desired_anonymity					:
+			observer	: '_desired_anonymity_changed'
+			type		: Number
+		desired_anonymity_custom			:
+			computed	: '_desired_anonymity_custom(desired_anonymity)'
+			type		: Boolean
 		settings_additional_options			:
 			observer	: '_settings_additional_options_changed'
 			type		: Object
@@ -32,6 +38,10 @@ Polymer(
 		settings_bucket_size					:
 			observer	: '_settings_bucket_size_changed'
 			type		: Number
+		# TODO: Following setting should be added to state and properly integrated
+		settings_direct_connections				:
+			type		: Number
+			value		: 1
 		settings_experience						:
 			observer	: '_settings_experience_changed'
 			type		: Number
@@ -82,6 +92,7 @@ Polymer(
 		@settings_packets_per_second			= state.get_settings_packets_per_second()
 		@settings_reconnects_intervals			= state.get_settings_reconnects_intervals()
 		@settings_send_ctrl_enter				= @_bool_to_string(state.get_settings_send_ctrl_enter())
+		@_update_desired_anonymity()
 		state
 			.on('settings_additional_options_changed', (@settings_additional_options) !~>)
 			.on('settings_announce_changed', (new_settings_announce) !~>
@@ -101,7 +112,9 @@ Polymer(
 			)
 			.on('settings_ice_servers_changed', (@settings_ice_servers) !~>)
 			.on('settings_max_pending_segments_changed', (@settings_max_pending_segments) !~>)
-			.on('settings_number_of_intermediate_nodes_changed', (@settings_number_of_intermediate_nodes) !~>)
+			.on('settings_number_of_intermediate_nodes_changed', (@settings_number_of_intermediate_nodes) !~>
+				@_update_desired_anonymity()
+			)
 			.on('settings_number_of_introduction_nodes_changed', (@settings_number_of_introduction_nodes) !~>)
 			.on('settings_online_changed', (new_settings_online) !~>
 				new_settings_online	= @_bool_to_string(new_settings_online)
@@ -113,6 +126,59 @@ Polymer(
 			)
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
+	_update_desired_anonymity : !->
+		if @settings_number_of_intermediate_nodes == undefined
+			return
+		settings_direct_connections				= parseInt(@settings_direct_connections)
+		settings_number_of_intermediate_nodes	= parseInt(@settings_number_of_intermediate_nodes)
+		if settings_number_of_intermediate_nodes == 0
+			@desired_anonymity = 2 # Low
+		else if settings_number_of_intermediate_nodes != @state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']
+			@desired_anonymity = 3 # Custom
+		else if !settings_direct_connections
+			@desired_anonymity = 0 # Strict
+		else
+			@desired_anonymity = 1 # High
+	_desired_anonymity_changed : (desired_anonymity) !->
+		changed	= false
+		switch parseInt(desired_anonymity)
+			case 0
+				# TODO: Unlock this when implemented
+#				if @state.get_settings_direct_connections() != false
+#					@state.set_settings_direct_connections(false)
+#					changed	= true
+				if @state.get_settings_number_of_intermediate_nodes() != @state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']
+					@state.set_settings_number_of_intermediate_nodes(@state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes'])
+					changed	= true
+			case 1
+				# TODO: Unlock this when implemented
+#				if @state.get_settings_direct_connections() != true
+#					@state.set_settings_direct_connections(true)
+#					changed	= true
+				if @state.get_settings_number_of_intermediate_nodes() != @state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']
+					@state.set_settings_number_of_intermediate_nodes(@state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes'])
+					changed	= true
+			case 2
+				# TODO: Unlock this when implemented
+#				if @state.get_settings_direct_connections() != true
+#					@state.set_settings_direct_connections(false)
+#					changed	= true
+				if @state.get_settings_number_of_intermediate_nodes() != 0
+					@state.set_settings_number_of_intermediate_nodes(0)
+					changed	= true
+		if changed
+			detox_chat_app.notify_success('Saved changes to desired anonymity setting, but restart is needed for changes to take effect', 3)
+	_help_desired_anonymity : !->
+		content	= """
+			<p>This option allows easy configuration of Detox network parameters that impact anonymity.</p>
+			<p>High is the default option, it uses recommended parameters that should result in high anonymity, while still supporting direct connections (which are not anonymous) for audio and video calls as well as file transfers.</p>
+			<p>Strict is the same as High, but disables any non-anonymous communications and removes relevant elements from application UI.</p>
+			<p>Low will try to make as little work as possible while still following Detox protocol, this drastically reduces anonymity, but makes connections and data transfers faster, also direct connections (which are not anonymous) for audio and video calls as well as file transfers will no longer require explicit confirmation before establishing.</p>
+			<p>Custom would only be be present if any of advanced settings that impact anonymity were changed manually.</p>
+		"""
+		detox_chat_app.simple_modal(content)
+	_desired_anonymity_custom : (desired_anonymity) ->
+		desired_anonymity == 3
 	_settings_additional_options_changed : (settings_additional_options) !->
 		@settings_additional_options_string	= JSON.stringify(settings_additional_options, null, '  ')
 	_settings_additional_options_blur : !->

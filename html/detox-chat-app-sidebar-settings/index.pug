@@ -3,6 +3,23 @@ dom-module(id="detox-chat-app-sidebar-settings")
 	template
 		csw-form: form
 			label
+				div Desired anonymity:
+				detox-chat-icon-button(icon="question" tooltip="What is desired anonymity?" hidden="[[!help]]"): button(type="button" on-click="_help_desired_anonymity")
+			csw-group
+				// TODO: Unlock when `direct_connections` setting is implemented
+				//csw-label-button: label
+				//	input(type="radio" value="0")
+				//	| Strict
+				csw-label-button(value="{{desired_anonymity}}"): label
+					input(type="radio" value="1")
+					| High
+				csw-label-button: label
+					input(type="radio" value="2")
+					| Low
+				csw-label-button(hidden="[[!desired_anonymity_custom]]"): label
+					input(type="radio" value="3")
+					| Custom
+			label
 				div User experience level:
 				detox-chat-icon-button(icon="question" tooltip="What these levels mean?" hidden="[[!help]]"): button(type="button" on-click="_help_settings_experience")
 			csw-group
