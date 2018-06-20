@@ -172,6 +172,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		# State upgrade
 		if !('audio_notifications' of @_state['settings'])
 			@_state['settings']['audio_notifications']	= true
+		if !('additional_options' of @_state['settings'])
+			@_state['settings']['additional_options']	= {}
 		if @_state['settings']['bootstrap_nodes'][0]?['node_id']?
 			@_state['settings']['bootstrap_nodes']	=
 				for bootstrap_node in @_state['settings']['bootstrap_nodes']
@@ -512,6 +514,19 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_sidebar_shown				= @_local_state.ui.sidebar_shown
 			@_local_state.ui.sidebar_shown	= new_sidebar_shown
 			@'fire'('ui_sidebar_shown_changed', new_sidebar_shown, old_sidebar_shown)
+		/**
+		 * @return {!Array<!Array<number>>}
+		 */
+		'get_settings_additional_options' : ->
+			@_state['settings']['additional_options']
+		/**
+		 * @param {!Array<!Array<number>>} additional_options
+		 */
+		'set_settings_additional_options' : (additional_options) !->
+			old_additional_options					= @_state['additional_options']
+			@_state['settings']['additional_options']	= additional_options
+			@'fire'('settings_additional_options_changed', additional_options, old_additional_options)
+			@_save_state()
 		/**
 		 * @return {boolean}
 		 */
@@ -1149,6 +1164,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 
 	# Default settings, potentially can be relatively easily customized
 	State.DEFAULT_SETTINGS	=
+		'additional_options'			: {}
 		'announce'						: true
 		'audio_notifications'			: true
 		# Block request from contact we've already rejected for 30 days

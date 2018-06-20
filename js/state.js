@@ -201,6 +201,9 @@
       if (!('audio_notifications' in this._state['settings'])) {
         this._state['settings']['audio_notifications'] = true;
       }
+      if (!('additional_options' in this._state['settings'])) {
+        this._state['settings']['additional_options'] = {};
+      }
       if (((ref$ = this._state['settings']['bootstrap_nodes'][0]) != null ? ref$['node_id'] : void 8) != null) {
         this._state['settings']['bootstrap_nodes'] = (function(){
           var i$, ref$, len$, results$ = [];
@@ -643,6 +646,22 @@
         old_sidebar_shown = this._local_state.ui.sidebar_shown;
         this._local_state.ui.sidebar_shown = new_sidebar_shown;
         this['fire']('ui_sidebar_shown_changed', new_sidebar_shown, old_sidebar_shown);
+      }
+      /**
+       * @return {!Array<!Array<number>>}
+       */,
+      'get_settings_additional_options': function(){
+        return this._state['settings']['additional_options'];
+      }
+      /**
+       * @param {!Array<!Array<number>>} additional_options
+       */,
+      'set_settings_additional_options': function(additional_options){
+        var old_additional_options;
+        old_additional_options = this._state['additional_options'];
+        this._state['settings']['additional_options'] = additional_options;
+        this['fire']('settings_additional_options_changed', additional_options, old_additional_options);
+        this._save_state();
       }
       /**
        * @return {boolean}
@@ -1420,6 +1439,7 @@
     Object.assign(State, constants);
     Object.assign(State.prototype, constants);
     State.DEFAULT_SETTINGS = {
+      'additional_options': {},
       'announce': true,
       'audio_notifications': true,
       'block_contact_requests_for': 30 * 24 * 60 * 60,

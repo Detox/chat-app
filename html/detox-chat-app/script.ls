@@ -48,7 +48,7 @@ Polymer(
 			state.get_settings_ice_servers()
 			state.get_settings_packets_per_second()
 			state.get_settings_bucket_size()
-			# TODO: More options here
+			state.get_settings_additional_options()
 		)
 		chat	= detox-chat.Chat(
 			core

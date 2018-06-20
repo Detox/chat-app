@@ -12,6 +12,10 @@ Polymer(
 		behaviors.state_instance
 	]
 	properties	:
+		settings_additional_options			:
+			observer	: '_settings_additional_options_changed'
+			type		: Object
+		settings_additional_options_string	: String
 		settings_announce						:
 			observer	: '_settings_announce_changed'
 			type		: String
@@ -62,6 +66,7 @@ Polymer(
 			type		: String
 	ready : !->
 		state									= @state
+		@settings_additional_options			= state.get_settings_additional_options()
 		@settings_announce						= @_bool_to_string(state.get_settings_announce())
 		@settings_audio_notifications			= @_bool_to_string(state.get_settings_audio_notifications())
 		@settings_block_contact_requests_for	= state.get_settings_block_contact_requests_for() / 60 / 60 / 24 # In days
@@ -78,6 +83,7 @@ Polymer(
 		@settings_reconnects_intervals			= state.get_settings_reconnects_intervals()
 		@settings_send_ctrl_enter				= @_bool_to_string(state.get_settings_send_ctrl_enter())
 		state
+			.on('settings_additional_options_changed', (@settings_additional_options) !~>)
 			.on('settings_announce_changed', (new_settings_announce) !~>
 				new_settings_announce	= @_bool_to_string(new_settings_announce)
 			)
@@ -107,6 +113,24 @@ Polymer(
 			)
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
+	_settings_additional_options_changed : (settings_additional_options) !->
+		@settings_additional_options_string	= JSON.stringify(settings_additional_options, null, '  ')
+	_settings_additional_options_blur : !->
+		try
+			settings_additional_options	= JSON.parse(@settings_additional_options_string)
+			if JSON.stringify(@settings_additional_options) == JSON.stringify(settings_additional_options)
+				return
+			# TODO: Check if object structure is valid
+			@state.set_settings_additional_options(settings_additional_options)
+			detox_chat_app.notify_success('Saved changes to additional options setting', 3)
+		catch
+			detox_chat_app.notify_error('Additional options syntax error, changes were not saved', 3)
+	_help_settings_additional_options : !->
+		content	= """
+			<p>This option allows to control the most detailed settings of Detox network and corresponds to the last argument of Core library's constructor.</p>
+			<p>Do not change this setting unless you know what you're doing.</p>
+		"""
+		detox_chat_app.simple_modal(content)
 	_settings_announce_changed : !->
 		if @settings_announce != @_bool_to_string(@state.get_settings_announce())
 			@state.set_settings_announce(@settings_announce == '1')

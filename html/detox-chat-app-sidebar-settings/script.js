@@ -12,6 +12,11 @@
       is: 'detox-chat-app-sidebar-settings',
       behaviors: [behaviors.experience_level, behaviors.help, behaviors.state_instance],
       properties: {
+        settings_additional_options: {
+          observer: '_settings_additional_options_changed',
+          type: Object
+        },
+        settings_additional_options_string: String,
         settings_announce: {
           observer: '_settings_announce_changed',
           type: String
@@ -79,6 +84,7 @@
       ready: function(){
         var state, this$ = this;
         state = this.state;
+        this.settings_additional_options = state.get_settings_additional_options();
         this.settings_announce = this._bool_to_string(state.get_settings_announce());
         this.settings_audio_notifications = this._bool_to_string(state.get_settings_audio_notifications());
         this.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
@@ -94,7 +100,9 @@
         this.settings_packets_per_second = state.get_settings_packets_per_second();
         this.settings_reconnects_intervals = state.get_settings_reconnects_intervals();
         this.settings_send_ctrl_enter = this._bool_to_string(state.get_settings_send_ctrl_enter());
-        state.on('settings_announce_changed', function(new_settings_announce){
+        state.on('settings_additional_options_changed', function(settings_additional_options){
+          this$.settings_additional_options = settings_additional_options;
+        }).on('settings_announce_changed', function(new_settings_announce){
           new_settings_announce = this$._bool_to_string(new_settings_announce);
         }).on('settings_audio_notifications_changed', function(new_settings_audio_notifications){
           new_settings_audio_notifications = this$._bool_to_string(new_settings_audio_notifications);
@@ -132,6 +140,28 @@
         } else {
           return '0';
         }
+      },
+      _settings_additional_options_changed: function(settings_additional_options){
+        this.settings_additional_options_string = JSON.stringify(settings_additional_options, null, '  ');
+      },
+      _settings_additional_options_blur: function(){
+        var settings_additional_options, e;
+        try {
+          settings_additional_options = JSON.parse(this.settings_additional_options_string);
+          if (JSON.stringify(this.settings_additional_options) === JSON.stringify(settings_additional_options)) {
+            return;
+          }
+          this.state.set_settings_additional_options(settings_additional_options);
+          detox_chat_app.notify_success('Saved changes to additional options setting', 3);
+        } catch (e$) {
+          e = e$;
+          detox_chat_app.notify_error('Additional options syntax error, changes were not saved', 3);
+        }
+      },
+      _help_settings_additional_options: function(){
+        var content;
+        content = "<p>This option allows to control the most detailed settings of Detox network and corresponds to the last argument of Core library's constructor.</p>\n<p>Do not change this setting unless you know what you're doing.</p>";
+        detox_chat_app.simple_modal(content);
       },
       _settings_announce_changed: function(){
         if (this.settings_announce !== this._bool_to_string(this.state.get_settings_announce())) {
