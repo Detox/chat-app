@@ -78,7 +78,7 @@ dom-module(id="detox-chat-app-sidebar-settings")
 			label(hidden="[[!developer]]")
 				div Number of intermediate nodes*:
 				detox-chat-icon-button(icon="question" tooltip="What are intermediate nodes?" hidden="[[!help]]"): button(type="button" on-click="_help_settings_number_of_intermediate_nodes")
-			csw-input-text(hidden="[[!developer]]"): input(type="number" min="1" value="{{settings_number_of_intermediate_nodes}}")
+			csw-input-text(hidden="[[!developer]]"): input(type="number" min="0" value="{{settings_number_of_intermediate_nodes}}")
 			label(hidden="[[!developer]]")
 				div Number of introduction nodes*:
 				detox-chat-icon-button(icon="question" tooltip="What are introduction nodes?" hidden="[[!help]]"): button(type="button" on-click="_help_settings_number_of_introduction_nodes")
