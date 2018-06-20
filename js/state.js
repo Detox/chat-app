@@ -67,7 +67,7 @@
     });
   }
   function Wrapper(detoxChat, detoxUtils, asyncEventer){
-    var id_encode, are_arrays_equal, ArrayMap, ArraySet, global_state, constants, Contact, ContactRequest, ContactRequestBlocked, Message, Secret;
+    var id_encode, are_arrays_equal, ArrayMap, ArraySet, global_state, constants, DEFAULT_SETTINGS, Contact, ContactRequest, ContactRequestBlocked, Message, Secret;
     id_encode = detoxChat['id_encode'];
     are_arrays_equal = detoxUtils['are_arrays_equal'];
     ArrayMap = detoxUtils['ArrayMap'];
@@ -192,7 +192,7 @@
         x$['version'] = STATE_VERSION;
         x$['nickname'] = '';
         x$['seed'] = null;
-        x$['settings'] = JSON.parse(JSON.stringify(State.DEFAULT_SETTINGS));
+        x$['settings'] = JSON.parse(JSON.stringify(State['DEFAULT_SETTINGS']));
         x$['contacts'] = [];
         x$['contacts_requests'] = [];
         x$['contacts_requests_blocked'] = [];
@@ -203,6 +203,9 @@
       }
       if (!('additional_options' in this._state['settings'])) {
         this._state['settings']['additional_options'] = {};
+      }
+      if (!('direct_connections' in this._state['settings'])) {
+        this._state['settings']['direct_connections'] = State['DEFAULT_SETTINGS']['direct_connections'];
       }
       if (((ref$ = this._state['settings']['bootstrap_nodes'][0]) != null ? ref$['node_id'] : void 8) != null) {
         this._state['settings']['bootstrap_nodes'] = (function(){
@@ -743,6 +746,22 @@
         old_bucket_size = this._state['bucket_size'];
         this._state['settings']['bucket_size'] = parseInt(bucket_size);
         this['fire']('settings_bucket_size_changed', bucket_size, old_bucket_size);
+        this._save_state();
+      }
+      /**
+       * @return {number}
+       */,
+      'get_settings_direct_connections': function(){
+        return this._state['settings']['direct_connections'];
+      }
+      /**
+       * @param {number} direct_connections
+       */,
+      'set_settings_direct_connections': function(direct_connections){
+        var old_direct_connections;
+        old_direct_connections = this._state['direct_connections'];
+        this._state['settings']['direct_connections'] = parseInt(direct_connections);
+        this['fire']('settings_direct_connections_changed', direct_connections, old_direct_connections);
         this._save_state();
       }
       /**
@@ -1434,18 +1453,22 @@
       'EXPERIENCE_DEVELOPER': 2,
       'MESSAGE_ORIGIN_SENT': 0,
       'MESSAGE_ORIGIN_RECEIVED': 1,
-      'MESSAGE_ORIGIN_SERVICE': 2
+      'MESSAGE_ORIGIN_SERVICE': 2,
+      'DIRECT_CONNECTIONS_REJECT': 0,
+      'DIRECT_CONNECTIONS_PROMPT': 1,
+      'DIRECT_CONNECTIONS_ACCEPT': 2
     };
     Object.assign(State, constants);
     Object.assign(State.prototype, constants);
-    State.DEFAULT_SETTINGS = {
+    DEFAULT_SETTINGS = {
       'additional_options': {},
       'announce': true,
       'audio_notifications': true,
       'block_contact_requests_for': 30 * 24 * 60 * 60,
       'bootstrap_nodes': ['50da72d1fe105c649a1c16c085627b368196e258667d2a2fc02d4b8af7182651:testnet-bootstrap.detox.technology:443'],
       'bucket_size': 2,
-      'experience': State.EXPERIENCE_REGULAR,
+      'direct_connections': State['DIRECT_CONNECTIONS_PROMPT'],
+      'experience': State['EXPERIENCE_REGULAR'],
       'help': true,
       'ice_servers': [
         {
@@ -1464,6 +1487,12 @@
       'reconnects_intervals': [[5, 30], [10, 60], [15, 150], [100, 300], [Number.MAX_SAFE_INTEGER, 600]],
       'send_ctrl_enter': true
     };
+    Object.assign(State, {
+      'DEFAULT_SETTINGS': DEFAULT_SETTINGS
+    });
+    Object.assign(State.prototype, {
+      'DEFAULT_SETTINGS': DEFAULT_SETTINGS
+    });
     /**
      * Remote secret is used by us to connect to remote friend.
      * Local secret is used by remote friend to connect to us.

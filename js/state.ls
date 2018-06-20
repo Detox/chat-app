@@ -163,7 +163,7 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 				..'version'						= STATE_VERSION
 				..'nickname'					= ''
 				..'seed'						= null
-				..'settings'					= JSON.parse(JSON.stringify(State.DEFAULT_SETTINGS))
+				..'settings'					= JSON.parse(JSON.stringify(State['DEFAULT_SETTINGS']))
 				..'contacts'					= []
 				..'contacts_requests'			= []
 				..'contacts_requests_blocked'	= []
@@ -174,6 +174,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			@_state['settings']['audio_notifications']	= true
 		if !('additional_options' of @_state['settings'])
 			@_state['settings']['additional_options']	= {}
+		if !('direct_connections' of @_state['settings'])
+			@_state['settings']['direct_connections']	= State['DEFAULT_SETTINGS']['direct_connections']
 		if @_state['settings']['bootstrap_nodes'][0]?['node_id']?
 			@_state['settings']['bootstrap_nodes']	=
 				for bootstrap_node in @_state['settings']['bootstrap_nodes']
@@ -593,6 +595,19 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			old_bucket_size						= @_state['bucket_size']
 			@_state['settings']['bucket_size']	= parseInt(bucket_size)
 			@'fire'('settings_bucket_size_changed', bucket_size, old_bucket_size)
+			@_save_state()
+		/**
+		 * @return {number}
+		 */
+		'get_settings_direct_connections' : ->
+			@_state['settings']['direct_connections']
+		/**
+		 * @param {number} direct_connections
+		 */
+		'set_settings_direct_connections' : (direct_connections) !->
+			old_direct_connections						= @_state['direct_connections']
+			@_state['settings']['direct_connections']	= parseInt(direct_connections)
+			@'fire'('settings_direct_connections_changed', direct_connections, old_direct_connections)
 			@_save_state()
 		/**
 		 * @return {number} One of State.EXPERIENCE_* constants
@@ -1158,12 +1173,15 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 		'MESSAGE_ORIGIN_SENT'		: 0
 		'MESSAGE_ORIGIN_RECEIVED'	: 1
 		'MESSAGE_ORIGIN_SERVICE'	: 2
+		'DIRECT_CONNECTIONS_REJECT'	: 0
+		'DIRECT_CONNECTIONS_PROMPT'	: 1
+		'DIRECT_CONNECTIONS_ACCEPT'	: 2
 	# For convenience, assign both on constructor and on instances
 	Object.assign(State, constants)
 	Object.assign(State::, constants)
 
 	# Default settings, potentially can be relatively easily customized
-	State.DEFAULT_SETTINGS	=
+	DEFAULT_SETTINGS	=
 		'additional_options'			: {}
 		'announce'						: true
 		'audio_notifications'			: true
@@ -1177,7 +1195,8 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 
 		]
 		'bucket_size'					: 2
-		'experience'					: State.EXPERIENCE_REGULAR
+		'direct_connections'			: State['DIRECT_CONNECTIONS_PROMPT']
+		'experience'					: State['EXPERIENCE_REGULAR']
 		'help'							: true
 		'ice_servers'					: [
 			{'urls': 'stun:stun.l.google.com:19302'}
@@ -1203,6 +1222,9 @@ function Wrapper (detox-chat, detox-utils, async-eventer)
 			[Number.MAX_SAFE_INTEGER, 600]
 		]
 		'send_ctrl_enter'				: true
+	# For convenience, assign both on constructor and on instances
+	Object.assign(State, {'DEFAULT_SETTINGS' : DEFAULT_SETTINGS})
+	Object.assign(State::, {'DEFAULT_SETTINGS' : DEFAULT_SETTINGS})
 
 	/**
 	 * Remote secret is used by us to connect to remote friend.

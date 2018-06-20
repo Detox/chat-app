@@ -35,6 +35,7 @@
           value: false
         },
         contact: Object,
+        direct_connections: Boolean,
         messages: Array,
         send_ctrl_enter: Boolean,
         text_message: {
@@ -54,6 +55,7 @@
         text_messages = ArrayMap();
         state = this.state;
         this.active_contact = !!state.get_ui_active_contact();
+        this.direct_connections = state.get_settings_direct_connections() !== this.state['DIRECT_CONNECTIONS_REJECT'];
         this.send_ctrl_enter = state.get_settings_send_ctrl_enter();
         this._update_unread_messages();
         state.on('contact_message_added', function(contact_id, message){
@@ -126,6 +128,8 @@
             messages_list.scrollTop = messages_list.scrollHeight - messages_list.offsetHeight;
             this$._update_unread_messages();
           });
+        }).on('settings_direct_connections_changed', function(value){
+          this$.direct_connections = value !== this$.state['DIRECT_CONNECTIONS_REJECT'];
         }).on('settings_send_ctrl_enter_changed', function(send_ctrl_enter){
           this$.send_ctrl_enter = send_ctrl_enter;
         });

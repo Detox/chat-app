@@ -47,8 +47,8 @@
           type: Number
         },
         settings_direct_connections: {
-          type: Number,
-          value: 1
+          observer: '_settings_direct_connections_changed',
+          type: Number
         },
         settings_experience: {
           observer: '_settings_experience_changed',
@@ -102,6 +102,7 @@
         this.settings_block_contact_requests_for = state.get_settings_block_contact_requests_for() / 60 / 60 / 24;
         this.settings_bootstrap_nodes = state.get_settings_bootstrap_nodes();
         this.settings_bucket_size = state.get_settings_bucket_size();
+        this.settings_direct_connections = state.get_settings_direct_connections();
         this.settings_experience = state.get_settings_experience();
         this.settings_help = this._bool_to_string(state.get_settings_help());
         this.settings_ice_servers = state.get_settings_ice_servers();
@@ -125,10 +126,14 @@
           this$.settings_bootstrap_nodes = settings_bootstrap_nodes;
         }).on('settings_bucket_size_changed', function(settings_bucket_size){
           this$.settings_bucket_size = settings_bucket_size;
+        }).on('settings_direct_connections_changed', function(settings_direct_connections){
+          this$.settings_direct_connections = settings_direct_connections;
+          this$._update_desired_anonymity();
         }).on('settings_experience_changed', function(settings_experience){
           this$.settings_experience = settings_experience;
         }).on('settings_help_changed', function(new_settings_help){
           new_settings_help = this$._bool_to_string(new_settings_help);
+          this$.settings_help = new_settings_help;
         }).on('settings_ice_servers_changed', function(settings_ice_servers){
           this$.settings_ice_servers = settings_ice_servers;
         }).on('settings_max_pending_segments_changed', function(settings_max_pending_segments){
@@ -140,12 +145,14 @@
           this$.settings_number_of_introduction_nodes = settings_number_of_introduction_nodes;
         }).on('settings_online_changed', function(new_settings_online){
           new_settings_online = this$._bool_to_string(new_settings_online);
+          this$.settings_online = new_settings_online;
         }).on('settings_packets_per_second_changed', function(settings_packets_per_second){
           this$.settings_packets_per_second = settings_packets_per_second;
         }).on('settings_reconnects_intervals_changed', function(settings_reconnects_intervals){
           this$.settings_reconnects_intervals = settings_reconnects_intervals;
         }).on('settings_send_ctrl_enter_changed', function(new_settings_send_ctrl_enter){
           new_settings_send_ctrl_enter = this$._bool_to_string(new_settings_send_ctrl_enter);
+          this$.settings_send_ctrl_enter = new_settings_send_ctrl_enter;
         });
       },
       _bool_to_string: function(value){
@@ -162,40 +169,55 @@
         }
         settings_direct_connections = parseInt(this.settings_direct_connections);
         settings_number_of_intermediate_nodes = parseInt(this.settings_number_of_intermediate_nodes);
-        if (settings_number_of_intermediate_nodes === 0) {
-          this.desired_anonymity = 2;
-        } else if (settings_number_of_intermediate_nodes !== this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']) {
-          this.desired_anonymity = 3;
-        } else if (!settings_direct_connections) {
+        if (settings_direct_connections === this.state['DIRECT_CONNECTIONS_REJECT'] && settings_number_of_intermediate_nodes === this.state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']) {
           this.desired_anonymity = 0;
-        } else {
+        } else if (settings_direct_connections === this.state['DEFAULT_SETTINGS']['direct_connections'] && settings_number_of_intermediate_nodes === this.state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']) {
           this.desired_anonymity = 1;
+        } else if (settings_number_of_intermediate_nodes === 0 && settings_direct_connections === this.state['DIRECT_CONNECTIONS_ACCEPT']) {
+          this.desired_anonymity = 2;
+        } else {
+          this.desired_anonymity = 3;
         }
       },
       _desired_anonymity_changed: function(desired_anonymity){
-        var changed;
-        changed = false;
+        var changed_no_restart, changed_restart;
+        changed_no_restart = false;
+        changed_restart = false;
         switch (parseInt(desired_anonymity)) {
         case 0:
-          if (this.state.get_settings_number_of_intermediate_nodes() !== this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']) {
-            this.state.set_settings_number_of_intermediate_nodes(this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']);
-            changed = true;
+          if (this.state.get_settings_direct_connections() !== this.state['DIRECT_CONNECTIONS_REJECT']) {
+            this.state.set_settings_direct_connections(this.state['DIRECT_CONNECTIONS_REJECT']);
+            changed_no_restart = true;
+          }
+          if (this.state.get_settings_number_of_intermediate_nodes() !== this.state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']) {
+            this.state.set_settings_number_of_intermediate_nodes(this.state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']);
+            changed_restart = true;
           }
           break;
         case 1:
-          if (this.state.get_settings_number_of_intermediate_nodes() !== this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']) {
-            this.state.set_settings_number_of_intermediate_nodes(this.state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']);
-            changed = true;
+          if (this.state.get_settings_direct_connections() !== this.state['DEFAULT_SETTINGS']['direct_connections']) {
+            this.state.set_settings_direct_connections(this.state['DEFAULT_SETTINGS']['direct_connections']);
+            changed_no_restart = true;
+          }
+          if (this.state.get_settings_number_of_intermediate_nodes() !== this.state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']) {
+            this.state.set_settings_number_of_intermediate_nodes(this.state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']);
+            changed_restart = true;
           }
           break;
         case 2:
+          if (this.state.get_settings_direct_connections() !== this.state['DIRECT_CONNECTIONS_ACCEPT']) {
+            this.state.set_settings_direct_connections(this.state['DIRECT_CONNECTIONS_ACCEPT']);
+            changed_no_restart = true;
+          }
           if (this.state.get_settings_number_of_intermediate_nodes() !== 0) {
             this.state.set_settings_number_of_intermediate_nodes(0);
-            changed = true;
+            changed_restart = true;
           }
         }
-        if (changed) {
+        if (changed_restart) {
           detox_chat_app.notify_success('Saved changes to desired anonymity setting, but restart is needed for changes to take effect', 3);
+        } else if (changed_no_restart) {
+          detox_chat_app.notify_success('Saved changes to desired anonymity setting', 3);
         }
       },
       _help_desired_anonymity: function(){
@@ -295,6 +317,18 @@
       _help_settings_bucket_size: function(){
         var content;
         content = "<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>\n<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>\nDo not change this setting unless you know what you're doing.</p>";
+        detox_chat_app.simple_modal(content);
+      },
+      _settings_direct_connections_changed: function(value){
+        value = parseInt(value);
+        if (value !== this.state.get_settings_direct_connections()) {
+          this.state.set_settings_direct_connections(value);
+          detox_chat_app.notify_success('Saved changes to direct connections setting', 3);
+        }
+      },
+      _help_settings_direct_connections: function(){
+        var content;
+        content = "<p>Direct connections (which are not anonymous) are used for audio and video calls as well as file transfers.<br>\nYou can be prompted to accept direct connections before establishing or accept them unconditionally (dangerous for anonymity!), but in case you have no plans to use them, you can disable direct connections entirely, which will also hide relevant UI elements.</p>";
         detox_chat_app.simple_modal(content);
       },
       _settings_experience_changed: function(value){

@@ -38,10 +38,9 @@ Polymer(
 		settings_bucket_size					:
 			observer	: '_settings_bucket_size_changed'
 			type		: Number
-		# TODO: Following setting should be added to state and properly integrated
 		settings_direct_connections				:
+			observer	: '_settings_direct_connections_changed'
 			type		: Number
-			value		: 1
 		settings_experience						:
 			observer	: '_settings_experience_changed'
 			type		: Number
@@ -82,6 +81,7 @@ Polymer(
 		@settings_block_contact_requests_for	= state.get_settings_block_contact_requests_for() / 60 / 60 / 24 # In days
 		@settings_bootstrap_nodes				= state.get_settings_bootstrap_nodes()
 		@settings_bucket_size					= state.get_settings_bucket_size()
+		@settings_direct_connections			= state.get_settings_direct_connections()
 		@settings_experience					= state.get_settings_experience()
 		@settings_help							= @_bool_to_string(state.get_settings_help())
 		@settings_ice_servers					= state.get_settings_ice_servers()
@@ -106,9 +106,13 @@ Polymer(
 			)
 			.on('settings_bootstrap_nodes_changed', (@settings_bootstrap_nodes) !~>)
 			.on('settings_bucket_size_changed', (@settings_bucket_size) !~>)
+			.on('settings_direct_connections_changed', (@settings_direct_connections) !~>
+				@_update_desired_anonymity()
+			)
 			.on('settings_experience_changed', (@settings_experience) !~>)
 			.on('settings_help_changed', (new_settings_help) !~>
 				new_settings_help	= @_bool_to_string(new_settings_help)
+				@settings_help		= new_settings_help
 			)
 			.on('settings_ice_servers_changed', (@settings_ice_servers) !~>)
 			.on('settings_max_pending_segments_changed', (@settings_max_pending_segments) !~>)
@@ -118,11 +122,13 @@ Polymer(
 			.on('settings_number_of_introduction_nodes_changed', (@settings_number_of_introduction_nodes) !~>)
 			.on('settings_online_changed', (new_settings_online) !~>
 				new_settings_online	= @_bool_to_string(new_settings_online)
+				@settings_online	= new_settings_online
 			)
 			.on('settings_packets_per_second_changed', (@settings_packets_per_second) !~>)
 			.on('settings_reconnects_intervals_changed', (@settings_reconnects_intervals) !~>)
 			.on('settings_send_ctrl_enter_changed', (new_settings_send_ctrl_enter) !~>
 				new_settings_send_ctrl_enter	= @_bool_to_string(new_settings_send_ctrl_enter)
+				@settings_send_ctrl_enter		= new_settings_send_ctrl_enter
 			)
 	_bool_to_string : (value) ->
 		if value then '1' else '0'
@@ -131,43 +137,49 @@ Polymer(
 			return
 		settings_direct_connections				= parseInt(@settings_direct_connections)
 		settings_number_of_intermediate_nodes	= parseInt(@settings_number_of_intermediate_nodes)
-		if settings_number_of_intermediate_nodes == 0
-			@desired_anonymity = 2 # Low
-		else if settings_number_of_intermediate_nodes != @state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']
-			@desired_anonymity = 3 # Custom
-		else if !settings_direct_connections
+		if (
+			settings_direct_connections == @state['DIRECT_CONNECTIONS_REJECT'] &&
+			settings_number_of_intermediate_nodes == @state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']
+		)
 			@desired_anonymity = 0 # Strict
-		else
+		else if (
+			settings_direct_connections == @state['DEFAULT_SETTINGS']['direct_connections'] &&
+			settings_number_of_intermediate_nodes == @state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']
+		)
 			@desired_anonymity = 1 # High
+		else if settings_number_of_intermediate_nodes == 0 && settings_direct_connections == @state['DIRECT_CONNECTIONS_ACCEPT']
+			@desired_anonymity = 2 # Low
+		else
+			@desired_anonymity = 3 # Custom
 	_desired_anonymity_changed : (desired_anonymity) !->
-		changed	= false
+		changed_no_restart	= false
+		changed_restart		= false
 		switch parseInt(desired_anonymity)
 			case 0
-				# TODO: Unlock this when implemented
-#				if @state.get_settings_direct_connections() != false
-#					@state.set_settings_direct_connections(false)
-#					changed	= true
-				if @state.get_settings_number_of_intermediate_nodes() != @state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']
-					@state.set_settings_number_of_intermediate_nodes(@state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes'])
-					changed	= true
+				if @state.get_settings_direct_connections() != @state['DIRECT_CONNECTIONS_REJECT']
+					@state.set_settings_direct_connections(@state['DIRECT_CONNECTIONS_REJECT'])
+					changed_no_restart	= true
+				if @state.get_settings_number_of_intermediate_nodes() != @state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']
+					@state.set_settings_number_of_intermediate_nodes(@state['DEFAULT_SETTINGS']['number_of_intermediate_nodes'])
+					changed_restart	= true
 			case 1
-				# TODO: Unlock this when implemented
-#				if @state.get_settings_direct_connections() != true
-#					@state.set_settings_direct_connections(true)
-#					changed	= true
-				if @state.get_settings_number_of_intermediate_nodes() != @state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes']
-					@state.set_settings_number_of_intermediate_nodes(@state.constructor.DEFAULT_SETTINGS['number_of_intermediate_nodes'])
-					changed	= true
+				if @state.get_settings_direct_connections() != @state['DEFAULT_SETTINGS']['direct_connections']
+					@state.set_settings_direct_connections(@state['DEFAULT_SETTINGS']['direct_connections'])
+					changed_no_restart	= true
+				if @state.get_settings_number_of_intermediate_nodes() != @state['DEFAULT_SETTINGS']['number_of_intermediate_nodes']
+					@state.set_settings_number_of_intermediate_nodes(@state['DEFAULT_SETTINGS']['number_of_intermediate_nodes'])
+					changed_restart	= true
 			case 2
-				# TODO: Unlock this when implemented
-#				if @state.get_settings_direct_connections() != true
-#					@state.set_settings_direct_connections(false)
-#					changed	= true
+				if @state.get_settings_direct_connections() != @state['DIRECT_CONNECTIONS_ACCEPT']
+					@state.set_settings_direct_connections(@state['DIRECT_CONNECTIONS_ACCEPT'])
+					changed_no_restart	= true
 				if @state.get_settings_number_of_intermediate_nodes() != 0
 					@state.set_settings_number_of_intermediate_nodes(0)
-					changed	= true
-		if changed
+					changed_restart	= true
+		if changed_restart
 			detox_chat_app.notify_success('Saved changes to desired anonymity setting, but restart is needed for changes to take effect', 3)
+		else if changed_no_restart
+			detox_chat_app.notify_success('Saved changes to desired anonymity setting', 3)
 	_help_desired_anonymity : !->
 		content	= """
 			<p>This option allows easy configuration of Detox network parameters that impact anonymity.</p>
@@ -259,6 +271,17 @@ Polymer(
 			<p>Bucket size is a data structure used in underlying Distributed Hash Table (DHT) implementation used in Detox network.</p>
 			<p>Bigger number means more nodes will be stored, but this will also increase communication overhead.<br>
 			Do not change this setting unless you know what you're doing.</p>
+		"""
+		detox_chat_app.simple_modal(content)
+	_settings_direct_connections_changed : (value) !->
+		value	= parseInt(value)
+		if value != @state.get_settings_direct_connections()
+			@state.set_settings_direct_connections(value)
+			detox_chat_app.notify_success('Saved changes to direct connections setting', 3)
+	_help_settings_direct_connections : !->
+		content	= """
+			<p>Direct connections (which are not anonymous) are used for audio and video calls as well as file transfers.<br>
+			You can be prompted to accept direct connections before establishing or accept them unconditionally (dangerous for anonymity!), but in case you have no plans to use them, you can disable direct connections entirely, which will also hide relevant UI elements.</p>
 		"""
 		detox_chat_app.simple_modal(content)
 	_settings_experience_changed : (value) !->

@@ -26,16 +26,17 @@ Polymer(
 		Polymer.MutableDataBehavior
 	]
 	properties	:
-		active_contact	:
+		active_contact		:
 			type	: Boolean
 			value	: false
-		contact			: Object
-		messages		: Array
-		send_ctrl_enter	: Boolean
-		text_message	:
+		contact				: Object
+		direct_connections	: Boolean
+		messages			: Array
+		send_ctrl_enter		: Boolean
+		text_message		:
 			type	: String
 			value	: ''
-		unread_messages	: Boolean
+		unread_messages		: Boolean
 	created : !->
 		@_ctrl_enter_handler	= @_ctrl_enter_handler.bind(@)
 		@_enter_handler			= @_enter_handler.bind(@)
@@ -46,6 +47,7 @@ Polymer(
 		text_messages		= ArrayMap()
 		state				= @state
 		@active_contact		= !!state.get_ui_active_contact()
+		@direct_connections	= state.get_settings_direct_connections() != @state['DIRECT_CONNECTIONS_REJECT']
 		@send_ctrl_enter	= state.get_settings_send_ctrl_enter()
 		@_update_unread_messages()
 		state
@@ -115,6 +117,9 @@ Polymer(
 				messages_list			= @$['messages-list']
 				messages_list.scrollTop	= messages_list.scrollHeight - messages_list.offsetHeight
 				@_update_unread_messages()
+			)
+			.on('settings_direct_connections_changed', (value) !~>
+				@direct_connections	= value != @state['DIRECT_CONNECTIONS_REJECT']
 			)
 			.on('settings_send_ctrl_enter_changed', (@send_ctrl_enter) !~>)
 	attached : !->
